@@ -1,57 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
-
-
-class Turbine(ABC):
-    """
-    Turbine abstract base class, specifies a turbine with a diameter of 1m and a nacelle height of 1m.
-
-    Args:
-        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
-        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
-    """
-    # Attributes
-    diameter = 1  # in Meter
-    nacellePos = np.array([0, 0, 1])  # in Meter
-    turbine_type = "base"
-    orientation = np.array([0, 0])  # yaw, tilt in Degree
-
-    def __init__(self, base_location: np.ndarray, orientation: np.ndarray):
-        self.base_location = base_location
-        self.orientation = orientation
-        print("Base turbine created")
-
-    def calc_yaw(self, wind_direction):
-        return self.orientation[0] - wind_direction
-
-    def calc_tilt(self):
-        return self.orientation[1]
-
-    @abstractmethod
-    def calc_power(self, wind_speed, air_den):
-        pass
-
-
-class DTU10MW(Turbine):
-    """
-    DTU10MW extends the base turbine class and specifies the 10 MW turbine based on
-    SOURCE
-
-    Args:
-        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
-        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
-    """
-    diameter = 178.4  # Meter
-    nacellePos = np.array([0, 0, 119])  # in Meter
-    turbine_type = "DTU10MW"
-    turbine_state = np.array([1/3, 0, 0])  # axial ind, yaw misalignment, added turbulence
-
-    def __init__(self, base_location, orientation):
-        super().__init__(base_location, orientation)
-        print("DTU10MW turbine created")
-
-    def calc_power(self, wind_speed, air_den):
-        return 0.5 * np.pi * (self.diameter/2)**2 * wind_speed**3  # TODO link with turbine state Cp calculation
+from Code.observation_points import ObservationPoints
+from Code.ambient import AmbientStates
 
 
 class TurbineStates(ABC):
@@ -64,10 +14,10 @@ class TurbineStates(ABC):
     turbine_states = np.array([])
 
     def __init__(self, list_length: int, number_of_states: int):
-        self.turbine_states = np.zeros(list_length, number_of_states)
+        self.turbine_states = np.zeros((list_length, number_of_states))
 
     @abstractmethod
-    def shift_states(self, new_state: np.array):
+    def iterate_states(self, new_state: np.ndarray):
         """
         shift_states shifts all states and adds a new entry in first place
         :return:
@@ -102,8 +52,18 @@ class TurbineStates(ABC):
     def get_ct(self, index: int) -> float:
         """
         get_ct(index) returns the Ct coefficient at a requested index.
-        :return:
+        :param index: Turbine state list index at which Ct should be calculated
+        :return: Ct coefficient
         """
+
+    @abstractmethod
+    def get_yaw(self, index: int) -> float:
+        """
+        get_yaw(index) returns the yaw misalignment at a requested index
+        :param index: Turbine state list index at which yaw should be returned
+        :return: yaw misalignment in deg
+        """
+        pass
 
     @abstractmethod
     def get_all_ct(self) -> np.array:
@@ -121,6 +81,63 @@ class TurbineStates(ABC):
         """
         pass
 
+
+class Turbine(ABC):
+    """
+    Turbine abstract base class, specifies a turbine with a diameter of 1m and a nacelle height of 1m.
+
+    Args:
+        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
+        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
+    """
+    # Attributes
+    diameter = 1  # in Meter
+    nacellePos = np.array([0, 0, 1])  # in Meter
+    turbine_type = "base"
+    orientation = np.array([0, 0])  # yaw, tilt in Degree
+
+    def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
+                 observation_points: ObservationPoints, ambient_states: AmbientStates):
+        self.base_location = base_location
+        self.orientation = orientation
+        self.turbine_states = turbine_states
+        self.observation_points = observation_points
+        self.ambient_states = ambient_states
+
+    def calc_yaw(self, wind_direction):
+        return self.orientation[0] - wind_direction
+
+    def calc_tilt(self):
+        return self.orientation[1]
+
+    @abstractmethod
+    def calc_power(self, wind_speed, air_den):
+        pass
+
+
+class DTU10MW(Turbine):
+    """
+    DTU10MW extends the base turbine class and specifies the 10 MW turbine based on
+    SOURCE
+
+    Args:
+        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
+        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
+    """
+    diameter = 178.4  # Meter
+    nacellePos = np.array([0, 0, 119])  # in Meter
+    turbine_type = "DTU10MW"
+    turbine_state = np.array([1/3, 0, 0])  # axial ind, yaw misalignment, added turbulence
+
+    def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
+                 observation_points: ObservationPoints, ambient_states: AmbientStates):
+        super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
+        print("DTU10MW turbine created")
+
+    def calc_power(self, wind_speed, air_den):
+        return 0.5 * np.pi * (self.diameter/2)**2 * wind_speed**3  # TODO link with turbine state Cp calculation
+
+
 class TurbineStatesFLORIDyn(TurbineStates):
     """
     TurbineStatesFLORIDyn includes the axial induction factor, the yaw misalignment and the added turbulence intensity.
@@ -129,7 +146,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
     def __init__(self, list_length: int):
         super().__init__(list_length, 3)
 
-    def shift_states(self, new_state: np.array):
+    def iterate_states(self, new_state: np.ndarray):
         """
         shift_states shifts all states and adds a new entry in first place
         :return:
@@ -176,7 +193,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         return self.turbine_states[index, 1]
 
-    def get_all_ct(self) -> np.array:
+    def get_all_ct(self) -> np.ndarray:
         """
         get_all_ct(index) returns the Ct coefficients for all turbine states.
         :return:
@@ -184,7 +201,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         # TODO vectorized calculation of Ct
         pass
 
-    def get_all_yaw(self) -> np.array:
+    def get_all_yaw(self) -> np.ndarray:
         """
         get_all_yaw(index) returns the yaw misalignment for all turbine states.
         :return:
