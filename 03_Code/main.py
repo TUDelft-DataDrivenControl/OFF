@@ -25,7 +25,7 @@ def main():
                 tur.DTU10MW(np.array([1800, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
                             ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10))]
 
-    wind_farm = wfm.WindFarm(turbines, 'test2')
+    wind_farm = wfm.WindFarm(turbines)
 
     print(wind_farm.turbines[0].orientation)
     wind_farm.turbines[0].orientation[0] = 260

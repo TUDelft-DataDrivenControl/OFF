@@ -41,7 +41,7 @@ class TurbineStates(ABC):
         pass
 
     @abstractmethod
-    def get_current_yaw(self):
+    def get_current_yaw(self) -> float:
         """
         get_current_yaw returns the current yaw misalignment at the turbine location
         :return:
@@ -127,7 +127,6 @@ class DTU10MW(Turbine):
     diameter = 178.4  # Meter
     nacellePos = np.array([0, 0, 119])  # in Meter
     turbine_type = "DTU10MW"
-    turbine_state = np.array([1/3, 0, 0])  # axial ind, yaw misalignment, added turbulence
 
     def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
                  observation_points: ObservationPoints, ambient_states: AmbientStates):
