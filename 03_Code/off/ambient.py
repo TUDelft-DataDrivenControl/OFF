@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from Code.states import States
+from off.states import States
 
 
 class AmbientStates(States, ABC):

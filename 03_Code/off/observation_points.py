@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from Code.states import States
-from Code.off import OFFTools as OT
+from off.states import States
+from off.utils import OFFTools as OT
 
 
 class ObservationPoints(States, ABC):

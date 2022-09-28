@@ -1,10 +1,10 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from Code.observation_points import ObservationPoints
-from Code.ambient import AmbientStates
-from Code.states import States
-from Code.off import OFFTools as OT
+from off.observation_points import ObservationPoints
+from off.ambient import AmbientStates
+from off.states import States
 
+from off.utils import OFFTools as OT
 
 class TurbineStates(States, ABC):
     """

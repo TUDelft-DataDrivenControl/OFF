@@ -1,9 +1,9 @@
-import Code.turbine as tur
-import Code.windfarm as wfm
-import Code.observation_points as ops
-import Code.ambient as amb
+import off.turbine as tur
+import off.windfarm as wfm
+import off.observation_points as ops
+import off.ambient as amb
 import numpy as np
-import Code.off as off
+import off.off as off
 
 
 def main():
@@ -30,8 +30,6 @@ def main():
     # Create simulation object
     off_sim = off.OFF(wind_farm)
     off_sim.init_sim(np.array([8, 255, 0]), np.array([1/3, 0, 0]))
-
-
 
     print(wind_farm.turbines[0].orientation)
     wind_farm.turbines[0].orientation[0] = 260
