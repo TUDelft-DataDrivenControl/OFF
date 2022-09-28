@@ -2,8 +2,8 @@ import Code.turbine as tur
 import Code.windfarm as wfm
 import Code.observation_points as ops
 import Code.ambient as amb
-
 import numpy as np
+import Code.off as off
 
 
 def main():
@@ -25,7 +25,13 @@ def main():
                 tur.DTU10MW(np.array([1800, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
                             ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10))]
 
-    wind_farm = wfm.WindFarm(turbines)
+    wind_farm = wfm.WindFarm(turbines, 4)
+
+    # Create simulation object
+    off_sim = off.OFF(wind_farm)
+    off_sim.init_sim(np.array([8, 255, 0]), np.array([1/3, 0, 0]))
+
+
 
     print(wind_farm.turbines[0].orientation)
     wind_farm.turbines[0].orientation[0] = 260

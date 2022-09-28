@@ -2,27 +2,19 @@ import numpy as np
 from abc import ABC, abstractmethod
 from Code.observation_points import ObservationPoints
 from Code.ambient import AmbientStates
+from Code.states import States
+from Code.off import OFFTools as OT
 
 
-class TurbineStates(ABC):
+class TurbineStates(States, ABC):
     """
-    Abstract base class for the turbine states. This class determines how many states are stored and how they are used
-    to calculate the Cp and Ct coefficient.
+    Abstract base class for the turbine states, inherits from abstract States class. This class determines how many
+    turbine states are stored and how they are used to calculate the Cp and Ct coefficient. The states class provides
+    the get, set, init & iterate methods
     """
 
-    # Attributes
-    turbine_states = np.array([])
-
-    def __init__(self, list_length: int, number_of_states: int):
-        self.turbine_states = np.zeros((list_length, number_of_states))
-
-    @abstractmethod
-    def iterate_states(self, new_state: np.ndarray):
-        """
-        shift_states shifts all states and adds a new entry in first place
-        :return:
-        """
-        pass
+    def __init__(self, number_of_time_steps: int, number_of_states: int):
+        super(TurbineStates, self).__init__(number_of_time_steps, number_of_states)
 
     @abstractmethod
     def get_current_cp(self) -> float:
@@ -114,6 +106,22 @@ class Turbine(ABC):
     def calc_power(self, wind_speed, air_den):
         pass
 
+    def get_rotor_pos(self) -> np.float_:
+        """
+        Calculates the rotor position based on the current yaw and tilt
+
+        :return:
+        """
+        # TODO add tilt to offset calculation
+        print("Orientation [0] ", self.orientation[0])
+
+        ot = OT()
+        yaw = ot.deg2rad(self.orientation[0])
+        offset = np.array([np.cos(yaw), np.sin(yaw), 0]) * \
+            self.nacellePos
+
+        return self.base_location + offset
+
 
 class DTU10MW(Turbine):
     """
@@ -134,7 +142,7 @@ class DTU10MW(Turbine):
         print("DTU10MW turbine created")
 
     def calc_power(self, wind_speed, air_den):
-        return 0.5 * np.pi * (self.diameter/2)**2 * wind_speed**3  # TODO link with turbine state Cp calculation
+        return 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3  # TODO link with turbine state Cp calculation
 
 
 class TurbineStatesFLORIDyn(TurbineStates):
@@ -145,21 +153,13 @@ class TurbineStatesFLORIDyn(TurbineStates):
     def __init__(self, list_length: int):
         super().__init__(list_length, 3)
 
-    def iterate_states(self, new_state: np.ndarray):
-        """
-        shift_states shifts all states and adds a new entry in first place
-        :return:
-        """
-        self.turbine_states = np.roll(self.turbine_states, 1, axis=0)
-        self.turbine_states[0, :] = new_state
-
     def get_current_cp(self) -> float:
         """
         get_current_cp returns the current power coefficient of the turbine location
         :return:
         """
-        return 4 * self.turbine_states[0, 0] * (1 - self.turbine_states[0, 0])**2 * \
-            np.cos(self.turbine_states[0, 1])**2.2  # TODO Double check correct Cp calculation
+        return 4 * self.states[0, 0] * (1 - self.states[0, 0]) ** 2 * \
+               np.cos(self.states[0, 1]) ** 2.2  # TODO Double check correct Cp calculation
 
     def get_current_ct(self) -> float:
         """
@@ -181,8 +181,8 @@ class TurbineStatesFLORIDyn(TurbineStates):
         :param index: Turbine state list index at which Ct should be calculated
         :return: Ct coefficient
         """
-        return 4 * self.turbine_states[index, 0] * (1 - self.turbine_states[index, 0]) * \
-            np.cos(self.turbine_states[index, 1]) ** 2.2  # TODO Insert correct Ct calculation
+        return 4 * self.states[index, 0] * (1 - self.states[index, 0]) * \
+               np.cos(self.states[index, 1]) ** 2.2  # TODO Insert correct Ct calculation
 
     def get_yaw(self, index: int) -> float:
         """
@@ -190,7 +190,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         :param index: Turbine state list index at which yaw should be returned
         :return: yaw misalignment in deg
         """
-        return self.turbine_states[index, 1]
+        return self.states[index, 1]
 
     def get_all_ct(self) -> np.ndarray:
         """
@@ -205,4 +205,4 @@ class TurbineStatesFLORIDyn(TurbineStates):
         get_all_yaw(index) returns the yaw misalignment for all turbine states.
         :return:
         """
-        return self.turbine_states[:, 1]
+        return self.states[:, 1]
