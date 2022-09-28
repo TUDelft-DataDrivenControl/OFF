@@ -102,8 +102,10 @@ class FLORIDynOPs6(ObservationPoints):
         :param time_step: simulation time step in s
         :return:
         """
+        ot = OT()
+
         dw = np.arange(self.n_time_steps) * wind_speed
-        self.states[:, 0] = np.cos(OT.deg2rad(wind_direction)) * dw + rotor_pos[0]
-        self.states[:, 1] = np.sin(OT.deg2rad(wind_direction)) * dw + rotor_pos[1]
+        self.states[:, 0] = np.cos(ot.deg2rad(wind_direction)) * dw + rotor_pos[0]
+        self.states[:, 1] = np.sin(ot.deg2rad(wind_direction)) * dw + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = dw

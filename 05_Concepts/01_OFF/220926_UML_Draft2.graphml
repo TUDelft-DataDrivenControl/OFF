@@ -18,15 +18,14 @@
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="102.0" width="229.513671875" x="990.7312593005952" y="570.5"/>
+          <y:Geometry height="102.0" width="587.5923154700426" x="20.000270836407253" y="596.7850168388434"/>
           <y:Fill color="#FF9900" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="196.080078125" x="16.716796875" xml:space="preserve" y="3.0">{abstract} ObservationPoints<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="196.080078125" x="195.75611867252132" xml:space="preserve" y="3.0">{abstract} ObservationPoints<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve">op_list -&gt; np.array</y:AttributeLabel>
-            <y:MethodLabel xml:space="preserve">iterate_ops(self, new_op: np.ndarray)
-get_ops(self) -&gt; np.ndarray
-get_world_coord(self) -&gt; np.ndarray</y:MethodLabel>
+            <y:MethodLabel xml:space="preserve">get_world_coord(self) -&gt; np.ndarray
+init_all_states(self, wind_speed: float, wind_direction: float, rotor_pos: np.ndarray, time_step: float)</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -35,14 +34,13 @@ get_world_coord(self) -&gt; np.ndarray</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="173.0" width="256.478515625" x="540.6238374255952" y="535.0"/>
+          <y:Geometry height="173.0" width="256.478515625" x="637.5928850446429" y="561.2850168388434"/>
           <y:Fill color="#FF9900" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="165.5224609375" x="45.47802734375" xml:space="preserve" y="3.0">{abstract} TurbineStates<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve">turbine_states -&gt; np.array</y:AttributeLabel>
-            <y:MethodLabel xml:space="preserve">iterate_states(self, new_state: np.ndarray)
-get_current_cp(self) -&gt; float
+            <y:MethodLabel xml:space="preserve">get_current_cp(self) -&gt; float
 get_current_ct(self) -&gt; float
 get_current_yaw(self) -&gt; float
 get_ct(self, index: int) -&gt; float
@@ -57,14 +55,16 @@ get_all_yaw(self) -&gt; np.array</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="85.0" width="288.494140625" x="222.12951698908728" y="579.0"/>
+          <y:Geometry height="118.0" width="288.494140625" x="985.5676122271825" y="588.7850168388434"/>
           <y:Fill color="#FF9900" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="169.55322265625" x="59.470458984375" xml:space="preserve" y="3.0">{abstract} AmbientStates<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve">ambient_states -&gt; np.array</y:AttributeLabel>
-            <y:MethodLabel xml:space="preserve">iterate_ambient(self, new_ambient: np.ndarray)
-get_ambient(self) -&gt; np.ndarray</y:MethodLabel>
+            <y:MethodLabel xml:space="preserve">get_wind_speed(self) -&gt; np.ndarray
+get_wind_dir(self) -&gt; np.ndarray
+get_turbine_wind_speed(self) -&gt; np.float_
+get_turbine_wind_dir(self) -&gt; np.float_</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -73,7 +73,7 @@ get_ambient(self) -&gt; np.ndarray</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="189.0" width="254.498046875" x="477.4946273561508" y="299.0"/>
+          <y:Geometry height="199.28501683884338" width="254.498046875" x="417.2140718005952" y="315.0"/>
           <y:Fill color="#FF9900" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="124.9482421875" x="64.77490234375" xml:space="preserve" y="3.0">{abstract} Turbine<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -87,7 +87,8 @@ observation_points -&gt; ObservationPoints
 ambient_states -&gt; Ambient States</y:AttributeLabel>
             <y:MethodLabel xml:space="preserve">calc_yaw(self, wind_direction)
 calc_tilt(self)
-calc_power(self, wind_speed, air_den)</y:MethodLabel>
+calc_power(self, wind_speed, air_den)
+get_rotor_pos(self) -&gt; np.float_</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -96,7 +97,7 @@ calc_power(self, wind_speed, air_den)</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="85.0" width="254.498046875" x="602.0571273561508" y="183.0"/>
+          <y:Geometry height="85.0" width="254.498046875" x="541.7765718005952" y="199.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="82.12060546875" x="86.188720703125" xml:space="preserve" y="3.0">DTU 10 MW<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -113,7 +114,7 @@ turbine_type = "DTU10MW"</y:AttributeLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="28.0" width="256.478515625" x="761.9928850446429" y="379.5"/>
+          <y:Geometry height="28.0" width="256.478515625" x="701.7123294890873" y="400.6425084194217"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="162.41845703125" x="47.030029296875" xml:space="preserve" y="3.0">TurbineStatesFLORIDyn<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -128,7 +129,7 @@ turbine_type = "DTU10MW"</y:AttributeLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="85.0" width="427.494140625" x="20.000151909722234" y="351.0"/>
+          <y:Geometry height="85.0" width="427.494140625" x="988.1910249255952" y="372.1425084194217"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="125.875" x="150.8095703125" xml:space="preserve" y="3.0">FLORIDynAmbient<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -144,7 +145,7 @@ get_wind_direction_at(self, location: np.ndarray, op_coord: np.ndarray):</y:Meth
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="28.0" width="114.03271484375" x="1048.4717378162202" y="379.5"/>
+          <y:Geometry height="28.0" width="114.03271484375" x="60.915785435267864" y="400.6425084194217"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="104.03271484375" x="5.0" xml:space="preserve" y="3.0">FLORIDynOPs4<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -159,7 +160,7 @@ get_wind_direction_at(self, location: np.ndarray, op_coord: np.ndarray):</y:Meth
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="28.0" width="114.03271484375" x="1192.5046743241567" y="379.5"/>
+          <y:Geometry height="28.0" width="114.03271484375" x="256.7800711495536" y="400.6425084194217"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="104.03271484375" x="5.0" xml:space="preserve" y="3.0">FLORIDynOPs6<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -174,13 +175,13 @@ get_wind_direction_at(self, location: np.ndarray, op_coord: np.ndarray):</y:Meth
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="73.0" width="183.751953125" x="388.3051742311508" y="189.0"/>
+          <y:Geometry height="73.0" width="183.751953125" x="328.02461867559526" y="205.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="70.751953125" x="56.5" xml:space="preserve" y="3.0">WindFarm<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve">turbines -&gt; Turbine[ ]
-simulation_settings -&gt; dict</y:AttributeLabel>
+time_step</y:AttributeLabel>
             <y:MethodLabel xml:space="preserve"/>
           </y:UML>
         </y:UMLClassNode>
@@ -189,7 +190,7 @@ simulation_settings -&gt; dict</y:AttributeLabel>
     <node id="n10">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="30.0" width="42.74609375" x="458.8081039186508" y="0.0"/>
+          <y:Geometry height="30.0" width="42.74609375" x="632.5434213789682" y="0.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="32.74609375" x="5.0" xml:space="preserve" y="5.93359375">main<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -201,12 +202,14 @@ simulation_settings -&gt; dict</y:AttributeLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="145.0" width="256.478515625" x="540.6238374255952" y="739.0"/>
+          <y:Geometry height="173.0" width="256.478515625" x="637.5928850446429" y="765.2850168388434"/>
           <y:Fill color="#FFCC99" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="113.10986328125" x="71.684326171875" xml:space="preserve" y="3.0">{abstract} States<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
-            <y:AttributeLabel xml:space="preserve">states -&gt; np.array</y:AttributeLabel>
+            <y:AttributeLabel xml:space="preserve">states -&gt; np.array
+n_time_steps -&gt; int
+n_states -&gt; int</y:AttributeLabel>
             <y:MethodLabel xml:space="preserve">get_all_states(self) -&gt; np.array
 set_all_states(self, state_mat: np.array)
 get_ind_state(self) -&gt; np.array
@@ -221,7 +224,7 @@ iterate_states(self, new_state: np.array)</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="118.0" width="405.8193359375" x="277.2714828249008" y="50.0"/>
+          <y:Geometry height="118.0" width="405.8193359375" x="451.0068002852182" y="50.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="29.6318359375" x="188.09375" xml:space="preserve" y="3.0">OFF<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -236,17 +239,32 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
         </y:UMLClassNode>
       </data>
     </node>
+    <node id="n13">
+      <data key="d4" xml:space="preserve"/>
+      <data key="d6">
+        <y:UMLClassNode>
+          <y:Geometry height="59.22847520660957" width="123.31484909606513" x="826.2749167218087" y="211.8857623966952"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="66.78466796875" x="28.265090563657566" xml:space="preserve" y="3.0">OFFTools<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
+            <y:AttributeLabel xml:space="preserve"/>
+            <y:MethodLabel xml:space="preserve">deg2rad(self, deg)</y:MethodLabel>
+          </y:UML>
+        </y:UMLClassNode>
+      </data>
+    </node>
     <edge id="e0" source="n3" target="n4">
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="63.62451171875" sy="-94.5" tx="0.0" ty="42.5">
-            <y:Point x="668.3681625124008" y="283.5"/>
-            <y:Point x="729.3061507936508" y="283.5"/>
+          <y:Path sx="63.62451171875" sy="-99.64250841942169" tx="0.0" ty="42.5">
+            <y:Point x="608.0876069568452" y="299.5"/>
+            <y:Point x="669.0255952380952" y="299.5"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="11.102049231150772" xml:space="preserve" y="-29.195653467684906">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="6.283185307179586" distance="24.66796875" distanceToCenter="true" position="left" ratio="0.6012284716367577" segment="-1"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="11.102072288876457" xml:space="preserve" y="-29.195653467684906">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="6.283185307179586" distance="24.66796875" distanceToCenter="true" position="left" ratio="0.6012284716367577" segment="-1"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -255,13 +273,10 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="64.11962890625" sy="-86.5" tx="0.0" ty="14.0">
-            <y:Point x="732.9827241443452" y="519.5"/>
-            <y:Point x="890.2321428571429" y="519.5"/>
-          </y:Path>
+          <y:Path sx="64.11962890625" sy="-86.5" tx="0.0" ty="14.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.832028343563934" xml:space="preserve" y="-20.6611328125">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.831928555956665" xml:space="preserve" y="-75.35526813258622">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -270,13 +285,10 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-72.12353515625" sy="-42.5" tx="0.0" ty="42.5">
-            <y:Point x="294.2530521453373" y="451.5"/>
-            <y:Point x="233.74722222222223" y="451.5"/>
-          </y:Path>
+          <y:Path sx="72.12353515625" sy="-59.0" tx="0.0" ty="42.5"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.8320316375247785" xml:space="preserve" y="-79.8184814453125">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.831955295151829" xml:space="preserve" y="-74.85551227321116">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -285,10 +297,10 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="-51.0" tx="0.0" ty="14.0"/>
+          <y:Path sx="-195.86410515668086" sy="-51.0" tx="0.0" ty="14.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.832089378720184" xml:space="preserve" y="-90.526611328125">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.831944744849295" xml:space="preserve" y="-93.09660114039866">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -297,13 +309,10 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="76.50455729166666" sy="-51.0" tx="0.0" ty="14.0">
-            <y:Point x="1181.992652529762" y="423.0"/>
-            <y:Point x="1249.5210317460317" y="423.0"/>
-          </y:Path>
+          <y:Path sx="0.0" sy="-51.0" tx="0.0" ty="14.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.832007998511926" xml:space="preserve" y="-89.8135986328125">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.3359375" x="4.832042585100453" xml:space="preserve" y="-93.09660114039866">extends<y:LabelModel><y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/></y:LabelModel><y:ModelParameter><y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/></y:ModelParameter><y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
@@ -311,9 +320,9 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
     <edge id="e5" source="n3" target="n0">
       <data key="d10">
         <y:QuadCurveEdge straightness="0.1">
-          <y:Path sx="84.83268229166666" sy="94.5" tx="-76.50455729166666" ty="-51.0">
-            <y:Point x="689.5763330853174" y="503.5"/>
-            <y:Point x="1028.9835379464284" y="503.5"/>
+          <y:Path sx="-84.83268229166666" sy="99.64250841942169" tx="195.86410515668086" ty="-51.0">
+            <y:Point x="459.6304129464286" y="529.7850168388434"/>
+            <y:Point x="509.66053372810944" y="529.7850168388434"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -323,7 +332,10 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
     <edge id="e6" source="n3" target="n1">
       <data key="d10">
         <y:QuadCurveEdge straightness="0.1">
-          <y:Path sx="0.0" sy="94.5" tx="-64.11962890625" ty="-86.5"/>
+          <y:Path sx="0.0" sy="99.64250841942169" tx="-64.11962890625" ty="-86.5">
+            <y:Point x="544.4630952380952" y="545.7850168388434"/>
+            <y:Point x="701.7125139508929" y="545.7850168388434"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
         </y:QuadCurveEdge>
@@ -332,9 +344,9 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
     <edge id="e7" source="n3" target="n2">
       <data key="d10">
         <y:QuadCurveEdge straightness="0.1">
-          <y:Path sx="-84.83268229166666" sy="94.5" tx="72.12353515625" ty="-42.5">
-            <y:Point x="519.9109685019841" y="503.5"/>
-            <y:Point x="438.5001224578373" y="503.5"/>
+          <y:Path sx="84.83268229166666" sy="99.64250841942169" tx="-72.12353515625" ty="-59.0">
+            <y:Point x="629.2957775297618" y="529.7850168388434"/>
+            <y:Point x="1057.6911473834325" y="529.7850168388434"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -344,9 +356,9 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
     <edge id="e8" source="n9" target="n3">
       <data key="d10">
         <y:QuadCurveEdge straightness="0.1">
-          <y:Path sx="0.0" sy="36.5" tx="-63.62451171875" ty="-94.5">
-            <y:Point x="480.1811507936508" y="277.5"/>
-            <y:Point x="541.1191390749008" y="277.5"/>
+          <y:Path sx="0.0" sy="36.5" tx="-63.62451171875" ty="-99.64250841942169">
+            <y:Point x="419.90059523809526" y="293.5"/>
+            <y:Point x="480.8385835193452" y="293.5"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -358,7 +370,7 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="-72.5" tx="0.0" ty="86.5"/>
+          <y:Path sx="0.0" sy="-86.5" tx="0.0" ty="86.5"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
           <y:BendStyle smoothed="false"/>
@@ -370,9 +382,9 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-85.49283854166666" sy="-72.5" tx="72.12353515625" ty="42.5">
-            <y:Point x="583.3702566964286" y="723.5"/>
-            <y:Point x="438.5001224578373" y="723.5"/>
+          <y:Path sx="85.49283854166666" sy="-86.5" tx="0.0" ty="59.0">
+            <y:Point x="851.3249813988095" y="749.7850168388434"/>
+            <y:Point x="1129.8146825396825" y="749.7850168388434"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
@@ -385,9 +397,9 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="85.49283854166666" sy="-72.5" tx="0.0" ty="51.0">
-            <y:Point x="754.3559337797618" y="723.5"/>
-            <y:Point x="1105.4880952380952" y="723.5"/>
+          <y:Path sx="-85.49283854166666" sy="-86.5" tx="0.0" ty="51.0">
+            <y:Point x="680.3393043154763" y="749.7850168388434"/>
+            <y:Point x="313.7964285714286" y="749.7850168388434"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="diamond" target="none"/>
@@ -409,7 +421,23 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
       <data key="d9"/>
       <data key="d10">
         <y:QuadCurveEdge straightness="0.1">
-          <y:Path sx="0.0" sy="59.0" tx="0.0" ty="-36.5"/>
+          <y:Path sx="-101.454833984375" sy="59.0" tx="0.0" ty="-36.5">
+            <y:Point x="552.4616342695932" y="183.5"/>
+            <y:Point x="419.90059523809526" y="183.5"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
+      </data>
+    </edge>
+    <edge id="e14" source="n12" target="n13">
+      <data key="d9"/>
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="101.454833984375" sy="59.0" tx="0.0" ty="-29.614237603304787">
+            <y:Point x="755.3713022383432" y="183.5"/>
+            <y:Point x="887.9323412698413" y="183.5"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
         </y:QuadCurveEdge>
