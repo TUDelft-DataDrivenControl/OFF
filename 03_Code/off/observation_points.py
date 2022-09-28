@@ -15,11 +15,13 @@ class ObservationPoints(States, ABC):
 
     @abstractmethod
     def get_world_coord(self) -> np.ndarray:
-        """
-        Returns the x, y, z coordinates of all OPs
+        """ Returns the x, y, z coordinates of all OPs
 
-        :return: m x 3 matrix where the columns are the x,y,z coordinates
-        """
+        Returns
+        -------
+        np.ndarray
+            m x 3 matrix where the columns are the x,y,z coordinates
+        """       
         pass
 
     @abstractmethod
@@ -28,11 +30,16 @@ class ObservationPoints(States, ABC):
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
-        :param wind_speed: Wind speed in m/s
-        :param wind_direction: Wind direction in deg
-        :param rotor_pos: 1 x 3 vector with x,y,z location of the rotor in the world coordinate system
-        :param time_step: simulation time step in s
-        :return:
+        Parameters
+        ----------
+        wind_speed : float
+            Wind speed in m/s
+        wind_direction : float
+            Wind direction in deg
+        rotor_pos : np.ndarray
+            1 x 3 vector with x,y,z location of the rotor in the world coordinate system
+        time_step : float
+            simulation time step in s
         """
         pass
 
@@ -48,21 +55,25 @@ class FLORIDynOPs4(ObservationPoints):
     def get_world_coord(self) -> np.ndarray:
         """
         Returns the world coordinates of the OPs
-        :return:
         """
         return self.states[:, 0:3]
 
     def init_all_states(self, wind_speed: float, wind_direction: float, rotor_pos: np.ndarray, time_step: float):
-        """
+        """        
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
-        :param wind_speed: Wind speed in m/s
-        :param wind_direction: Wind direction in deg
-        :param rotor_pos: 1 x 3 vector with x,y,z location of the rotor in the world coordinate system
-        :param time_step: simulation time step in s
-        :return:
-        """
+        Parameters
+        ----------
+        wind_speed : float
+            Wind speed in m/s
+        wind_direction : float
+            Wind direction in deg
+        rotor_pos : np.ndarray
+            1 x 3 vector with x,y,z location of the rotor in the world coordinate system
+        time_step : float
+            simulation time step in s
+        """       
         ot = OT()
 
         dw = np.arange(self.n_time_steps) * wind_speed
@@ -87,7 +98,6 @@ class FLORIDynOPs6(ObservationPoints):
     def get_world_coord(self) -> np.ndarray:
         """
         Returns the world coordinates of the OPs
-        :return:
         """
         return self.op_list[:, 0:3]
 
@@ -96,11 +106,16 @@ class FLORIDynOPs6(ObservationPoints):
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
-        :param wind_speed: Wind speed in m/s
-        :param wind_direction: Wind direction in deg
-        :param rotor_pos: 1 x 3 vector with x,y,z location of the rotor in the world coordinate system
-        :param time_step: simulation time step in s
-        :return:
+        Parameters
+        ----------
+        wind_speed : float
+            Wind speed in m/s
+        wind_direction : float
+            Wind direction in deg
+        rotor_pos : np.ndarray
+            1 x 3 vector with x,y,z location of the rotor in the world coordinate system
+        time_step : float
+            simulation time step in s
         """
         ot = OT()
 

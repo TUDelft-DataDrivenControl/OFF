@@ -15,13 +15,18 @@ class OFF:
 
     def init_sim(self, start_ambient: np.ndarray, start_turbine: np.ndarray):
         """
-        Function which initializes the states within the self.wind_farm object. Assigns turbine & ambient states and
-        distributes the OPs downstream. OP locations are not necessarily correct but the wakes are "unrolled" and do not
-        have to first develop.
-        :param start_ambient: 1 x n vector with initial ambient state
-        :param start_turbine: 1 x n vector with initial turbine state
-        :return: none
-        """
+        Function which initializes the states within the ``self.wind_farm`` object. 
+        Assigns turbine & ambient states and distributes the OPs downstream. OP 
+        locations are not necessarily correct but the wakes are "unrolled" and 
+        do not have to first develop.
+
+        Parameters
+        ----------
+        start_ambient : np.ndarray
+            1 x n vector with initial ambient state
+        start_turbine : np.ndarray
+            1 x n vector with initial turbine state
+        """        
 
         for t in self.wind_farm.turbines:
             t.ambient_states.init_all_states(start_ambient)
@@ -32,8 +37,8 @@ class OFF:
 
     def run_sim(self):
         """
-        Central function which executes the simulation and manipulates the self.wind_farm object
-        :return:
+        Central function which executes the simulation and manipulates the 
+        ``self.wind_farm object``
         """
         pass
 
