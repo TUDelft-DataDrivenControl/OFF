@@ -11,6 +11,17 @@ class ObservationPoints(States, ABC):
     """
 
     def __init__(self, number_of_time_steps: int, number_of_states: int):
+        """
+        ObservationPoints is the abstract base class for a list of wake tracers / particles
+        The class inherits get, set & iterate methods from the abstract States class, init is overwritten
+
+        Parameters
+        ----------
+        number_of_time_steps : int
+            number of time steps the states should go back / chain length
+        number_of_states : int
+            number of states per time step
+        """
         super(ObservationPoints, self).__init__(number_of_time_steps, number_of_states)
 
     @abstractmethod
@@ -45,16 +56,27 @@ class ObservationPoints(States, ABC):
 
 
 class FLORIDynOPs4(ObservationPoints):
-    """
-    FLORIDynOPs have four states, three in the world coordinate system (x,y,z) and one in the wake coordinate system
-    (downstream).
-    """
+
     def __init__(self, number_of_time_steps: int):
+        """
+        FLORIDynOPs have four states, three in the world coordinate system (x,y,z) and one in the wake coordinate system
+        (downstream).
+
+        Parameters
+        ----------
+        number_of_time_steps : int
+            equivalent to OP chain length
+        """
         super(FLORIDynOPs4, self).__init__(number_of_time_steps, 4)
 
     def get_world_coord(self) -> np.ndarray:
         """
         Returns the world coordinates of the OPs
+
+        Returns
+        -------
+        np.ndarray
+            [x, y, z] coordinates in world coordinate system
         """
         return self.states[:, 0:3]
 
@@ -84,20 +106,27 @@ class FLORIDynOPs4(ObservationPoints):
 
 
 class FLORIDynOPs6(ObservationPoints):
-    """
-    FLORIDynOPs have six states, three in the world coordinate system (x,y,z) and one in the wake coordinate system
-    (x,y,z). This method requires more memory but less calculations at runtime.
-
-    Args:
-        list_length (`int`): length of the OP list
-    """
 
     def __init__(self, number_of_time_steps: int):
+        """
+        FLORIDyn OPs with six states, three in the world coordinate system (x,y,z) and one in the wake coordinate system
+        (x,y,z). This method requires more memory but less calculations at runtime.
+
+        Parameters
+        ----------
+        number_of_time_steps : int
+            equivalent to OP chain length
+        """
         super(FLORIDynOPs6, self).__init__(number_of_time_steps, 6)
 
     def get_world_coord(self) -> np.ndarray:
         """
         Returns the world coordinates of the OPs
+
+        Returns
+        -------
+        np.ndarray
+            [x, y, z] coordinates in world coordinate system
         """
         return self.op_list[:, 0:3]
 

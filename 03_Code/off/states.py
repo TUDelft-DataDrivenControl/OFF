@@ -57,8 +57,15 @@ class States(ABC):
     def get_ind_state(self, index: int) -> np.ndarray:
         """
         Returns the state at a given index
-        :param index:
-        :return: state at the requested index
+
+        Parameters
+        ----------
+        index : int
+            index of the state to return
+        Returns
+        -------
+        state : np.ndarray
+            1 x n state vector
         """
         # TODO check for out of bounds request
         return self.states[index, :]
@@ -67,9 +74,16 @@ class States(ABC):
         """
         Overwrites a state at the given index
 
-        :param index: index of state to overwrite
-        :param new_state: 1 x n vector which overwrites the state
-        :return: none
+        Parameters
+        ----------
+        index : int
+            index of state to overwrite
+        new_state : np.ndarray
+            1 x n vector which overwrites the state
+
+        Returns
+        -------
+
         """
         # TODO check vector size
         # TODO check for out of bounds request
@@ -80,8 +94,14 @@ class States(ABC):
         Copies a given state across all state entries as initialisation.
         For more advanced initialisation, use set_all_states()
 
-        :param init_state: 1 x n vector of init state
-        :return: none
+        Parameters
+        ----------
+        init_state : np.ndarray
+            1 x n vector of init state
+
+        Returns
+        -------
+
         """
         # TODO check vector size
         self.states[:, :] = init_state
