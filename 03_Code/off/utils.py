@@ -22,9 +22,27 @@ def ot_deg2rad(deg):
     return np.deg2rad(270 - deg)
 
 
+def ot_uv2deg(u, v):
+    """
+    Function to convert u and v component to the in LES common degree convention
+    Parameters
+    ----------
+    u
+        wind speed in x direction
+    v
+        wind speed in y direction
+
+    Returns
+    -------
+    deg
+        LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
+    """
+    return 270 - np.arctan2(v, u)*180 / np.pi
+
+
 def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
     """
-    Calculates the magitude of the wind speed based on u and v component
+    Calculates the magnitude of the wind speed based on u and v component
 
     Parameters
     ----------
