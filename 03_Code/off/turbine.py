@@ -3,32 +3,49 @@ from abc import ABC, abstractmethod
 from off.observation_points import ObservationPoints
 from off.ambient import AmbientStates
 from off.states import States
+from off.utils import ot_deg2rad
 
-from off.utils import OFFTools as OT
 
 class TurbineStates(States, ABC):
-    """
-    Abstract base class for the turbine states, inherits from abstract States class. This class determines how many
-    turbine states are stored and how they are used to calculate the Cp and Ct coefficient. The states class provides
-    the get, set, init & iterate methods
-    """
 
-    def __init__(self, number_of_time_steps: int, number_of_states: int):
-        super(TurbineStates, self).__init__(number_of_time_steps, number_of_states)
+    def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
+        """
+        Abstract base class for the turbine states, inherits from abstract States class. This class determines how many
+        turbine states are stored and how they are used to calculate the Cp and Ct coefficient. The states class provides
+        the get, set, init & iterate methods
+
+        Parameters
+        ----------
+        number_of_time_steps : int
+            number of time steps the states should go back / chain length
+        number_of_states : int
+            number of states per time step
+        state_names : list
+            name and unit of the states
+        """
+        super(TurbineStates, self).__init__(number_of_time_steps, number_of_states, state_names)
 
     @abstractmethod
     def get_current_cp(self) -> float:
         """
-        get_current_cp returns the current power coefficient of the turbine location
-        :return:
+        get_current_cp returns the current power coefficient of the turbine
+
+        Returns
+        -------
+        float:
+            Power coefficient (-)
         """
         pass
 
     @abstractmethod
     def get_current_ct(self) -> float:
         """
-        get_current_ct returns the current yaw misalignment at the turbine location
-        :return:
+        get_current_ct returns the current thrust coefficient of the turbine
+
+        Returns
+        -------
+        float:
+            Thrust coefficient (-)
         """
         pass
 
@@ -36,52 +53,72 @@ class TurbineStates(States, ABC):
     def get_current_yaw(self) -> float:
         """
         get_current_yaw returns the current yaw misalignment at the turbine location
-        :return:
+
+        Returns
+        -------
+        float:
+            yaw misalignment at the turbine location (deg)
         """
         pass
 
     @abstractmethod
     def get_ct(self, index: int) -> float:
         """
-        get_ct(index) returns the Ct coefficient at a requested index.
-        :param index: Turbine state list index at which Ct should be calculated
-        :return: Ct coefficient
+        get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain
+
+        Parameters
+        ----------
+        index : int
+            Turbine state list index at which Ct should be calculated
+        Returns
+        -------
+        float:
+            Thrust coefficient
         """
+        pass
 
     @abstractmethod
     def get_yaw(self, index: int) -> float:
         """
         get_yaw(index) returns the yaw misalignment at a requested index
-        :param index: Turbine state list index at which yaw should be returned
-        :return: yaw misalignment in deg
+
+        Parameters
+        ----------
+        index : int
+
+        Returns
+        -------
+        float:
+            yaw misalignment in deg
         """
         pass
 
     @abstractmethod
-    def get_all_ct(self) -> np.array:
+    def get_all_ct(self) -> np.ndarray:
         """
         get_all_ct(index) returns the Ct coefficients for all turbine states.
-        :return:
+
+        Returns
+        -------
+        np.ndarray:
+            Thrust coefficient at all turbine states (-)
         """
         pass
 
     @abstractmethod
-    def get_all_yaw(self) -> np.array:
+    def get_all_yaw(self) -> np.ndarray:
         """
-        get_all_yaw(index) returns the yaw misalignment for all turbine states.
-        :return:
+        get_all_ct(index) returns the yaw misalignment for all turbine states.
+
+        Returns
+        -------
+        np.ndarray:
+            Yaw misalignment at all turbine states (deg)
         """
         pass
 
 
 class Turbine(ABC):
-    """
-    Turbine abstract base class, specifies a turbine with a diameter of 1m and a nacelle height of 1m.
-
-    Args:
-        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
-        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
-    """
     # Attributes
     diameter = 1  # in Meter
     nacellePos = np.array([0, 0, 1])  # in Meter
@@ -90,6 +127,22 @@ class Turbine(ABC):
 
     def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
                  observation_points: ObservationPoints, ambient_states: AmbientStates):
+        """
+        Turbine abstract base class
+
+        Parameters
+        ----------
+        base_location : np.ndarray
+            1 x 3 vector with x, y, z position of the turbine base (m)
+        orientation : np.ndarray
+            1 x 2 vector with yaw, tilt orientation of the turbine
+        turbine_states : TurbineStates
+            Turbine state object
+        observation_points : ObservationPoints
+            Observation Points object
+        ambient_states : AmbientStates
+            Ambient states object
+        """
         self.base_location = base_location
         self.orientation = orientation
         self.turbine_states = turbine_states
@@ -97,26 +150,65 @@ class Turbine(ABC):
         self.ambient_states = ambient_states
 
     def calc_yaw(self, wind_direction):
+        """
+        Get the yaw misalignment of the turbine
+
+        Parameters
+        ----------
+        wind_direction : number
+            Wind direction (deg)
+
+        Returns
+        -------
+        float:
+            yaw misalignment (deg)
+        """
         return self.orientation[0] - wind_direction
 
     def calc_tilt(self):
+        """
+            Get the tilt of the turbine
+
+            Returns
+            -------
+            float:
+                tilt (deg)
+            """
         return self.orientation[1]
 
     @abstractmethod
     def calc_power(self, wind_speed, air_den):
+        """
+        Calculate the power based on turbine, ambient and OP states
+
+        Parameters
+        ----------
+        wind_speed : float
+            Wind speed (m/s)
+        air_den : float
+            air density
+
+        Returns
+        -------
+        float :
+            Power generated (W)
+        """
+        # TODO this function should either rely on its own states or be more descriptive with what inputs are need
         pass
 
     def get_rotor_pos(self) -> np.float_:
         """
         Calculates the rotor position based on the current yaw and tilt
 
-        :return:
+        Returns
+        -------
+        np.ndarray:
+            1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         """
         # TODO add tilt to offset calculation
         print("Orientation [0] ", self.orientation[0])
 
-        ot = OT()
-        yaw = ot.deg2rad(self.orientation[0])
+        yaw = ot_deg2rad(self.orientation[0])
         offset = np.array([np.cos(yaw), np.sin(yaw), 0]) * \
             self.nacellePos
 
@@ -124,62 +216,112 @@ class Turbine(ABC):
 
 
 class DTU10MW(Turbine):
-    """
-    DTU10MW extends the base turbine class and specifies the 10 MW turbine based on
-    SOURCE
-
-    Args:
-        base_location (`numpy.ndarray`): x, y, z position of the turbine base in meter
-        orientation (`numpy.ndarray`): yaw, tilt of the rotor in deg, yaw in world orientation, NOT yaw misalignment
-    """
+    # Attributes
     diameter = 178.4  # Meter
     nacellePos = np.array([0, 0, 119])  # in Meter
     turbine_type = "DTU10MW"
 
     def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
                  observation_points: ObservationPoints, ambient_states: AmbientStates):
+        """
+        DTU10MW extends the base turbine class and specifies the 10 MW turbine based on [1]
+
+        Parameters
+        ----------
+        base_location : np.ndarray
+            1 x 3 vector with x, y, z position of the turbine base (m)
+        orientation : np.ndarray
+            1 x 2 vector with yaw, tilt orientation of the turbine
+        turbine_states : TurbineStates
+            Turbine state object
+        observation_points : ObservationPoints
+            Observation Points object
+        ambient_states : AmbientStates
+            Ambient states object
+        """
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         print("DTU10MW turbine created")
 
     def calc_power(self, wind_speed, air_den):
+        """
+        Calculate the power based on turbine, ambient and OP states
+
+        Parameters
+        ----------
+        wind_speed : float
+            Wind speed (m/s)
+        air_den : float
+            air density
+
+        Returns
+        -------
+        float :
+            Power generated (W)
+        """
+        # TODO probably needs to be rewritten
         return 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3  # TODO link with turbine state Cp calculation
 
 
 class TurbineStatesFLORIDyn(TurbineStates):
-    """
-    TurbineStatesFLORIDyn includes the axial induction factor, the yaw misalignment and the added turbulence intensity.
-    """
 
-    def __init__(self, list_length: int):
-        super().__init__(list_length, 3)
+    def __init__(self, number_of_time_steps: int):
+        """
+        TurbineStatesFLORIDyn includes the axial induction factor, the yaw misalignment and the added turbulence
+        intensity.
+
+        Parameters
+        ----------
+        number_of_time_steps : int
+            number of time steps the states should go back / chain length
+        """
+        super().__init__(number_of_time_steps, 3, ['axial induction (-), yaw (deg), added turbulence intensity (%)'])
 
     def get_current_cp(self) -> float:
         """
-        get_current_cp returns the current power coefficient of the turbine location
-        :return:
+        get_current_cp returns the current power coefficient of the turbine
+
+        Returns
+        -------
+        float:
+            Power coefficient (-)
         """
         return 4 * self.states[0, 0] * (1 - self.states[0, 0]) ** 2 * \
                np.cos(self.states[0, 1]) ** 2.2  # TODO Double check correct Cp calculation
 
     def get_current_ct(self) -> float:
         """
-        get_current_ct returns the current yaw misalignment at the turbine location
-        :return:
+        get_current_ct returns the current thrust coefficient of the turbine
+
+        Returns
+        -------
+        float:
+            Thrust coefficient (-)
         """
         return self.get_ct(0)
 
     def get_current_yaw(self) -> float:
         """
         get_current_yaw returns the current yaw misalignment at the turbine location
-        :return:
+
+        Returns
+        -------
+        float:
+            yaw misalignment at the turbine location (deg)
         """
         return self.get_yaw(0)
 
     def get_ct(self, index: int) -> float:
         """
-        get_ct(index) returns the Ct coefficient at a requested index.
-        :param index: Turbine state list index at which Ct should be calculated
-        :return: Ct coefficient
+        get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain
+
+        Parameters
+        ----------
+        index : int
+            Turbine state list index at which Ct should be calculated
+        Returns
+        -------
+        float:
+            Thrust coefficient
         """
         return 4 * self.states[index, 0] * (1 - self.states[index, 0]) * \
                np.cos(self.states[index, 1]) ** 2.2  # TODO Insert correct Ct calculation
@@ -187,22 +329,41 @@ class TurbineStatesFLORIDyn(TurbineStates):
     def get_yaw(self, index: int) -> float:
         """
         get_yaw(index) returns the yaw misalignment at a requested index
-        :param index: Turbine state list index at which yaw should be returned
-        :return: yaw misalignment in deg
+
+        Parameters
+        ----------
+        index : int
+
+        Returns
+        -------
+        float:
+            yaw misalignment in deg
         """
         return self.states[index, 1]
 
     def get_all_ct(self) -> np.ndarray:
         """
         get_all_ct(index) returns the Ct coefficients for all turbine states.
-        :return:
+
+        Returns
+        -------
+        np.ndarray:
+            Thrust coefficient at all turbine states (-)
         """
         # TODO vectorized calculation of Ct
         pass
 
     def get_all_yaw(self) -> np.ndarray:
         """
-        get_all_yaw(index) returns the yaw misalignment for all turbine states.
-        :return:
+        returns the yaw misalignment for all turbine states.
+
+        Returns
+        -------
+        np.ndarray:
+            n x 1 vector with all yaw angles
         """
         return self.states[:, 1]
+
+# SOURCES
+# [1] The Dtu 10-Mw Reference Wind Turbine, Bak et al., 2013
+#       https://orbit.dtu.dk/en/publications/the-dtu-10-mw-reference-wind-turbine

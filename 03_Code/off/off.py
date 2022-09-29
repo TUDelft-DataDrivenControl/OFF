@@ -31,8 +31,8 @@ class OFF:
         for t in self.wind_farm.turbines:
             t.ambient_states.init_all_states(start_ambient)
             t.turbine_states.init_all_states(start_turbine)
-            t.observation_points.init_all_states(t.ambient_states.get_turbine_wind_speed(),
-                                                 t.ambient_states.get_turbine_wind_dir(),
+            t.observation_points.init_all_states(t.ambient_states.get_turbine_wind_speed_u(),
+                                                 t.ambient_states.get_turbine_wind_speed_v(),
                                                  t.get_rotor_pos(), self.wind_farm.time_step)
 
     def run_sim(self):

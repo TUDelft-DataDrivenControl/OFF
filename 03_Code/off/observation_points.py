@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from off.states import States
-from off.utils import OFFTools as OT
+from off.utils import ot_abs_wind_speed
 
 
 class ObservationPoints(States, ABC):
@@ -10,7 +10,7 @@ class ObservationPoints(States, ABC):
     The class inherits get, set & iterate methods from the abstract States class, init is overwritten
     """
 
-    def __init__(self, number_of_time_steps: int, number_of_states: int):
+    def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
         """
         ObservationPoints is the abstract base class for a list of wake tracers / particles
         The class inherits get, set & iterate methods from the abstract States class, init is overwritten
@@ -21,12 +21,15 @@ class ObservationPoints(States, ABC):
             number of time steps the states should go back / chain length
         number_of_states : int
             number of states per time step
+        state_names : list
+            name and unit of the states
         """
-        super(ObservationPoints, self).__init__(number_of_time_steps, number_of_states)
+        super(ObservationPoints, self).__init__(number_of_time_steps, number_of_states, state_names)
 
     @abstractmethod
     def get_world_coord(self) -> np.ndarray:
-        """ Returns the x, y, z coordinates of all OPs
+        """
+        Returns the x, y, z coordinates of all OPs
 
         Returns
         -------
@@ -36,17 +39,17 @@ class ObservationPoints(States, ABC):
         pass
 
     @abstractmethod
-    def init_all_states(self, wind_speed: float, wind_direction: float, rotor_pos: np.ndarray, time_step: float):
+    def init_all_states(self, wind_speed_u: float, wind_speed_v: float, rotor_pos: np.ndarray, time_step: float):
         """
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
         Parameters
         ----------
-        wind_speed : float
-            Wind speed in m/s
-        wind_direction : float
-            Wind direction in deg
+        wind_speed_u : float
+            Wind speed in x direction in m/s
+        wind_speed_v : float
+            Wind speed in y direction in m/s
         rotor_pos : np.ndarray
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         time_step : float
@@ -67,7 +70,7 @@ class FLORIDynOPs4(ObservationPoints):
         number_of_time_steps : int
             equivalent to OP chain length
         """
-        super(FLORIDynOPs4, self).__init__(number_of_time_steps, 4)
+        super(FLORIDynOPs4, self).__init__(number_of_time_steps, 4, ['x0 (m)', 'y0 (m)', 'z0 (m)', 'x1 (m)'])
 
     def get_world_coord(self) -> np.ndarray:
         """
@@ -80,29 +83,27 @@ class FLORIDynOPs4(ObservationPoints):
         """
         return self.states[:, 0:3]
 
-    def init_all_states(self, wind_speed: float, wind_direction: float, rotor_pos: np.ndarray, time_step: float):
+    def init_all_states(self, wind_speed_u: float, wind_speed_v: float, rotor_pos: np.ndarray, time_step: float):
         """        
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
         Parameters
         ----------
-        wind_speed : float
-            Wind speed in m/s
-        wind_direction : float
-            Wind direction in deg
+        wind_speed_u : float
+            wind speed in x direction in m/s
+        wind_speed_v : float
+            wind speed in y direction in m/s
         rotor_pos : np.ndarray
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         time_step : float
             simulation time step in s
-        """       
-        ot = OT()
+        """
 
-        dw = np.arange(self.n_time_steps) * wind_speed
-        self.states[:, 0] = np.cos(ot.deg2rad(wind_direction)) * dw + rotor_pos[0]
-        self.states[:, 1] = np.sin(ot.deg2rad(wind_direction)) * dw + rotor_pos[1]
+        self.states[:, 0] = np.arange(self.n_time_steps) * wind_speed_u + rotor_pos[0]
+        self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
-        self.states[:, 3] = dw
+        self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
 
 
 class FLORIDynOPs6(ObservationPoints):
@@ -117,7 +118,8 @@ class FLORIDynOPs6(ObservationPoints):
         number_of_time_steps : int
             equivalent to OP chain length
         """
-        super(FLORIDynOPs6, self).__init__(number_of_time_steps, 6)
+        super(FLORIDynOPs6, self).__init__(number_of_time_steps, 6,
+                                           ['x0 (m)', 'y0 (m)', 'z0 (m)', 'x1 (m)', 'y1 (m)', 'z1 (m)'])
 
     def get_world_coord(self) -> np.ndarray:
         """
@@ -130,26 +132,24 @@ class FLORIDynOPs6(ObservationPoints):
         """
         return self.op_list[:, 0:3]
 
-    def init_all_states(self, wind_speed: float, wind_direction: float, rotor_pos: np.ndarray, time_step: float):
+    def init_all_states(self, wind_speed_u: float, wind_speed_v: float, rotor_pos: np.ndarray, time_step: float):
         """
         Creates a downstream chain of OPs
         Overwrites the base method of the States class
 
         Parameters
         ----------
-        wind_speed : float
-            Wind speed in m/s
-        wind_direction : float
-            Wind direction in deg
+        wind_speed_u : float
+            wind speed in x direction in m/s
+        wind_speed_v : float
+            wind speed in y direction in m/s
         rotor_pos : np.ndarray
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         time_step : float
             simulation time step in s
         """
-        ot = OT()
 
-        dw = np.arange(self.n_time_steps) * wind_speed
-        self.states[:, 0] = np.cos(ot.deg2rad(wind_direction)) * dw + rotor_pos[0]
-        self.states[:, 1] = np.sin(ot.deg2rad(wind_direction)) * dw + rotor_pos[1]
+        self.states[:, 0] = np.arange(self.n_time_steps) * wind_speed_u + rotor_pos[0]
+        self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
-        self.states[:, 3] = dw
+        self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)

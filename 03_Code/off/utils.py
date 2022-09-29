@@ -1,18 +1,42 @@
+"""
+Utilities for the OFF toolbox
+    functions which are handy in multiple places but do not have a true parent object they could belong to.
+"""
 import numpy as np
 
-class OFFTools:
+
+def ot_deg2rad(deg):
     """
-    Class which provides handy methods to run the algorithm
+    Function to convert the in LES common degree convention into radians for calculation
+
+    Parameters
+    ----------
+    deg : number
+        LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
+
+    Returns
+    -------
+    number
+        radians (0 rad pointing along the x-axis, pi/2 rad along the y axis)
+    """
+    return np.deg2rad(270 - deg)
+
+
+def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
+    """
+    Calculates the magitude of the wind speed based on u and v component
+
+    Parameters
+    ----------
+    wind_speed_u:
+        wind speed in x direction
+    wind_speed_v:
+        wind speed in y direction
+
+    Returns
+    -------
+    number
+        absolute wind speed
     """
 
-    def __init__(self):
-        pass
-
-    def deg2rad(self, deg):
-        """
-        Function to convert the in LES common degree convention into radians for calculation
-
-        :param deg: LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
-        :return: radians (0 rad pointing along the x-axis, pi/2 rad along the y axis)
-        """
-        return np.deg2rad(270 - deg)
+    return np.sqrt(wind_speed_u**2 + wind_speed_v**2)

@@ -1,5 +1,5 @@
 import numpy as np
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class States(ABC):
@@ -12,18 +12,26 @@ class States(ABC):
     states = np.array([])
     n_time_steps = 0
     n_states = 0
+    state_names = []
 
-    def __init__(self, number_of_time_steps: int, number_of_states: int):
+    def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
         """
         Creates a new state object. States are organized as a que with young states at low indexes and old states with
         high indexes. The rows mark the progressing time, the columns the different states at each time step
 
-        :param number_of_time_steps: Number of time steps the list should store
-        :param number_of_states: Number of states per time step
+        Parameters
+        ----------
+        number_of_time_steps : int
+            number of time steps the states should go back / chain length
+        number_of_states : int
+            number of states per time step
+        state_names : list
+            name and unit of the states
         """
         self.states = np.zeros((number_of_time_steps, number_of_states))
         self.n_time_steps = number_of_time_steps
         self.n_states = number_of_states
+        self.state_names = state_names
 
     def get_all_states(self) -> np.ndarray:
         """
@@ -105,3 +113,14 @@ class States(ABC):
         """
         # TODO check vector size
         self.states[:, :] = init_state
+
+    def get_state_names(self) -> list:
+        """
+        List with names of the stored states
+
+        Returns
+        -------
+        list
+            List with the names of the stored states in the corresponding order
+        """
+        return self.state_names
