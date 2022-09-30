@@ -62,6 +62,18 @@ class States(ABC):
         self.states = np.roll(self.states, 1, axis=0)
         self.states[0, :] = new_state
 
+    def iterate_states_and_keep(self):
+        """
+        shift_states shifts all states and but keeps the first entry the same
+
+        :param new_state: 1 x n vector
+        :return: none
+        """
+        # TODO check vector size
+        keep_state = self.states[0, :]
+        self.states = np.roll(self.states, 1, axis=0)
+        self.states[0, :] = keep_state
+
     def get_ind_state(self, index: int) -> np.ndarray:
         """
         Returns the state at a given index

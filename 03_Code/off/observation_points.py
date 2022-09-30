@@ -57,6 +57,21 @@ class ObservationPoints(States, ABC):
         """
         pass
 
+    @abstractmethod
+    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+        """
+        Propagates the OPs based on the u and v velocity component
+
+        Parameters
+        ----------
+        uv_op : np.ndarray
+            m x 2 matrix with wind speeds of all OPs in x and y direction in m/s
+        time_step : float
+            Time step of the simulation in s
+        """
+        pass
+
+
 
 class FLORIDynOPs4(ObservationPoints):
 
@@ -104,6 +119,23 @@ class FLORIDynOPs4(ObservationPoints):
         self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
+
+    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+        """
+        Propagates the OPs based on the u and v velocity component
+
+        Parameters
+        ----------
+        uv_op : np.ndarray
+            m x 2 matrix with wind speeds of all OPs in x and y direction in m/s
+        time_step : float
+            Time step of the simulation in s
+        """
+        keep_op = self.states[0, :]
+        self.states[:, 0] = self.states[:, 0] + uv_op[:, 0] * time_step
+        self.states[:, 1] = self.states[:, 0] + uv_op[:, 1] * time_step
+        self.states[:, 3] = self.states[:, 3] + np.sqrt(uv_op[:, 0]**2 + uv_op[:, 1]**2) * time_step
+        self.states[0, :] = keep_op
 
 
 class FLORIDynOPs6(ObservationPoints):
@@ -153,3 +185,20 @@ class FLORIDynOPs6(ObservationPoints):
         self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
+
+    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+        """
+        Propagates the OPs based on the u and v velocity component
+
+        Parameters
+        ----------
+        uv_op : np.ndarray
+            m x 2 matrix with wind speeds of all OPs in x and y direction in m/s
+        time_step : float
+            Time step of the simulation in s
+        """
+        keep_op = self.states[0, :]
+        self.states[:, 0] = self.states[:, 0] + uv_op[:, 0] * time_step
+        self.states[:, 1] = self.states[:, 0] + uv_op[:, 1] * time_step
+        self.states[:, 3] = self.states[:, 3] + np.sqrt(uv_op[:, 0] ** 2 + uv_op[:, 1] ** 2) * time_step
+        self.states[0, :] = keep_op

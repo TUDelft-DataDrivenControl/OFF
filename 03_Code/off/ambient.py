@@ -34,6 +34,18 @@ class AmbientStates(States, ABC):
         pass
 
     @abstractmethod
+    def get_wind_speed(self) -> np.ndarray:
+        """
+        Returns u,v component of all wind speeds
+
+        Returns
+        -------
+        np.ndarray
+            m x 2 matrix of [u,v] wind speeds in m/s
+        """
+        pass
+
+    @abstractmethod
     def get_wind_speed_u(self) -> np.ndarray:
         """
         Returns the u component of the wind speed (x direction)
@@ -78,6 +90,17 @@ class AmbientStates(States, ABC):
         -------
         np.float_
             absolute wind speed
+        """
+        pass
+
+    def get_turbine_wind_speed(self) -> np.ndarray:
+        """
+        Returns u,v component wind speed at the turbine location
+
+        Returns
+        -------
+        np.ndarray
+            1 x 2 vector of [u,v] wind speeds in m/s
         """
         pass
 
@@ -184,6 +207,17 @@ class FLORIDynAmbient(AmbientStates):
         """
         return self.states[0, 0]
 
+    def get_turbine_wind_speed(self) -> np.ndarray:
+        """
+        Returns u,v component of u & v wind speed at the turbine location
+
+        Returns
+        -------
+        np.ndarray
+            1 x 2 matrix of [u,v] wind speeds in m/s
+        """
+        return np.array([self.get_turbine_wind_speed_u(), self.get_turbine_wind_speed_v()])
+
     def get_turbine_wind_speed_u(self) -> np.float_:
         """
         Returns the u component of the wind speed (x direction) at the turbine location
@@ -216,6 +250,17 @@ class FLORIDynAmbient(AmbientStates):
              m x 1 vector of the absolute wind speed in m/s
         """
         return self.states[:, 0]
+
+    def get_wind_speed(self) -> np.ndarray:
+        """
+        Returns u,v component of all wind speeds
+
+        Returns
+        -------
+        np.ndarray
+            m x 2 matrix of [u,v] wind speeds in m/s
+        """
+        return np.transpose(np.array([self.get_wind_speed_u(), self.get_wind_speed_v()]))
 
     def get_wind_speed_u(self) -> np.ndarray:
         """

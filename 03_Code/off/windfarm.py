@@ -1,7 +1,8 @@
 class WindFarm:
     time_step = -1
+    settings_sol = dict()
 
-    def __init__(self, turbines, time_step):
+    def __init__(self, turbines, settings_sol: dict):
         """
         Object which hosts the turbine array as well as parameters, constants & variables important to the simulation.
 
@@ -9,8 +10,8 @@ class WindFarm:
         ----------
         turbines : Turbine object list
             List of turbines in the wind farm
-        time_step : float
-            Time step in seconds
+        settings_sol : dict
+            Solver settings
         """
         self.turbines = turbines
-        self.time_step = time_step
+        self.settings_sol = settings_sol
