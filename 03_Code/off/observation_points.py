@@ -131,11 +131,9 @@ class FLORIDynOPs4(ObservationPoints):
         time_step : float
             Time step of the simulation in s
         """
-        keep_op = self.states[0, :] + 0  # TODO find a nice solution for this
-        self.states[:, 0] = self.states[:, 0] + uv_op[:, 0] * time_step
-        self.states[:, 1] = self.states[:, 0] + uv_op[:, 1] * time_step
-        self.states[:, 3] = self.states[:, 3] + np.sqrt(uv_op[:, 0]**2 + uv_op[:, 1]**2) * time_step
-        self.iterate_states(keep_op)
+        self.states[1:, 0] = self.states[:-1, 0] + uv_op[:-1, 0] * time_step
+        self.states[1:, 1] = self.states[:-1, 1] + uv_op[:-1, 1] * time_step
+        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(uv_op[:-1, 0]**2 + uv_op[:-1, 1]**2) * time_step
 
 
 class FLORIDynOPs6(ObservationPoints):
@@ -197,8 +195,6 @@ class FLORIDynOPs6(ObservationPoints):
         time_step : float
             Time step of the simulation in s
         """
-        keep_op = self.states[0, :] + 0  # TODO find a nice solution for this
-        self.states[:, 0] = self.states[:, 0] + uv_op[:, 0] * time_step
-        self.states[:, 1] = self.states[:, 0] + uv_op[:, 1] * time_step
-        self.states[:, 3] = self.states[:, 3] + np.sqrt(uv_op[:, 0] ** 2 + uv_op[:, 1] ** 2) * time_step
-        self.iterate_states(keep_op)
+        self.states[1:, 0] = self.states[:-1, 0] + uv_op[:-1, 0] * time_step
+        self.states[1:, 1] = self.states[:-1, 1] + uv_op[:-1, 1] * time_step
+        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(uv_op[:-1, 0] ** 2 + uv_op[:-1, 1] ** 2) * time_step

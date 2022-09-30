@@ -40,7 +40,7 @@ def main():
 
     # Create simulation object
     off_sim = off.OFF(wind_farm, settings_sim)
-    off_sim.init_sim(np.array([8, 270, 0]), np.array([1/3, 0, 0]))
+    off_sim.init_sim(np.array([8, 180, 0]), np.array([1/3, 0, 0]))
 
     off_sim.run_sim()
 

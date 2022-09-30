@@ -70,9 +70,7 @@ class States(ABC):
         :return: none
         """
         # TODO check vector size
-        keep_state = self.states[0, :]
-        self.states = np.roll(self.states, 1, axis=0)
-        self.states[0, :] = keep_state
+        self.states[1:, :] = self.states[:-1, :]
 
     def get_ind_state(self, index: int) -> np.ndarray:
         """
