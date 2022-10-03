@@ -1,7 +1,7 @@
 import os
 
 import logging
-lg = logging.getLogger(__name__)
+lg = logging.getLogger('off')
 
 import off.turbine as tur
 import off.windfarm as wfm
@@ -10,13 +10,14 @@ import off.ambient as amb
 import numpy as np
 import off.wake_solver as ws
 
-from off.logger import CONSOLE_LVL, FILE_LVL, _logger_add
+from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 
 class OFF:
     """
     OFF is the central object which initializes the wind farm and runs the simulation
     """
     settings_sim = dict()
+    wind_farm = wfm.WindFarm
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict):
         self.wind_farm = wind_farm
@@ -85,10 +86,10 @@ class OFF:
             Dictionary containing the OFF parameters
             
             :log console lvl:  *(str)*                  - 
-                Logging level (``DEBUG``,``INFO``,``WARNING``,``ERROR``) used 
+                Logging level (``DEBUG``, ``INFO``, ``WARNING``, ``ERROR``) used 
                 for the console logging.
             :log file lvl:     *(str)*                  - 
-                Logging level (``DEBUG``,``INFO``,``WARNING``,``ERROR``) used 
+                Logging level (``DEBUG``, ``INFO``, ``WARNING``, ``ERROR``) used 
                 for the file logging. Log logged to ``self.sim_dir/off.log``. 
                 Not available if ``self.sim_dir`` not set.
         """
@@ -99,12 +100,12 @@ class OFF:
         lg.setLevel(min_lvl)
         lg.propagate = False
 
-        file_formatter = logging.Formatter('%(levelname)s : %(filename)s, line %(lineno)d in %(funcName)s : %(message)s')
-        console_formatter = logging.Formatter('%(levelname)s : %(message)s')
+        file_formatter = Formatter('%(levelname)s : %(filename)s, line %(lineno)d in %(funcName)s : %(message)s')
+        console_formatter = Formatter('%(levelname)s : %(message)s')
 
         _logger_add(lg, logging.StreamHandler(), console_lvl, console_formatter)
         if self.sim_dir:
-            if not self.self.sim_dir:
+            if not self.sim_dir:
                 lg.warning('Not simulation folder was specified: file logger disabled.')
             else: 
                 log_fid = f'{self.sim_dir}/off.log'

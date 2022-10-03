@@ -8,7 +8,6 @@ from off.ambient import AmbientStates
 from off.states import States
 from off.utils import ot_deg2rad
 
-
 class TurbineStates(States, ABC):
 
     def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
@@ -261,6 +260,7 @@ class DTU10MW(Turbine):
         float :
             Power generated (W)
         """
+
         # TODO probably needs to be rewritten
         return 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3  # TODO link with turbine state Cp calculation
 
