@@ -1,3 +1,6 @@
+import logging
+lg = logging.getLogger(__name__)
+
 """
 Utilities for the OFF toolbox
     functions which are handy in multiple places but do not have a true parent object they could belong to.

@@ -18,3 +18,7 @@ __pycache__/
 *.doctree
 *.pickle
 01_Docs/build
+
+### onwards files ###
+.runid
+off_run_*

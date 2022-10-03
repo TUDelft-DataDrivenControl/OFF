@@ -1,6 +1,8 @@
+import logging
+lg = logging.getLogger(__name__)
+
 import numpy as np
 from abc import ABC, abstractmethod
-
 
 class States(ABC):
     """

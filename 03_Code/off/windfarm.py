@@ -1,3 +1,6 @@
+import logging
+lg = logging.getLogger(__name__)
+
 class WindFarm:
     time_step = -1
     settings_sol = dict()

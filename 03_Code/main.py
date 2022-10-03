@@ -1,10 +1,12 @@
+import logging
+# logging.basicConfig(level=logging.DEBUG)
+
 import off.turbine as tur
 import off.windfarm as wfm
 import off.observation_points as ops
 import off.ambient as amb
 import numpy as np
 import off.off as off
-
 
 def main():
     print("Hello OFF")
@@ -13,7 +15,10 @@ def main():
     settings_sim = dict([('time step', 4),
                          ('time start', 0),
                          ('time end', 40),
-                         ('simulation folder', '')
+                        #  ('simulation folder', '/Users/lejeunemax/Desktop'),
+                         ('data folder', ''),
+                         ('log console lvl', 'DEBUG'),
+                         ('log file lvl', 'INFO'),
                          ])
     settings_sol = dict([('rotor discretization', 'isocell'),
                          ('rotor points', 50),

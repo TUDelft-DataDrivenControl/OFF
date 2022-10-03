@@ -1,3 +1,6 @@
+import logging
+lg = logging.getLogger(__name__)
+
 import numpy as np
 from abc import ABC, abstractmethod
 import off.windfarm as wfm

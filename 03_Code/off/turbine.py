@@ -1,3 +1,6 @@
+import logging
+lg = logging.getLogger(__name__)
+
 import numpy as np
 from abc import ABC, abstractmethod
 from off.observation_points import ObservationPoints
@@ -206,7 +209,7 @@ class Turbine(ABC):
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         """
         # TODO add tilt to offset calculation
-        print("Orientation [0] ", self.orientation[0])
+        lg.info(f'Orientation [0] {self.orientation[0]}')
 
         yaw = ot_deg2rad(self.orientation[0])
         offset = np.array([np.cos(yaw), np.sin(yaw), 0]) * \
@@ -240,7 +243,7 @@ class DTU10MW(Turbine):
             Ambient states object
         """
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
-        print("DTU10MW turbine created")
+        lg.info("DTU10MW turbine created")
 
     def calc_power(self, wind_speed, air_den):
         """
