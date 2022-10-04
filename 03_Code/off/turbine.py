@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from off.observation_points import ObservationPoints
 from off.ambient import AmbientStates
 from off.states import States
-from off.utils import ot_deg2rad
+import off.utils as ot
 import logging
 lg = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ class Turbine(ABC):
         float:
             yaw misalignment (deg)
         """
-        return self.orientation[0] - wind_direction
+        return ot.get_yaw(wind_direction, self.orientation[0])
 
     def calc_tilt(self):
         """
@@ -250,7 +250,7 @@ class Turbine(ABC):
         # TODO add tilt to offset calculation
         lg.info(f'Orientation [0] {self.orientation[0]}')
 
-        yaw = ot_deg2rad(self.orientation[0])
+        yaw = ot.ot_deg2rad(self.orientation[0])
         offset = np.array([np.cos(yaw), np.sin(yaw), 0]) * \
             self.nacellePos
 

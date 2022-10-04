@@ -81,7 +81,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         u_op = self._get_wind_speeds_op(i_t, wind_farm)
         return u_rp, u_op
 
-    def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:
+    def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
         Calculates the effective wind speed at the rotor plane of turbine i_t
         Parameters
@@ -96,7 +96,6 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         nd.array
             [u,v] wind speeds at the rotor plane
         """
-        # TODO call wake model with rotor points & wind farm
         wind_farm_layout = wind_farm.get_layout()
         turbine_states = wind_farm.get_current_turbine_states()
         ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed(),

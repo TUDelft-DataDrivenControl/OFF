@@ -43,15 +43,15 @@ def ot_uv2deg(u, v):
     return 270 - np.arctan2(v, u)*180 / np.pi
 
 
-def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
+def ot_abs_wind_speed(u, v):
     """
     Calculates the magnitude of the wind speed based on u and v component
 
     Parameters
     ----------
-    wind_speed_u:
+    u:
         wind speed in x direction
-    wind_speed_v:
+    v:
         wind speed in y direction
 
     Returns
@@ -60,7 +60,7 @@ def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
         absolute wind speed
     """
 
-    return np.sqrt(wind_speed_u**2 + wind_speed_v**2)
+    return np.sqrt(u**2 + v**2)
 
 def ot_abs2uv(wind_speed_abs, wind_dir):
     """
@@ -112,7 +112,7 @@ def ot_isocell(n_rp: int) -> tuple:
         nS = (2 * (idx + 1) - 1)*N        # Segments in the ring
 
         idx_e = np.sum((2 * (np.arange(idx + 1) + 1) - 1) * N)
-        idx_s = idx_e - nS       # Start and end index TODO double check because adapted from MATLAB
+        idx_s = idx_e - nS       # Start and end index
 
         phi = np.arange(nS)/nS * 2 * np.pi
         rp[idx_s: idx_e, 0] = 0.5 * np.cos(phi) * dR * (0.5 + idx)
