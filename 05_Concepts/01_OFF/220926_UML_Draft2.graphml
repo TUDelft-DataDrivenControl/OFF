@@ -256,7 +256,6 @@ get_wind_farm(self) -&gt; wfm.WindFarm</y:MethodLabel>
     </node>
     <node id="n14">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="121.46889226100154" width="249.740234375" x="1503.278965985291" y="497.1114006804233"/>
@@ -276,7 +275,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </node>
     <node id="n15">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="62.37936267071322" width="249.740234375" x="1503.278965985291" y="372.14250841942174"/>
@@ -294,7 +292,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </node>
     <node id="n16">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="139.73292867981792" width="249.740234375" x="1503.2789659852908" y="675.4543445347481"/>
@@ -314,7 +311,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n17">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="264.482421875" x="2291.5861726905277" y="441.97710629499085"/>
@@ -326,7 +322,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n18">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="108.44140625" x="1952.356301140357" y="577.3458468109241"/>
@@ -338,7 +333,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n19">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="321.9453125" x="2440.810721308225" y="345.28514878361"/>
@@ -350,7 +344,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n20">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="281.984375" x="2146.005150604507" y="345.28514878361"/>
@@ -362,7 +355,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n21">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="218.685546875" x="2314.4846101905277" y="544.0408392236707"/>
@@ -374,7 +366,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n22">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="166.36132812500023" x="2340.6467195655277" y="602.0560137304992"/>
@@ -386,7 +377,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n23">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="160.888671875" x="2343.3830476905277" y="665.4429636546267"/>
@@ -398,7 +388,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </node>
     <node id="n24">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="214.12109375" x="2586.0685945655277" y="439.8283961280713"/>
@@ -411,7 +400,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </node>
     <node id="n25">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="62.37936267071322" width="409.8191418105084" x="1801.6674333601027" y="425.7874249596342"/>
@@ -612,7 +600,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </edge>
     <edge id="e15" source="n15" target="n14">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -624,7 +611,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </edge>
     <edge id="e16" source="n14" target="n16">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -635,7 +621,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e17" source="n14" target="n18">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -645,7 +630,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e18" source="n16" target="n18">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -655,7 +639,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e19" source="n19" target="n17">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -665,7 +648,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e20" source="n20" target="n17">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -675,7 +657,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e21" source="n17" target="n21">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -685,7 +666,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e22" source="n21" target="n22">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -695,7 +675,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e23" source="n22" target="n23">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -705,7 +684,6 @@ _get_wind_speed_OPs -&gt; [u,v]
       </data>
     </edge>
     <edge id="e24" source="n17" target="n24">
-      <data key="d9"/>
       <data key="d10">
         <y:BezierEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -716,7 +694,6 @@ _get_wind_speed_OPs -&gt; [u,v]
     </edge>
     <edge id="e25" source="n25" target="n18">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -724,6 +701,18 @@ _get_wind_speed_OPs -&gt; [u,v]
           <y:Arrows source="diamond" target="none"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e26" source="n12" target="n15">
+      <data key="d9"/>
+      <data key="d10">
+        <y:QuadCurveEdge straightness="0.1">
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="1252.639601278826" y="109.0"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+        </y:QuadCurveEdge>
       </data>
     </edge>
   </graph>

@@ -1,12 +1,13 @@
-import logging
-lg = logging.getLogger(__name__)
-
 import numpy as np
 from abc import ABC, abstractmethod
 import off.windfarm as wfm
+import off.wake_model as wm
+import logging
+lg = logging.getLogger(__name__)
 
 
 class WakeSolver(ABC):
+
     def __init__(self):
         """
         Object to connect OFF to the wake model.
@@ -15,7 +16,7 @@ class WakeSolver(ABC):
         pass
 
     @abstractmethod
-    def get_wind_speeds(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
+    def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
         Get the wind speed at the location of all OPs and the rotor plane of turbine with index i_t
 
@@ -28,8 +29,9 @@ class WakeSolver(ABC):
 
         Returns
         -------
-        tuple(np.ndarray, np.ndarray)
+        tuple(np.ndarray, np.ndarray, nd.array)
             [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
+            m further measurements, depending on the used wake model
         """
         pass
 
@@ -39,7 +41,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
     def __init__(self):
         super(FLORIDynTWFWakeSolver, self).__init__()
 
-    def get_wind_speeds(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
+    def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
         Get the wind speed at the location of all OPs and the rotor plane of turbine with index i_t
 
@@ -75,6 +77,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
             [u,v] wind speeds at the rotor plane
         """
         # TODO call wake model with rotor points & wind farm
+
         return np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed()])
 
     def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:

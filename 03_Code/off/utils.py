@@ -61,3 +61,42 @@ def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
     """
 
     return np.sqrt(wind_speed_u**2 + wind_speed_v**2)
+
+
+def ot_isocell(n_rp: int) -> tuple:
+    """
+    Isocell algorithm to discretize the rotor plane (or any circle)
+     Masset et al.:
+        https://orbi.uliege.be/bitstream/2268/91953/1/masset_isocell_orbi.pdf
+    We choose N = 3 here, 4 or 5 are also viable options, 3 is close to optimal
+
+    Parameters
+    ----------
+    n_rp : int
+        desired number of Rotor points (algorithm can not work with all numbers, takes the closest one)
+
+    Returns
+    -------
+    tuple:
+        [yRP, zRP] : np.ndarray location of the rotor points with values between -0.5 and 0.5
+        w : float weight of the RPs (1/number)
+    """
+    N = 3
+    n = np.round(np.sqrt(n_rp/N)).astype(int)   # Number of rings
+    dR = 1/n                        # Radial thickness of each ring
+    nC = N * n**2                   # Number of elements
+
+    rp = np.zeros((nC, 2))
+
+    # TODO vectorize
+    for idx in range(n):
+        nS = (2 * (idx + 1) - 1)*N        # Segments in the ring
+
+        idx_e = np.sum((2 * (np.arange(idx + 1) + 1) - 1) * N)
+        idx_s = idx_e - nS       # Start and end index TODO double check because adapted from MATLAB
+
+        phi = np.arange(nS)/nS * 2 * np.pi
+        rp[idx_s: idx_e, 0] = 0.5 * np.cos(phi) * dR * (0.5 + idx)
+        rp[idx_s: idx_e, 1] = 0.5 * np.sin(phi) * dR * (0.5 + idx)
+
+    return rp, 1/nC

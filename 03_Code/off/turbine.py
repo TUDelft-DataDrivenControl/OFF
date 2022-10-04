@@ -1,12 +1,12 @@
-import logging
-lg = logging.getLogger(__name__)
-
 import numpy as np
 from abc import ABC, abstractmethod
 from off.observation_points import ObservationPoints
 from off.ambient import AmbientStates
 from off.states import States
 from off.utils import ot_deg2rad
+import logging
+lg = logging.getLogger(__name__)
+
 
 class TurbineStates(States, ABC):
 
@@ -64,6 +64,18 @@ class TurbineStates(States, ABC):
         pass
 
     @abstractmethod
+    def get_current_ax_ind(self) -> float:
+        """
+        get_current_axInd returns the current axial induction factor of the turbine
+
+        Returns
+        -------
+        float:
+            Axial induction factor (-)
+        """
+        pass
+
+    @abstractmethod
     def get_ct(self, index: int) -> float:
         """
         get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain
@@ -76,6 +88,22 @@ class TurbineStates(States, ABC):
         -------
         float:
             Thrust coefficient
+        """
+        pass
+
+    @abstractmethod
+    def get_ax_ind(self, index: int) -> float:
+        """
+        get_ax_ind(index) returns the axial induction coefficient at a requested index of the turbine state chain
+
+        Parameters
+        ----------
+        index : int
+            Turbine state list index at which a should be calculated
+        Returns
+        -------
+        float:
+            Axial induction factor
         """
         pass
 
@@ -116,6 +144,18 @@ class TurbineStates(States, ABC):
         -------
         np.ndarray:
             Yaw misalignment at all turbine states (deg)
+        """
+        pass
+
+    @abstractmethod
+    def get_all_ax_ind(self) -> np.ndarray:
+        """
+        get_all_axInd returns the all axial induction factors of the saved turbine states
+
+        Returns
+        -------
+        np.ndarray:
+            Axial induction factor (-)
         """
         pass
 
@@ -302,6 +342,17 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         return self.get_ct(0)
 
+    def get_current_ax_ind(self) -> float:
+        """
+        get_all_axInd returns the all axial induction factors of the saved turbine states
+
+        Returns
+        -------
+        np.ndarray:
+            Axial induction factor (-)
+        """
+        return self.states[0, 0]
+
     def get_current_yaw(self) -> float:
         """
         get_current_yaw returns the current yaw misalignment at the turbine location
@@ -329,6 +380,17 @@ class TurbineStatesFLORIDyn(TurbineStates):
         return 4 * self.states[index, 0] * (1 - self.states[index, 0]) * \
                np.cos(self.states[index, 1]) ** 2.2  # TODO Insert correct Ct calculation
 
+    def get_ax_ind(self, index: int) -> np.ndarray:
+        """
+        get_all_axInd returns the all axial induction factors of the saved turbine states
+
+        Returns
+        -------
+        np.ndarray:
+            Axial induction factor (-)
+        """
+        return self.states[index, 0]
+
     def get_yaw(self, index: int) -> float:
         """
         get_yaw(index) returns the yaw misalignment at a requested index
@@ -355,6 +417,17 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         # TODO vectorized calculation of Ct
         pass
+
+    def get_all_ax_ind(self) -> np.ndarray:
+        """
+        get_all_axInd returns the all axial induction factors of the saved turbine states
+
+        Returns
+        -------
+        np.ndarray:
+            Axial induction factor (-)
+        """
+        return self.states[:, 1]
 
     def get_all_yaw(self) -> np.ndarray:
         """

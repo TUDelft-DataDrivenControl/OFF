@@ -3,6 +3,7 @@ from typing import List
 from off.turbine import Turbine
 lg = logging.getLogger(__name__)
 
+
 class WindFarm:
     time_step = -1
     settings_sol: dict()
