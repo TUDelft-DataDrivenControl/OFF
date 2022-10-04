@@ -62,6 +62,25 @@ def ot_abs_wind_speed(wind_speed_u, wind_speed_v):
 
     return np.sqrt(wind_speed_u**2 + wind_speed_v**2)
 
+def ot_abs2uv(wind_speed_abs, wind_dir):
+    """
+    Calculates the u, v components of the wind speed based on the absolute speed and wind direction
+
+    Parameters
+    ----------
+    wind_speed_abs:
+        absolute wind speed in x direction
+    wind_dir:
+        wind direction (deg)
+
+    Returns
+    -------
+    np.ndarray
+        u,v component of the wind in [m, 2] matrix
+    """
+    phi = ot_deg2rad(wind_dir)
+    return np.array([np.cos(phi) * wind_speed_abs, np.sin(phi) * wind_speed_abs])
+
 
 def ot_isocell(n_rp: int) -> tuple:
     """
@@ -100,3 +119,41 @@ def ot_isocell(n_rp: int) -> tuple:
         rp[idx_s: idx_e, 1] = 0.5 * np.sin(phi) * dR * (0.5 + idx)
 
     return rp, 1/nC
+
+
+def ot_get_orientation(wind_dir: float, yaw: float) -> float:
+    """
+    Return the turbine orientation based on the wind direction and the yaw angle
+
+    Parameters
+    ----------
+    wind_dir : float
+        Wind direction in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)
+    yaw : float
+        Yaw angle in degree
+
+    Returns
+    -------
+    float:
+        Orientation in LES degree
+    """
+    return wind_dir + yaw
+
+
+def ot_get_yaw(wind_dir: float, orientation: float) -> float:
+    """
+    Return the turbine yaw angle based on the wind direction and turbine orientation
+
+    Parameters
+    ----------
+    wind_dir : float
+        Wind direction in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)
+    orientation : float
+        Turbine orientation in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)
+
+    Returns
+    -------
+    float:
+        yaw angle in LES degree (clockwise)
+    """
+    return orientation - wind_dir

@@ -18,14 +18,19 @@ def main():
                         #  ('simulation folder', '/Users/lejeunemax/Desktop'),
                          ('data folder', ''),
                          ('log console lvl', 'DEBUG'),
-                         ('log file lvl', 'INFO'),
-                         ])
-    settings_sol = dict([('rotor discretization', 'isocell'),
-                         ('rotor points', 50),
-                         ('wake superposition', 'internal'),    # Within the wake model or outside in OFF
+                         ('log file lvl', 'INFO')])
+
+    settings_sol = dict([('wake superposition', 'internal'),    # Within the wake model or outside in OFF
                          ('multi wake', False),                 # Enable different wakes per turbine
                          ('wake switch', False),                # Turbine can switch between wakes (modified OP)
                          ('extrapolation', 'pair')])            # Extrapolation method from OP to point of interest
+
+    settings_wke = dict([('rotor discretization', 'isocell'),
+                         ('rotor points', 50),
+                         ('dw', 50),                            # Dummy wake value
+                         ('cw', 20),                            # Dummy wake value
+                         ('sig dw', 500),                       # Dummy wake value
+                         ('sig r', 100)])                       # Dummy wake value
 
     # Create turbines
     #   Turbines are created with
@@ -41,10 +46,10 @@ def main():
                 tur.DTU10MW(np.array([1800, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
                             ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10))]
 
-    wind_farm = wfm.WindFarm(turbines, settings_sol)
+    wind_farm = wfm.WindFarm(turbines)
 
     # Create simulation object
-    off_sim = off.OFF(wind_farm, settings_sim)
+    off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol)
     off_sim.init_sim(np.array([8, 180, 0]), np.array([1/3, 0, 0]))
 
     off_sim.run_sim()

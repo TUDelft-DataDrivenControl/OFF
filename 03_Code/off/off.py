@@ -19,12 +19,12 @@ class OFF:
     settings_sim = dict()
     wind_farm = wfm.WindFarm
 
-    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict):
+    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
-        self.wake_solver = ws.FLORIDynTWFWakeSolver()
+        self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -148,8 +148,7 @@ class OFF:
             # Predict
             #   Get all wind speeds
             for idx, tur in enumerate(self.wind_farm.turbines):
-                uv_r, uv_op = self.wake_solver.get_wind_speeds(idx, self.wind_farm)
-                # TODO get turbine measurements (reduction, added turbulence, ...) in a generic way
+                uv_r, uv_op = self.wake_solver.get_measurements(idx, self.wind_farm)
                 # lg.info('Wind speed turbine ', idx)
                 # lg.info(uv_r)
 

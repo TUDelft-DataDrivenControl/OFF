@@ -44,6 +44,23 @@ class WakeModel(ABC):
         """
         pass
 
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: np.ndarray, ambient_states: np.ndarray):
+        """
+        Changes the states of the stored wind farm
+
+        Parameters
+        ----------
+        wind_farm_layout: np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states: np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states: np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        self.wind_farm_layout = wind_farm_layout
+        self.turbine_states = turbine_states
+        self.ambient_states = ambient_states
+
 
 class DummyWake(WakeModel):
     """
@@ -61,7 +78,7 @@ class DummyWake(WakeModel):
             .dw down wind wave number
             .cw cross wind wave number
             .sig dw down wind weight
-            .sig cw cross wind weight
+            .sig r  radial weight
         wind_farm_layout : np.ndarray
             n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
         turbine_states : np.ndarray
@@ -86,17 +103,43 @@ class DummyWake(WakeModel):
             float: u_eff at turbine i_t
             pandas.dataframe: m other measurements (Power gen, added turbulence, etc.)
         """
+        # Adapt basic rotor points to location and orientation of turbine i_t
+        n_rps = self.rp_s.shape[0]
+        rps = np.zeros((n_rps, 3))
+        phi = ot.ot_deg2rad(
+            ot.ot_get_orientation(self.ambient_states[1], self.turbine_states[i_t, 1]))
+        phi_u = ot.ot_deg2rad(self.ambient_states[1])
+
+        rps[:, 0] = self.wind_farm_layout[i_t, 0] - np.sin(phi) * self.rp_s[:, 0] * self.wind_farm_layout[i_t, 3]
+        rps[:, 1] = self.wind_farm_layout[i_t, 1] + np.cos(phi) * self.rp_s[:, 0] * self.wind_farm_layout[i_t, 3]
+        rps[:, 2] = self.wind_farm_layout[i_t, 2] + self.rp_s[:, 1] * self.wind_farm_layout[i_t, 3]
+
         #  Iterate over all turbines besides the relevant one and calculate reduction at the rotor points and
         #  subsequently across the plane
+        red = np.zeros((self.wind_farm_layout.shape[0], 1))
+
         for idx, tur in enumerate(self.wind_farm_layout):
             if idx == i_t:
+                # Wind shear
+                red[idx] = np.sum((rps[:, 2]/self.wind_farm_layout[i_t, 3]) ** 0.2)/n_rps
                 continue
 
             # calculate wake influence at rotor points
+            #   calculate down, crosswind distance and difference in height
+            dist_wc = np.array([self.wind_farm_layout[idx, 0] - rps[:, 0],
+                                self.wind_farm_layout[idx, 1] - rps[:, 1]])
+            dist_dw = np.cos(phi_u) * dist_wc[:, 0] + np.sin(phi_u) * dist_wc[:, 1]
+            dist_cw = -np.sin(phi_u) * dist_wc[:, 0] + np.cos(phi_u) * dist_wc[:, 1]
+            dist_h = self.wind_farm_layout[idx, 2] - rps[:, 2]
+            dist_r = np.sqrt(dist_cw ** 2 + dist_h ** 2)
+
+            #   calculate resulting reduction
+            r = np.cos(dist_dw * np.pi/self.settings['dw']) * np.sin(dist_r * np.pi/self.settings['cw']) * \
+                np.exp(-.5 * (dist_r/self.settings['sig dw'])**2) * np.exp(-.5 * (dist_r/self.settings['sig dw'])**2)
 
             # average
+            red[idx] = np.sum(r) / n_rps
 
-        #  multiply with background wind speed and return
-
-        pass
+        # Multiply with background wind speed and return
+        return self.ambient_states[0] * np.prod(red), np.prod(red)
 
