@@ -26,11 +26,11 @@ def main():
                          ('extrapolation', 'pair')])            # Extrapolation method from OP to point of interest
 
     settings_wke = dict([('rotor discretization', 'isocell'),
-                         ('rotor points', 50),
+                         ('nRP', 50),                           # Number of points to discretetize the rotor plane
                          ('dw', 50),                            # Dummy wake value
                          ('cw', 20),                            # Dummy wake value
                          ('sig dw', 500),                       # Dummy wake value
-                         ('sig r', 100)])                       # Dummy wake value
+                         ('sig r', 40)])                        # Dummy wake value
 
     # Create turbines
     #   Turbines are created with
@@ -50,7 +50,7 @@ def main():
 
     # Create simulation object
     off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol)
-    off_sim.init_sim(np.array([8, 180, 0]), np.array([1/3, 0, 0]))
+    off_sim.init_sim(np.array([8, 270, 0]), np.array([1/3, 0, 0]))
 
     off_sim.run_sim()
 

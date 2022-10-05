@@ -29,8 +29,8 @@ class WindFarm:
             [n_t x 4] matrix with wind farm layout in the world coordinate system and turbine diameter
         """
         layout = np.zeros((len(self.turbines), 4))
-        for idx, trb in self.turbines:
-            layout[idx, :] = np.array([trb.get_rotor_pos(), trb.diameter])
+        for idx, trb in enumerate(self.turbines):
+            layout[idx, :] = np.append(trb.get_rotor_pos(), trb.diameter)
 
         return layout
 
@@ -44,7 +44,7 @@ class WindFarm:
             [n_t x 2] matrix with axial induction factor and yaw angle for each turbine
         """
         t_states = np.zeros((len(self.turbines), 2))
-        for idx, trb in self.turbines:
+        for idx, trb in enumerate(self.turbines):
             t_states[idx, :] = np.array([
                 trb.turbine_states.get_current_ax_ind(), trb.turbine_states.get_current_yaw()])
 

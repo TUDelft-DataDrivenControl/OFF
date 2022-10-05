@@ -98,7 +98,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         """
         wind_farm_layout = wind_farm.get_layout()
         turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed(),
+        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
                                    wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
         self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.dummy_wake.get_measurements_i_t(i_t)

@@ -127,22 +127,24 @@ class DummyWake(WakeModel):
 
             # calculate wake influence at rotor points
             #   calculate down, crosswind distance and difference in height
-            dist_wc = np.array([self.wind_farm_layout[idx, 0] - rps[:, 0],
-                                self.wind_farm_layout[idx, 1] - rps[:, 1]])
+            dist_wc = np.transpose(np.array([self.wind_farm_layout[idx, 0] - rps[:, 0],
+                                np.transpose(self.wind_farm_layout[idx, 1] - rps[:, 1])]))
             dist_dw = np.cos(phi_u) * dist_wc[:, 0] + np.sin(phi_u) * dist_wc[:, 1]
             dist_cw = -np.sin(phi_u) * dist_wc[:, 0] + np.cos(phi_u) * dist_wc[:, 1]
             dist_h = self.wind_farm_layout[idx, 2] - rps[:, 2]
             dist_r = np.sqrt(dist_cw ** 2 + dist_h ** 2)
 
             #   calculate resulting reduction
-            r = np.cos(dist_dw * np.pi/self.settings['dw']) * np.sin(dist_r * np.pi/self.settings['cw']) * \
-                np.exp(-.5 * (dist_r/self.settings['sig dw'])**2) * np.exp(-.5 * (dist_r/self.settings['sig dw'])**2)
+            r = (0.7 + 0.3 * np.cos(dist_dw * np.pi/self.settings['dw'])) * \
+                (0.7 + 0.3 * np.sin(dist_r * np.pi/self.settings['cw'])) * \
+                (1 - np.exp(-.5 * (dist_dw/self.settings['sig dw'])**2) * \
+                 np.exp(-.5 * (dist_r/self.settings['sig r'])**2))
 
             # average
             red[idx] = np.sum(r) / n_rps
 
         # Multiply with background wind speed and return
-        m = pd.DataFrame([i_t, self.ambient_states[0] * np.prod(red), np.prod(red)],
+        m = pd.DataFrame([[i_t, self.ambient_states[0] * np.prod(red), np.prod(red)]],
                          columns=['t_idx', 'u_abs_eff', 'red'])
         return self.ambient_states[0] * np.prod(red), m
 

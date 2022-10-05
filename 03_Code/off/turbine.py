@@ -251,7 +251,7 @@ class Turbine(ABC):
         lg.info(f'Orientation [0] {self.orientation[0]}')
 
         yaw = ot.ot_deg2rad(self.orientation[0])
-        offset = np.array([np.cos(yaw), np.sin(yaw), 0]) * \
+        offset = np.array([np.cos(yaw), np.sin(yaw), 1]) * \
             self.nacellePos
 
         return self.base_location + offset
