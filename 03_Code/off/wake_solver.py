@@ -21,7 +21,8 @@ class WakeSolver(ABC):
             Wake solver settings
         """
         self.settings_sol = settings_sol
-        pass
+        lg.info('Wake solver settings:')
+        lg.info(settings_sol)
 
     @abstractmethod
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
@@ -59,6 +60,8 @@ class FLORIDynTWFWakeSolver(WakeSolver):
             Wake solver settings
         """
         super(FLORIDynTWFWakeSolver, self).__init__(settings_sol)
+        lg.info('FLORIDyn wake solver created.')
+
         self.dummy_wake = wm.DummyWake(settings_wke, np.array([]), np.array([]), np.array([]))
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:

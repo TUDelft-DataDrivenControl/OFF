@@ -36,18 +36,24 @@ class OFF:
         """
         try:
             run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
+            lg.info('RunID path: ' + run_id_path)
         except KeyError:
             # Works on my system (Marcus)
             run_id_path = f'{os.environ["PWD"]}/off/.runid'
+            lg.warning('Initial RunID path retrieval was unsuccessful, used ' + run_id_path)
 
-        try:                        fid = open(run_id_path)
-        except FileNotFoundError:   run_id = 0
+        try:
+            fid = open(run_id_path)
+        except FileNotFoundError:
+            run_id = 0
         else: 
-            with fid:               run_id = int(fid.readline())
-                
+            with fid:
+                run_id = int(fid.readline())
+
         with open(run_id_path, 'w') as fid:
             fid.write('{}'.format(run_id+1))
 
+        lg.info(f'RunID: {run_id}')
         return run_id
 
     def __dir_init__(self, settings_sim: dict):
@@ -76,13 +82,16 @@ class OFF:
 
         try:
             root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
+            lg.info('Root directory: ' + root_dir)
         except KeyError:
             root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
+            lg.warning('Initial root directory path retrieval was unsuccessful, used ' + root_dir)
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
 
         if not os.path.exists(self.sim_dir):
             os.makedirs(self.sim_dir)
+            lg.info('Created simulation directory at ' + self.sim_dir)
 
     def __logger_init__(self, settings_sim: dict):
         """ Initializes the logger
@@ -147,10 +156,13 @@ class OFF:
         Central function which executes the simulation and manipulates the 
         ``self.wind_farm object``
         """
+        lg.info(f'Running simulation from {self.settings_sim["time start"]} s to {self.settings_sim["time end"]} s.')
+        lg.info(f'Time step: {self.settings_sim["time step"]} s.')
 
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
+            lg.info(f'Starting time step: {t} s.')
 
             # Predict
             #   Get all wind speeds
@@ -174,7 +186,7 @@ class OFF:
 
             # Visualize
 
-            lg.info(t)
+            lg.info(f'Ending time step: {t} s.')
         pass
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):

@@ -17,6 +17,7 @@ class WindFarm:
         turbines : Turbine object list
             List of turbines in the wind farm
         """
+        lg.info(f'Wind farm created with {len(turbines)} turbines.')
         self.turbines = turbines
 
     def get_layout(self) -> np.ndarray:
@@ -31,6 +32,9 @@ class WindFarm:
         layout = np.zeros((len(self.turbines), 4))
         for idx, trb in enumerate(self.turbines):
             layout[idx, :] = np.append(trb.get_rotor_pos(), trb.diameter)
+
+        lg.info(f'Wind farm layout:')
+        lg.info(layout)
 
         return layout
 
@@ -47,6 +51,9 @@ class WindFarm:
         for idx, trb in enumerate(self.turbines):
             t_states[idx, :] = np.array([
                 trb.turbine_states.get_current_ax_ind(), trb.turbine_states.get_current_yaw()])
+
+        lg.info(f'Wind farm states (axial Induction, yaw):')
+        lg.info(t_states)
 
         return t_states
 

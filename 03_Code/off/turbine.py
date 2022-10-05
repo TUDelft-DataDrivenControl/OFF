@@ -26,6 +26,8 @@ class TurbineStates(States, ABC):
             name and unit of the states
         """
         super(TurbineStates, self).__init__(number_of_time_steps, number_of_states, state_names)
+        lg.info(f'Turbine states chain created with {number_of_time_steps} time steps and {number_of_states} states')
+        lg.info(state_names)
 
     @abstractmethod
     def get_current_cp(self) -> float:
@@ -283,6 +285,7 @@ class DTU10MW(Turbine):
         """
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         lg.info("DTU10MW turbine created")
+        lg.info(f'Turbine base location: {base_location}')
 
     def calc_power(self, wind_speed, air_den):
         """
