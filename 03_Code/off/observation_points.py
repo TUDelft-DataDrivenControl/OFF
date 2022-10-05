@@ -28,6 +28,7 @@ class ObservationPoints(States, ABC):
             name and unit of the states
         """
         super(ObservationPoints, self).__init__(number_of_time_steps, number_of_states, state_names)
+        self.op_propagation_speed = np.zeros((number_of_time_steps, 2))
 
     @abstractmethod
     def get_world_coord(self) -> np.ndarray:
@@ -61,7 +62,7 @@ class ObservationPoints(States, ABC):
         pass
 
     @abstractmethod
-    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+    def propagate_ops(self, time_step: float):
         """
         Propagates the OPs based on the u and v velocity component
 
@@ -73,6 +74,18 @@ class ObservationPoints(States, ABC):
             Time step of the simulation in s
         """
         pass
+
+    def set_op_propagation_speed(self, op_propagation_speed: np.ndarray):
+        """
+        Sets the propagation speed of the OPs, meant as a temporay storage, which ensures that different lengths of OP
+        chains can be used in the simulation
+
+        Parameters
+        ----------
+        op_propagation_speed: np.ndarray
+            m x 2 matrix with [u,v] velocity component for all OPs
+        """
+        self.op_propagation_speed = op_propagation_speed
 
 
 
@@ -123,7 +136,7 @@ class FLORIDynOPs4(ObservationPoints):
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
 
-    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+    def propagate_ops(self, time_step: float):
         """
         Propagates the OPs based on the u and v velocity component
 
@@ -134,9 +147,10 @@ class FLORIDynOPs4(ObservationPoints):
         time_step : float
             Time step of the simulation in s
         """
-        self.states[1:, 0] = self.states[:-1, 0] + uv_op[:-1, 0] * time_step
-        self.states[1:, 1] = self.states[:-1, 1] + uv_op[:-1, 1] * time_step
-        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(uv_op[:-1, 0]**2 + uv_op[:-1, 1]**2) * time_step
+        self.states[1:, 0] = self.states[:-1, 0] + self.op_propagation_speed[:-1, 0] * time_step
+        self.states[1:, 1] = self.states[:-1, 1] + self.op_propagation_speed[:-1, 1] * time_step
+        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(self.op_propagation_speed[:-1, 0]**2 +
+                                                           self.op_propagation_speed[:-1, 1]**2) * time_step
 
 
 class FLORIDynOPs6(ObservationPoints):
@@ -187,7 +201,7 @@ class FLORIDynOPs6(ObservationPoints):
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
 
-    def propagate_ops(self, uv_op: np.ndarray, time_step: float):
+    def propagate_ops(self, time_step: float):
         """
         Propagates the OPs based on the u and v velocity component
 
@@ -198,6 +212,7 @@ class FLORIDynOPs6(ObservationPoints):
         time_step : float
             Time step of the simulation in s
         """
-        self.states[1:, 0] = self.states[:-1, 0] + uv_op[:-1, 0] * time_step
-        self.states[1:, 1] = self.states[:-1, 1] + uv_op[:-1, 1] * time_step
-        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(uv_op[:-1, 0] ** 2 + uv_op[:-1, 1] ** 2) * time_step
+        self.states[1:, 0] = self.states[:-1, 0] + self.op_propagation_speed[:-1, 0] * time_step
+        self.states[1:, 1] = self.states[:-1, 1] + self.op_propagation_speed[:-1, 1] * time_step
+        self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(self.op_propagation_speed[:-1, 0] ** 2 +
+                                                           self.op_propagation_speed[:-1, 1] ** 2) * time_step

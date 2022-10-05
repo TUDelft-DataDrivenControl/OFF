@@ -165,9 +165,9 @@ class TurbineStates(States, ABC):
 class Turbine(ABC):
     # Attributes
     diameter = 1  # in Meter
-    nacellePos = np.array([0, 0, 1])  # in Meter
+    nacellePos = np.array([0, 0, 1])            # in Meter
     turbine_type = "base"
-    orientation = np.array([0, 0])  # yaw, tilt in Degree
+    orientation = np.array([0, 0])              # yaw, tilt in Degree
 
     def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
                  observation_points: ObservationPoints, ambient_states: AmbientStates):

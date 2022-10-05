@@ -8,9 +8,10 @@ import off.windfarm as wfm
 import off.observation_points as ops
 import off.ambient as amb
 import numpy as np
+import pandas as pd
 import off.wake_solver as ws
-
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
+
 
 class OFF:
     """
@@ -151,34 +152,43 @@ class OFF:
                                                  t.ambient_states.get_turbine_wind_speed_v(),
                                                  t.get_rotor_pos(), self.settings_sim['time step'])
 
-    def run_sim(self):
+    def run_sim(self) -> pd.DataFrame:
         """
-        Central function which executes the simulation and manipulates the 
-        ``self.wind_farm object``
+        Central function which executes the simulation and manipulates the ``self.wind_farm object``
+
+        Returns
+        -------
+        pandas.Dataframe :
+            Measurements from the entire simulation
         """
         lg.info(f'Running simulation from {self.settings_sim["time start"]} s to {self.settings_sim["time end"]} s.')
         lg.info(f'Time step: {self.settings_sim["time step"]} s.')
 
+        # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as OP speed
+        m = pd.DataFrame()
+        uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
             lg.info(f'Starting time step: {t} s.')
 
-            # Predict
-            #   Get all wind speeds
+            # Predict - Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
-                uv_r, uv_op, m = self.wake_solver.get_measurements(idx, self.wind_farm)
-                # lg.info('Wind speed turbine ', idx)
-                # lg.info(uv_r)
+                uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+                m_tmp.t_idx = idx
+                m_tmp['time'] = t
+                m = pd.concat([m, m_tmp], ignore_index=True)
+                tur.observation_points.set_OP_propagation_speed(uv_op)
 
-            # TODO store uv_r and uv_op for all turbines
-            # iterate all states
+            lg.info(f'Rotor wind speed of all turbines:')
+            lg.info(uv_r)
+
+            # Predict - iterate all states
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
-                tur.observation_points.propagate_ops(uv_op, self.settings_sim['time step'])
+                tur.observation_points.propagate_ops(self.settings_sim['time step'])
                 lg.debug(tur.observation_points.get_world_coord())
-                # TODO probably bug with the OP propagation, should not change under steady state
 
             # Correct
 
@@ -187,7 +197,10 @@ class OFF:
             # Visualize
 
             lg.info(f'Ending time step: {t} s.')
-        pass
+
+        lg.info('Simulation finished. Resulting measurements:')
+        lg.info(m)
+        return m
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """

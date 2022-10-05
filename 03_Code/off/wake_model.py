@@ -3,6 +3,7 @@ import pandas as pd
 from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
+
 lg = logging.getLogger(__name__)
 
 
@@ -117,28 +118,36 @@ class DummyWake(WakeModel):
 
         #  Iterate over all turbines besides the relevant one and calculate reduction at the rotor points and
         #  subsequently across the plane
-        red = np.zeros((self.wind_farm_layout.shape[0], 1))
+        red = np.ones((self.wind_farm_layout.shape[0], 1))
 
         for idx, tur in enumerate(self.wind_farm_layout):
             if idx == i_t:
                 # Wind shear
-                red[idx] = np.sum((rps[:, 2]/self.wind_farm_layout[i_t, 3]) ** 0.2)/n_rps
+                red[idx] = np.sum((rps[:, 2] / self.wind_farm_layout[i_t, 3]) ** 0.2) / n_rps
                 continue
 
             # calculate wake influence at rotor points
             #   calculate down, crosswind distance and difference in height
             dist_wc = np.transpose(np.array([self.wind_farm_layout[idx, 0] - rps[:, 0],
-                                np.transpose(self.wind_farm_layout[idx, 1] - rps[:, 1])]))
+                                             np.transpose(self.wind_farm_layout[idx, 1] - rps[:, 1])]))
             dist_dw = np.cos(phi_u) * dist_wc[:, 0] + np.sin(phi_u) * dist_wc[:, 1]
+
+            if np.average(dist_dw) > -.1:
+                lg.debug(f'Turbine {idx} has no influence on turbine {i_t}')
+                lg.debug(f'Location Turbine {idx}: {self.wind_farm_layout[idx, 0:3]}')
+                lg.debug(f'Location Turbine {i_t}: {self.wind_farm_layout[i_t, 0:3]}')
+                lg.debug(f'Wind direction: {ot.ot_get_orientation(self.ambient_states[1], self.turbine_states[i_t, 1])} deg')
+                continue
+
             dist_cw = -np.sin(phi_u) * dist_wc[:, 0] + np.cos(phi_u) * dist_wc[:, 1]
             dist_h = self.wind_farm_layout[idx, 2] - rps[:, 2]
             dist_r = np.sqrt(dist_cw ** 2 + dist_h ** 2)
 
             #   calculate resulting reduction
-            r = (0.7 + 0.3 * np.cos(dist_dw * np.pi/self.settings['dw'])) * \
-                (0.7 + 0.3 * np.sin(dist_r * np.pi/self.settings['cw'])) * \
-                (1 - np.exp(-.5 * (dist_dw/self.settings['sig dw'])**2) * \
-                 np.exp(-.5 * (dist_r/self.settings['sig r'])**2))
+            r = (0.7 + 0.3 * np.cos(dist_dw * np.pi / self.settings['dw'])) * \
+                (0.7 + 0.3 * np.sin(dist_r * np.pi / self.settings['cw'])) * \
+                (1 - np.exp(-.5 * (dist_dw / self.settings['sig dw']) ** 2) *
+                 np.exp(-.5 * (dist_r / self.settings['sig r']) ** 2))
 
             # average
             red[idx] = np.sum(r) / n_rps
@@ -147,4 +156,3 @@ class DummyWake(WakeModel):
         m = pd.DataFrame([[i_t, self.ambient_states[0] * np.prod(red), np.prod(red)]],
                          columns=['t_idx', 'u_abs_eff', 'red'])
         return self.ambient_states[0] * np.prod(red), m
-
