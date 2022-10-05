@@ -33,8 +33,12 @@ class OFF:
         -------
         int
             Current run id.
-        """        
-        run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
+        """
+        try:
+            run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
+        except KeyError:
+            # Works on my system (Marcus)
+            run_id_path = f'{os.environ["IDE_PROJECT_ROOTS"]}/03_Code/off/.runid'
 
         try:                        fid = open(run_id_path)
         except FileNotFoundError:   run_id = 0
