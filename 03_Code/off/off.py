@@ -178,7 +178,7 @@ class OFF:
                 m_tmp.t_idx = idx
                 m_tmp['time'] = t
                 m = pd.concat([m, m_tmp], ignore_index=True)
-                tur.observation_points.set_OP_propagation_speed(uv_op)
+                tur.observation_points.set_op_propagation_speed(uv_op)
 
             lg.info(f'Rotor wind speed of all turbines:')
             lg.info(uv_r)
