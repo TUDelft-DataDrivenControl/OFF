@@ -77,9 +77,9 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         tuple(np.ndarray, np.ndarray)
             [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
         """
-        u_rp = self._get_wind_speeds_rp(i_t, wind_farm)
+        u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
         u_op = self._get_wind_speeds_op(i_t, wind_farm)
-        return u_rp, u_op
+        return u_rp, u_op, m
 
     def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """

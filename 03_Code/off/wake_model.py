@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
@@ -141,5 +142,7 @@ class DummyWake(WakeModel):
             red[idx] = np.sum(r) / n_rps
 
         # Multiply with background wind speed and return
-        return self.ambient_states[0] * np.prod(red), np.prod(red)
+        m = pd.DataFrame([i_t, self.ambient_states[0] * np.prod(red), np.prod(red)],
+                         columns=['t_idx', 'u_abs_eff', 'red'])
+        return self.ambient_states[0] * np.prod(red), m
 

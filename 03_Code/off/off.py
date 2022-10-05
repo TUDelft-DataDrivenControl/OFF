@@ -38,7 +38,7 @@ class OFF:
             run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
         except KeyError:
             # Works on my system (Marcus)
-            run_id_path = f'{os.environ["IDE_PROJECT_ROOTS"]}/03_Code/off/.runid'
+            run_id_path = f'{os.environ["PWD"]}/off/.runid'
 
         try:                        fid = open(run_id_path)
         except FileNotFoundError:   run_id = 0
@@ -74,7 +74,10 @@ class OFF:
 
         run_id = self.__get_runid__()
 
-        root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
+        try:
+            root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
+        except KeyError:
+            root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
 
@@ -152,7 +155,7 @@ class OFF:
             # Predict
             #   Get all wind speeds
             for idx, tur in enumerate(self.wind_farm.turbines):
-                uv_r, uv_op = self.wake_solver.get_measurements(idx, self.wind_farm)
+                uv_r, uv_op, m = self.wake_solver.get_measurements(idx, self.wind_farm)
                 # lg.info('Wind speed turbine ', idx)
                 # lg.info(uv_r)
 
