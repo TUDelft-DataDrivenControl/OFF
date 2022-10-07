@@ -25,7 +25,8 @@ class OFF:
         self.settings_sim = settings_sim
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
-        self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
+        # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
+        self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id

@@ -3,6 +3,7 @@ import pandas as pd
 from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
+from floris.tools import FlorisInterface
 
 lg = logging.getLogger(__name__)
 
@@ -156,3 +157,91 @@ class DummyWake(WakeModel):
         m = pd.DataFrame([[i_t, self.ambient_states[0] * np.prod(red), np.prod(red)]],
                          columns=['t_idx', 'u_abs_eff', 'red'])
         return self.ambient_states[0] * np.prod(red), m
+
+
+class FlorisGaussianWake(WakeModel):
+    """
+    Dummy wake with funky shape for testing
+    """
+
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states: np.ndarray,
+                 ambient_states: np.ndarray):
+        """
+        Wake with funky shape for testing
+
+        Parameters
+        ----------
+        settings : dict
+            .dw down wind wave number
+            .cw cross wind wave number
+            .sig dw down wind weight
+            .sig r  radial weight
+        wind_farm_layout : np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states : np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states : np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: np.ndarray, ambient_states: np.ndarray):
+        """
+        Changes the states of the stored wind farm
+
+        Parameters
+        ----------
+        wind_farm_layout: np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states: np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states: np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        self.wind_farm_layout = wind_farm_layout
+        self.turbine_states = turbine_states
+        self.ambient_states = ambient_states
+
+        self.fi = FlorisInterface('/home/cbay/floris_v3/examples/inputs/gch.yaml')
+        self.fi.reinitialize(
+            layout_x=wind_farm_layout[:,0],
+            layout_y=wind_farm_layout[:,1],
+            wind_directions=[ambient_states[1]],
+            wind_speeds=[ambient_states[0]],
+        )
+
+    def get_measurements_i_t(self, i_t: int) -> tuple:
+        """
+        Returns the measurements of the wake model including the effective wind speed at the turbine i_t
+
+        Parameters
+        ----------
+        i_t : int
+            Index of the turbine of interest
+
+        Returns
+        -------
+        tuple:
+            float: u_eff at turbine i_t
+            pandas.dataframe: m other measurements (Power gen, added turbulence, etc.)
+        """
+
+        self.fi.calculate_wake(yaw_angles=self.turbine_states[:,1])
+        
+        avg_vel = self.fi.get_turbine_average_velocities()
+        Cts = self.fi.get_turbine_Cts()
+        AIs = self.fi.get_turbine_ais()
+        TIs = self.fi.get_turbine_TIs()
+
+        m = pd.DataFrame(
+            [[
+                i_t,
+                avg_vel[:,:,i_t].flatten()[0],
+                Cts[:,:,i_t].flatten()[0],
+                AIs[:,:,i_t].flatten()[0],
+                TIs[:,:,i_t].flatten()[0],
+            ]],
+            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
+        )
+
+        return avg_vel[:,:,i_t].flatten()[0], m

@@ -125,3 +125,90 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         """
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
+
+
+class FLORIDynFlorisWakeSolver(WakeSolver):
+    floris_wake: wm.FlorisGaussianWake
+
+    def __init__(self, settings_wke: dict, settings_sol: dict):
+        """
+        FLORIDyn temporary wind farm wake
+
+        Parameters
+        ----------
+        settings_wke: dict
+            Wake settings, including all parameters the wake needs to run
+        settings_sol: dict
+            Wake solver settings
+        """
+        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol)
+        lg.info('FLORIDyn wake solver created.')
+
+        self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+
+    def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
+        """
+        Get the wind speed at the location of all OPs and the rotor plane of turbine with index i_t
+
+        Parameters
+        ----------
+        i_t : int
+            index of the turbine to find the wind speeds for
+        wind_farm
+            influencing wind farm
+
+        Returns
+        -------
+        tuple(np.ndarray, np.ndarray)
+            [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
+        """
+        u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
+        u_op = self._get_wind_speeds_op(i_t, wind_farm)
+        print('u_rp: ', u_rp)
+        print('shape u_rp: ', np.shape(u_rp))
+        print( 'm: ', m)
+        print('u_op: ', u_op)
+        return u_rp, u_op, m
+
+    def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
+        """
+        Calculates the effective wind speed at the rotor plane of turbine i_t
+        Parameters
+        ----------
+        i_t : int
+            index of the turbine to find the wind speeds for
+        wind_farm
+            influencing wind farm
+
+        Returns
+        -------
+        nd.array
+            [u,v] wind speeds at the rotor plane
+        """
+        wind_farm_layout = wind_farm.get_layout()
+        turbine_states = wind_farm.get_current_turbine_states()
+        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
+                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+        self.floris_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
+        ueff, m = self.floris_wake.get_measurements_i_t(i_t)
+        print('ueff: ', ueff)
+        [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
+        return np.array([u_eff, v_eff]), m
+
+    def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:
+        """
+        Calculates the free wind speeds for the OPs of turbine i_t
+        Parameters
+        ----------
+        i_t : int
+            index of the turbine to find the wind speeds for
+        wind_farm
+            influencing wind farm
+
+        Returns
+        -------
+        nd.array
+            [u,v] wind speeds at the OP locations
+        """
+        # TODO combine the influence of different wakes
+        return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
