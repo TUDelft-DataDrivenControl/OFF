@@ -7,10 +7,14 @@ import off.observation_points as ops
 import off.ambient as amb
 import numpy as np
 import off.off as off
+import importlib.util
+import sys
 
 
 def main():
-    print("Hello OFF")
+    if _check_requirements():
+        print("Not all required packages installed, see terminal output for more info.")
+        return 0
 
     # Import data and create Simulation Dict
     settings_sim = dict([('time step', 4),
@@ -63,5 +67,37 @@ def main():
     # Run simulation
 
 
+def _check_requirements() -> bool:
+    """
+    Checks if the required packages are installed, mainly FLORIS.
+    But should also check numpy, pandas, ...
+
+    Returns
+    -------
+    pkg_missing : bool
+        If true, there is at least one required package missing
+    """
+    # TODO add a check for all packages
+    pkg_missing = False
+    floris_pkg = 'floris'
+
+    if floris_pkg in sys.modules:
+        print(f"{floris_pkg!r} is installed")
+    elif (spec := importlib.util.find_spec(name)) is not None:
+        # If you choose to perform the actual import ...
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[floris_pkg] = module
+        spec.loader.exec_module(module)
+        print(f"{floris_pkg!r} has been imported")
+    else:
+        print(f"can't find the {floris_pkg!r} module / package")
+        print("To solve, run 'pip install floris'")
+        pkg_missing = True
+
+    return pkg_missing
+
+
 if __name__ == "__main__":
     main()
+
+
