@@ -1,0 +1,7 @@
+name: Jensen
+description: Jensen wake model
+
+settings:
+  nRP: 10               # Not used yet but required
+  rotor_discr: Isocell  # Not used yet but required
+  gch_yaml_path: "02_Examples/00_Inputs/02_FLORIS/jensen.yaml"

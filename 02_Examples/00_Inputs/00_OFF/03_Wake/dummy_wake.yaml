@@ -1,0 +1,12 @@
+
+name: Dummy wake
+description: Dummy wake for testing the algorithm
+
+settings:
+  nRP: 10               # Not used yet but required
+  rotor_discr: Isocell  # Not used yet but required
+  dw: 50
+  cw: 20
+  sig dw: 500
+  sig r: 40
+

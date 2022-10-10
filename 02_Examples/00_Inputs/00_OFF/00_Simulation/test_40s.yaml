@@ -1,0 +1,18 @@
+
+name: Test sim
+description: Test simulation with 40s runtime, devided in 4s steps
+
+sim:
+  time step: 4.0
+  time start: 0.0
+  time end: 40.0
+  data folder: ""
+
+logging:
+  console:
+    enable: true
+    level: DEBUG
+  file:
+    enable: true
+    level: INFO
+

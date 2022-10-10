@@ -1,0 +1,30 @@
+
+name: turbine array
+description: Three turbine case with DTU 10 MW turbines at 5D distance in a row
+
+farm:
+  layout_x:
+    - 0.0
+    - 5.0
+    - 10.0
+  layout_y:
+    - 0.0
+    - 0.0
+    - 0.0
+  layout_z:
+    - 0.0
+    - 0.0
+    - 0.0
+  turbine_type:
+    - dtu_10mw
+    - dtu_10mw
+    - dtu_10mw
+  unit:
+    - D
+  boundaries_xyz:
+    - -2.0
+    - 12.0
+    - -4.0
+    - 4.0
+    - 0.0
+    - 5.0

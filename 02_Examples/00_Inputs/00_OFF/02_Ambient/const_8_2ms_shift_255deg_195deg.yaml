@@ -1,0 +1,25 @@
+
+name: ambient_conditions
+description: Constant wind speed at 8.2m/s, starting at 255 deg and shifting by -60deg to 195deg in 300s
+
+
+flow_field:
+  air_density: 1.225
+  reference_wind_height: -1 # -1 is code for use the hub height of T0
+  turbulence_intensity: 0.06
+  wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
+    - 255.0
+    - 255.0
+    - 195.0
+    - 195.0
+  wind_directions_t:
+    - 0.0
+    - 20600.0
+    - 20900.0
+    - 21200.0
+  wind_shear: 0.12
+  wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
+    - 8.2
+  wind_speeds_t:
+    - 0.0
+  wind_veer: 0.0

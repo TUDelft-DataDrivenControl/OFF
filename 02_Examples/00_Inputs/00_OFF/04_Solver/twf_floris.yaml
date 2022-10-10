@@ -1,0 +1,9 @@
+
+name: TWF FLORIS
+description:
+
+settings:
+  wake_solver: "TWFSolver"
+  wake_model: "Floris GCH"
+  op_propagation: "frozen turbulence"
+  extrapolation: "pair"
