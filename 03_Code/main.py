@@ -14,7 +14,7 @@ import sys
 def main():
     if _check_requirements():
         print("Not all required packages installed, see terminal output for more info.")
-        return 0
+        return 1
 
     # Import data and create Simulation Dict
     settings_sim = dict([('time step', 4),
@@ -83,7 +83,7 @@ def _check_requirements() -> bool:
 
     if floris_pkg in sys.modules:
         print(f"{floris_pkg!r} is installed")
-    elif (spec := importlib.util.find_spec(name)) is not None:
+    elif (spec := importlib.util.find_spec(floris_pkg)) is not None:
         # If you choose to perform the actual import ...
         module = importlib.util.module_from_spec(spec)
         sys.modules[floris_pkg] = module
