@@ -161,21 +161,19 @@ class DummyWake(WakeModel):
 
 class FlorisGaussianWake(WakeModel):
     """
-    Dummy wake with funky shape for testing
+    FLORIS interface for the Gaussian Curl Hybrid model
     """
 
     def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states: np.ndarray,
                  ambient_states: np.ndarray):
         """
-        Wake with funky shape for testing
+        FLORIS interface for the Gaussian Curl Hybrid model
 
         Parameters
         ----------
         settings : dict
-            .dw down wind wave number
-            .cw cross wind wave number
-            .sig dw down wind weight
-            .sig r  radial weight
+            .["gch_yaml_path"] path to settings gch.yaml
+                example file can be found at https://github.com/NREL/floris/tree/main/examples/inputs
         wind_farm_layout : np.ndarray
             n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
         turbine_states : np.ndarray
@@ -202,10 +200,11 @@ class FlorisGaussianWake(WakeModel):
         self.turbine_states = turbine_states
         self.ambient_states = ambient_states
 
-        self.fi = FlorisInterface('/home/cbay/floris_v3/examples/inputs/gch.yaml')
+        #  self.fi = FlorisInterface('/home/cbay/floris_v3/examples/inputs/gch.yaml')
+        self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
         self.fi.reinitialize(
-            layout_x=wind_farm_layout[:,0],
-            layout_y=wind_farm_layout[:,1],
+            layout_x=wind_farm_layout[:, 0],
+            layout_y=wind_farm_layout[:, 1],
             wind_directions=[ambient_states[1]],
             wind_speeds=[ambient_states[0]],
         )
@@ -236,12 +235,12 @@ class FlorisGaussianWake(WakeModel):
         m = pd.DataFrame(
             [[
                 i_t,
-                avg_vel[:,:,i_t].flatten()[0],
-                Cts[:,:,i_t].flatten()[0],
-                AIs[:,:,i_t].flatten()[0],
-                TIs[:,:,i_t].flatten()[0],
+                avg_vel[:, :, i_t].flatten()[0],
+                Cts[:, :, i_t].flatten()[0],
+                AIs[:, :, i_t].flatten()[0],
+                TIs[:, :, i_t].flatten()[0],
             ]],
             columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
         )
 
-        return avg_vel[:,:,i_t].flatten()[0], m
+        return avg_vel[:, :, i_t].flatten()[0], m

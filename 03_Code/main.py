@@ -31,7 +31,9 @@ def main():
                          ('dw', 50),                            # Dummy wake value
                          ('cw', 20),                            # Dummy wake value
                          ('sig dw', 500),                       # Dummy wake value
-                         ('sig r', 40)])                        # Dummy wake value
+                         ('sig r', 40),                         # Dummy wake value
+                         ('gch_yaml_path', '02_Examples/00_Inputs/02_FLORIS/gch.yaml')])  # Gaussian wake parameters
+
 
     # Create turbines
     #   Turbines are created with

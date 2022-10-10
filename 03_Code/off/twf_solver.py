@@ -72,8 +72,9 @@ class TWFSolver(ws.WakeSolver):
 
             # Based on settings either apply weighted retreval of flow field state or interpolation
             if self.settings_sol("Weighted"):
-
+                lg.debug('Ambient states: Weighted interpolation')
             else:
+                lg.debug('Ambient states: Two OP interpolation')
                 # Use same weights as OP calculation
 
         wind_farm_layout = wind_farm.get_layout()

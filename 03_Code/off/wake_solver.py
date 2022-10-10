@@ -142,7 +142,7 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
             Wake solver settings
         """
         super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol)
-        lg.info('FLORIDyn wake solver created.')
+        lg.info('FLORIDyn FLORIS wake solver created.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
 

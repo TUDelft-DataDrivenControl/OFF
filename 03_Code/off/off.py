@@ -25,8 +25,10 @@ class OFF:
         self.settings_sim = settings_sim
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
+        settings_wke['sim_dir'] = self.root_dir
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
+
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -84,12 +86,13 @@ class OFF:
 
         try:
             root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
-            lg.info('Root directory: ' + root_dir)
+            lg.info('Root runs directory: ' + root_dir)
         except KeyError:
             root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
-            lg.warning('Initial root directory path retrieval was unsuccessful, used ' + root_dir)
+            lg.warning('Initial root runs directory path retrieval was unsuccessful, used ' + root_dir)
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
+        self.root_dir = root_dir[:-len("runs/")]
 
         if not os.path.exists(self.sim_dir):
             os.makedirs(self.sim_dir)
