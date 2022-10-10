@@ -6,7 +6,19 @@ lg = logging.getLogger(__name__)
 
 
 class WindFarm:
+    """
+    Wind Farm Attributes
+
+    turbines : List[Turbine]
+        List of turbine objects which form the wind farm
+    dependencies : np.ndarray (with boolean entries)
+        Row i describes which turbines influence turbine i. The main diagonal should always be 'True'.
+    nT : int
+        Number of turbines in the wind farm
+    """
     turbines: List[Turbine]
+    dependencies: np.ndarray
+    nT: int
 
     def __init__(self, turbines: List[Turbine]):
         """
@@ -18,7 +30,9 @@ class WindFarm:
             List of turbines in the wind farm
         """
         lg.info(f'Wind farm created with {len(turbines)} turbines.')
+        self.nT = len(turbines)
         self.turbines = turbines
+        self.dependencies = np.full((self.nT, self.nT), True)
 
     def get_layout(self) -> np.ndarray:
         """
