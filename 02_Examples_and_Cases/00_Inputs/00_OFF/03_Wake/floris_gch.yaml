@@ -4,4 +4,4 @@ description: Gaussian Curl Hybrid wake model
 settings:
   nRP: 10               # Not used yet but required
   rotor_discr: Isocell  # Not used yet but required
-  gch_yaml_path: "02_Examples/00_Inputs/01_FLORIS/gch.yaml"
+  gch_yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
