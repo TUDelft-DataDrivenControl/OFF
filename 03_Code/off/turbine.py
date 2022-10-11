@@ -259,16 +259,16 @@ class Turbine(ABC):
         return self.base_location + offset
 
 
-class DTU10MW(Turbine):
+class HAWT_ADM(Turbine):
     # Attributes
     diameter = 178.4  # Meter
     nacellePos = np.array([0, 0, 119])  # in Meter
-    turbine_type = "DTU10MW"
+    turbine_type = "name"
 
     def __init__(self, base_location: np.ndarray, orientation: np.ndarray, turbine_states: TurbineStates,
-                 observation_points: ObservationPoints, ambient_states: AmbientStates):
+                 observation_points: ObservationPoints, ambient_states: AmbientStates, turbine_data: dict):
         """
-        DTU10MW extends the base turbine class and specifies the 10 MW turbine based on [1]
+        HAWT extends the base turbine class and specifies a generic horizontal axis wind turbine
 
         Parameters
         ----------
@@ -283,8 +283,13 @@ class DTU10MW(Turbine):
         ambient_states : AmbientStates
             Ambient states object
         """
+        self.diameter = turbine_data["rotor_diameter"]
+        self.nacellePos = np.array([0, 0, turbine_data["hub_height"]])
+        if "rotor_overhang" in turbine_data:
+            self.nacellePos[0] = turbine_data["rotor_overhang"]
+
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
-        lg.info("DTU10MW turbine created")
+        lg.info("HAWT turbine of type " + turbine_data["name"] + "created")
         lg.info(f'Turbine base location: {base_location}')
 
     def calc_power(self, wind_speed, air_den):

@@ -6,7 +6,8 @@ description: Constant wind speed at 8m/s coming from 270 deg (0 deg = north)
 flow_field:
   air_density: 1.225
   reference_wind_height: -1 # -1 is code for use the hub height of T0
-  turbulence_intensity: 0.06
+  turbulence_intensity:
+    - 0.06
   wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
     - 255.0
   wind_directions_t:

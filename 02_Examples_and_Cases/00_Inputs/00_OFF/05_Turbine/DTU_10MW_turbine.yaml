@@ -10,7 +10,7 @@ performance:
     Cp_tb_values: [ ]
     Cp_tb_tsr: [ ]          # in (m/s)/(m/s)
     Cp_tb_bpa: [ ]          # in deg
-  Ct_curve: # Ct curve copied from IEA37_10MW, needs to be replaced
+  Ct_curve: # Ct(u) curve copied from IEA37_10MW, needs to be replaced
     Ct_tb_values: [ ]
     Ct_tb_tsr: [ ]          # in (m/s)/(m/s)
     Ct_tb_bpa: [ ]          # in deg

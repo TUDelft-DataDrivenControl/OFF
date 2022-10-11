@@ -9,6 +9,7 @@ import numpy as np
 import off.off as off
 import importlib.util
 import sys
+import yaml
 
 
 def main():
@@ -16,54 +17,26 @@ def main():
         print("Not all required packages installed, see terminal output for more info.")
         return 1
 
-    # Import data and create Simulation Dict
-    settings_sim = dict([('time step', 4),
-                         ('time start', 0),
-                         ('time end', 40),
-                        #  ('simulation folder', '/Users/lejeunemax/Desktop'),
-                         ('data folder', ''),
-                         ('log console lvl', 'DEBUG'),
-                         ('log file lvl', 'INFO')])
+    # Call the run .yaml
+    stream = open('../02_Examples_and_Cases/02_Example_Cases/run_example.yaml', 'r')
+    sim_info = yaml.safe_load(stream)
 
-    settings_sol = dict([('wake superposition', 'internal'),    # Within the wake model or outside in OFF
-                         ('multi wake', False),                 # Enable different wakes per turbine
-                         ('wake switch', False),                # Turbine can switch between wakes (modified OP)
-                         ('extrapolation', 'pair')])            # Extrapolation method from OP to point of interest
+    # Convert run data into settings and wind farm object
+    settings_sim, settings_sol, settings_wke = _run_yaml_to_dict(sim_info)
+    wind_farm = _run_yaml_to_wind_farm(sim_info)
 
-    settings_wke = dict([('rotor discretization', 'isocell'),
-                         ('nRP', 50),                           # Number of points to discretetize the rotor plane
-                         ('dw', 50),                            # Dummy wake value
-                         ('cw', 20),                            # Dummy wake value
-                         ('sig dw', 500),                       # Dummy wake value
-                         ('sig r', 40),                         # Dummy wake value
-                         ('gch_yaml_path', '02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml')])  # Gaussian wake parameters
-
-    # Create turbines
-    #   Turbines are created with
-    #       - base location (x,y,z)     -> np.ndarray,
-    #       - orientation (yaw,tilt)    -> np.ndarray,
-    #       - Turbine states            -> TurbineStates,
-    #       - Observation Points        -> ObservationPoints,
-    #       - Ambient states            -> AmbientStates
-    turbines = [tur.DTU10MW(np.array([600, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
-                            ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10)),
-                tur.DTU10MW(np.array([1200, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
-                            ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10)),
-                tur.DTU10MW(np.array([1800, 600, 0]), np.array([0, 0]), tur.TurbineStatesFLORIDyn(10),
-                            ops.FLORIDynOPs4(10), amb.FLORIDynAmbient(10))]
-
-    wind_farm = wfm.WindFarm(turbines)
-
-    # Create simulation object
+    # Create OFF simulation object
     off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol)
-    off_sim.init_sim(np.array([8, 225, 0]), np.array([1/3, 0, 0]))
 
-    m = off_sim.run_sim()
+    # TODO init based on sim_info inputs & used ambient state model / turbine state model
+    off_sim.init_sim(
+        np.array([sim_info["ambient"]["flow_field"]["wind_speeds"][0],
+                  sim_info["ambient"]["flow_field"]["wind_directions"][0],
+                  sim_info["ambient"]["flow_field"]["turbulence_intensity"][0]]),
+        np.array([1 / 3, 0, 0]))
 
-    print(wind_farm.turbines[0].orientation)
-    wind_farm.turbines[0].orientation[0] = 260
-    print(wind_farm.turbines[0].orientation)
     # Run simulation
+    m = off_sim.run_sim()
 
 
 def _check_requirements() -> bool:
@@ -96,7 +69,82 @@ def _check_requirements() -> bool:
     return pkg_missing
 
 
+def _run_yaml_to_dict(sim_info: dict) -> tuple:
+    """
+    Returns settings dicts for simulation, wake and solver (sim, wke, sol)
+    Parameters
+    ----------
+    sim_info:
+        read directory from a run .yaml file
+
+    Returns
+    -------
+    (settings_sim, settings_wke, settings_sol):
+        Tuple of different directories for the OFF simulation
+    """
+    # Import data and create Simulation Dict
+    settings_sim = dict([('time step',          sim_info["sim"]["sim"]["time step"]),
+                         ('time start',         sim_info["sim"]["sim"]["time start"]),
+                         ('time end',           sim_info["sim"]["sim"]["time end"]),
+                         ('simulation folder',  sim_info["io"]["simulation folder"]),
+                         ('data folder',        sim_info["io"]["data folder"]),
+                         ('log console enable', sim_info["sim"]["logging"]["console"]["enable"]),
+                         ('log console lvl',    sim_info["sim"]["logging"]["console"]["level"]),
+                         ('log file enable',    sim_info["sim"]["logging"]["file"]["enable"]),
+                         ('log file lvl',       sim_info["sim"]["logging"]["file"]["level"])])
+
+    settings_sol = sim_info["solver"]["settings"]
+
+    settings_wke = sim_info["wake"]["settings"]
+
+    return settings_sim, settings_sol, settings_wke
+
+
+def _run_yaml_to_wind_farm(sim_info: dict) -> wfm.WindFarm:
+    """
+    Generates wind farm based on loaded yaml information
+
+    Parameters
+    ----------
+    sim_info
+
+    Returns
+    -------
+    wfm.WindFarm:
+        Object you can call OFF with.
+    """
+    # Create turbines
+    #   Turbines are created with
+    #       - base location (x,y,z)     -> np.ndarray,
+    #       - orientation (yaw,tilt)    -> np.ndarray,
+    #       - Turbine states            -> TurbineStates,
+    #       - Observation Points        -> ObservationPoints,
+    #       - Ambient states            -> AmbientStates
+    #       - Turbine data              -> Turbine type specific data
+    turbines = []
+
+    # TODO The current turbine creation does not select a specific OP class/ turbine state class / ambient class
+    for idx in range(len(sim_info["wind_farm"]["farm"]["turbine_type"])):
+        t = sim_info["wind_farm"]["farm"]["turbine_type"][idx]
+
+        if sim_info["wind_farm"]["farm"]["unit"][0] == 'D':
+            dist_factor = sim_info["wind_farm"]["farm"]["diameter"][0]
+        else:
+            dist_factor = 1
+
+        turbines.append(tur.HAWT_ADM(np.array([sim_info["wind_farm"]["farm"]["layout_x"][idx] * dist_factor,
+                                               sim_info["wind_farm"]["farm"]["layout_y"][idx] * dist_factor,
+                                               sim_info["wind_farm"]["farm"]["layout_z"][idx] * dist_factor]),
+                                     np.array([0,                                                   # yaw
+                                               sim_info["turbine"][t]["shaft_tilt"]]),            # tilt
+                                     tur.TurbineStatesFLORIDyn(sim_info["solver"]["settings"]["n_op"]),  # Turb. states
+                                     ops.FLORIDynOPs4(sim_info["solver"]["settings"]["n_op"]),           # OP model
+                                     amb.FLORIDynAmbient(sim_info["solver"]["settings"]["n_op"]),        # Ambient model
+                                     sim_info["turbine"][t]))                                     # Turbine data
+
+    wind_farm = wfm.WindFarm(turbines)
+    return wind_farm
+
+
 if __name__ == "__main__":
     main()
-
-

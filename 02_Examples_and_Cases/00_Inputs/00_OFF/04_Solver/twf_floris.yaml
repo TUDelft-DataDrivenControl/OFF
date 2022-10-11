@@ -7,3 +7,4 @@ settings:
   wake_model: "Floris GCH"
   op_propagation: "frozen turbulence"
   extrapolation: "pair"
+  n_op: 120
