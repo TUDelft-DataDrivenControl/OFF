@@ -88,6 +88,7 @@ def plot_ambient(path_to_amb, wind_farm, yaml_file):
     The wind direction and speed is indicated by barbs.
     See https://www.wikihow.com/Read-Wind-Barbs for more info.
     See https://matplotlib.org/stable/plot_types/arrays/barbs.html for the function used.
+    Barbs are shown in 5 knot increments, which translates to 2.57 m/s 
 
     Parameters
     ----------
@@ -110,7 +111,7 @@ def plot_ambient(path_to_amb, wind_farm, yaml_file):
     if u_s and phi_s:
         title = "Wind farm with steady wind speed & direction"
         ax = _plot_wind_farm(wind_farm, title)
-        u = dictionary['flow_field']['wind_speeds'][0]
+        u = dictionary['flow_field']['wind_speeds'][0] * 1.9438  # m/s to knots
         phi = dictionary['flow_field']['wind_directions'][0]
         phi = np.deg2rad(270 - phi)
         v = np.sin(phi) * u
