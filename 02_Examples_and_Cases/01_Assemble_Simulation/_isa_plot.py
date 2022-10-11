@@ -85,6 +85,9 @@ def _amb_is_steady(ambient_dict) -> tuple:
 def plot_ambient(path_to_amb, wind_farm, yaml_file):
     """
     Function for the interactive sim assembly to plot the selected wind farm and the (changing) wind conditions
+    The wind direction and speed is indicated by barbs.
+    See https://www.wikihow.com/Read-Wind-Barbs for more info.
+    See https://matplotlib.org/stable/plot_types/arrays/barbs.html for the function used.
 
     Parameters
     ----------
@@ -109,10 +112,9 @@ def plot_ambient(path_to_amb, wind_farm, yaml_file):
         ax = _plot_wind_farm(wind_farm, title)
         u = dictionary['flow_field']['wind_speeds'][0]
         phi = dictionary['flow_field']['wind_directions'][0]
-        phi = np.deg2rad(270 - phi + 180)  # + 180 to fix barbs
+        phi = np.deg2rad(270 - phi)
         v = np.sin(phi) * u
         u = np.cos(phi) * u
-        # https://matplotlib.org/stable/plot_types/arrays/barbs.html
         ax.barbs(wind_farm["farm"]["layout_x"],
                  wind_farm["farm"]["layout_y"],
                  np.ones(len(wind_farm["farm"]["layout_x"])) * u,
