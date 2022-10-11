@@ -62,6 +62,7 @@ def ot_abs_wind_speed(u, v):
 
     return np.sqrt(u**2 + v**2)
 
+
 def ot_abs2uv(wind_speed_abs, wind_dir):
     """
     Calculates the u, v components of the wind speed based on the absolute speed and wind direction

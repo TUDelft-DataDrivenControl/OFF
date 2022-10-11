@@ -45,6 +45,8 @@ farm:
     - dtu_10mw
   unit:
     - m
+  diameter: # Only needed if unit was set to D
+    - 178.4
   boundaries_xyz:
     - 0.0
     - 3000.0
