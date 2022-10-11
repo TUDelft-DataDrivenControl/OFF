@@ -1,0 +1,17 @@
+
+name: Turbulent 1200 s sim with 20000 s offset
+description: As LES simulation often require time to develop turbulences, this simulation starts at an offset
+
+sim:
+  time step: 4.0
+  time start: 20000.0
+  time end: 21200.0
+
+logging:
+  console:
+    enable: true
+    level: DEBUG
+  file:
+    enable: true
+    level: INFO
+
