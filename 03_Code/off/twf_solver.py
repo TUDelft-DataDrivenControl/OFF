@@ -5,6 +5,7 @@ import off.wake_model as wm
 import off.utils as ot
 import off.wake_solver as ws
 import logging
+
 lg = logging.getLogger(__name__)
 
 
@@ -90,12 +91,35 @@ class TWFSolver(ws.WakeSolver):
             b = op_locations[ind_op[1], :].transpose()
             c = rotor_center_i_t[0:2].transpose()
 
-            d = ((b - a).transpose()*(c-a))/((b-a).transpose() * (b-a))
-            d = np.min(np.max(d, 0), 1)
+            d = ((b - a).transpose() * (c - a)) / ((b - a).transpose() * (b - a))
 
-            r1 = 1 - d
-            r2 = d
+            d = np.min(np.max(d, 0), 1)
+            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
+            r0 = 1 - d
+            lg.info(f'TWF - Used OP interpolation weight: {d}')
+            r1 = d
+
+            #   Interpolate states
+            #       1. OP location
+            tmp_op = op_locations[ind_op[0], 0:2] * r0 + op_locations[ind_op[1], 0:2] * r1
+            #       2. Ambient
+            twf_a_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1
+            #       3. Turbine state
+            twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1
             #   Reconstruct turbine location
+            tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1
+            # TODO convert to deg
+            
+            #       1. Get vector from i_t to OP
+            vec_t2op = tmp_op - rotor_center_i_t
+            #       2. Get vector from OP to related turbine
+
+            #       3. Set turbine location
+            twf_layout[idx, :] = 0
+            #   Create wind farm object
 
             # Based on settings either apply weighted retreval of flow field state or interpolation
             if self.settings_sol("Weighted"):
@@ -103,7 +127,6 @@ class TWFSolver(ws.WakeSolver):
             else:
                 lg.debug('Ambient states: Two OP interpolation')
                 # Use same weights as OP calculation
-
 
         self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
@@ -128,10 +151,5 @@ class TWFSolver(ws.WakeSolver):
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
 
-
-
-
-
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022
-

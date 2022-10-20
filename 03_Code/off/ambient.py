@@ -87,6 +87,23 @@ class AmbientStates(States, ABC):
         pass
 
     @abstractmethod
+    def get_wind_dir_ind(self, ind: int):
+        """
+        Returns wind directions at an index
+
+        Parameters
+        ----------
+        ind: int
+            Index
+
+        Returns
+        -------
+        np.ndarray
+            m x 1 vector of wind direction states in deg
+        """
+        pass
+
+    @abstractmethod
     def get_turbine_wind_speed_abs(self) -> np.float_:
         """
         Returns the absolute wind speed at the turbine location (first entry)
@@ -98,6 +115,7 @@ class AmbientStates(States, ABC):
         """
         pass
 
+    @abstractmethod
     def get_turbine_wind_speed(self) -> np.ndarray:
         """
         Returns u,v component wind speed at the turbine location
@@ -304,3 +322,19 @@ class FLORIDynAmbient(AmbientStates):
         :return: float of wind direction state at the turbine location in deg
         """
         return self.states[0, 1]
+
+    def get_wind_dir_ind(self, ind: int):
+        """
+        Returns wind directions at an index
+
+        Parameters
+        ----------
+        ind: int
+            Index
+
+        Returns
+        -------
+        np.ndarray
+            m x 1 vector of wind direction states in deg
+        """
+        return self.states[ind, 1]
