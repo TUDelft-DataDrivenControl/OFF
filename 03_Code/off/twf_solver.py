@@ -61,13 +61,40 @@ class TWFSolver(ws.WakeSolver):
         nd.array
             [u,v] wind speeds at the rotor plane
         """
+        # Load current data
+        wind_farm_layout = wind_farm.get_layout()
+        turbine_states = wind_farm.get_current_turbine_states()
+        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
+                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+
+        # Create an index range over all nT turbines and only select the ones saved in the dependencies
+        inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
+        twf_layout = np.zeros(inf_turbines.shape[0], 2)  # Allocation of x & y coordinates of the turbines
+        twf_t_states = np.zeros(inf_turbines.shape[0], turbine_states.shape[1])
+        twf_a_states = np.zeros(inf_turbines.shape[0], ambient_states.shape[1])
+
+        rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
+
         # Go through dependencies
-        for idx in np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]:
+        for idx in np.arange(inf_turbines.shape[0]):
+            if idx == i_t:
+                continue
+
             # Interpolation of turbine states
             #   Step 1 retrieve closest up and downstream OPs
+            op_locations = wind_farm.turbines[inf_turbines[idx]].observation_points.get_world_coord()
+            ind_op = ot.ot_get_closest_2_points_3d_sorted(rotor_center_i_t, op_locations)
 
             #   Step 2 calculate interpolation weights
+            a = op_locations[ind_op[0], :].transpose()
+            b = op_locations[ind_op[1], :].transpose()
+            c = rotor_center_i_t[0:2].transpose()
 
+            d = ((b - a).transpose()*(c-a))/((b-a).transpose() * (b-a))
+            d = np.min(np.max(d, 0), 1)
+
+            r1 = 1 - d
+            r2 = d
             #   Reconstruct turbine location
 
             # Based on settings either apply weighted retreval of flow field state or interpolation
@@ -77,10 +104,7 @@ class TWFSolver(ws.WakeSolver):
                 lg.debug('Ambient states: Two OP interpolation')
                 # Use same weights as OP calculation
 
-        wind_farm_layout = wind_farm.get_layout()
-        turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+
         self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])

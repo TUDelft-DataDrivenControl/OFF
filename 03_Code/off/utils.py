@@ -158,3 +158,61 @@ def ot_get_yaw(wind_dir: float, orientation: float) -> float:
         yaw angle in LES degree (clockwise)
     """
     return orientation - wind_dir
+
+
+def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
+    """
+    Function to find the index of the closes point to a reference location in 3D.
+    The function can expect the list of points to be sorted / trailing each other.
+
+    Parameters
+    ----------
+    ref_loc:
+        [1 x 3] np.ndarray Reference location
+    points
+        [n x 3] np.ndarray Points
+
+    Returns
+    -------
+    int:
+        index
+    """
+    # Calculate squared distance
+    distSqr = (ref_loc[0] - points[:, 0]) ** 2 + (ref_loc[1] - points[:, 1]) ** 2 + (ref_loc[2] - points[:, 2]) ** 2
+    return np.argmin(distSqr)
+
+
+def ot_get_closest_2_points_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
+    """
+    Function to find the index of the closest 2 points to a reference location in 3D.
+    The function can expect the list of points to be sorted / trailing each other.
+
+    Parameters
+    ----------
+    ref_loc:
+        [1 x 3] np.ndarray Reference location
+    points
+        [n x 3] np.ndarray Points
+
+    Returns
+        [1 x 2] int array
+
+    -------
+
+    """
+    distSqr = (ref_loc[0] - points[:, 0]) ** 2 + (ref_loc[1] - points[:, 1]) ** 2 + (ref_loc[2] - points[:, 2]) ** 2
+    i_1 = np.argmin(distSqr)
+
+    if i_1 == 1:
+        # First OP
+        return [i_1, 2]
+    elif i_1 == points.shape[0]-1:
+        # Last OP
+        return [i_1, i_1-1]
+
+    if distSqr[i_1+1] > distSqr[i_1-1]:
+        return [i_1, i_1 - 1]
+    else:
+        return [i_1, i_1 + 1]
+
+
