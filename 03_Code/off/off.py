@@ -186,18 +186,18 @@ class OFF:
             lg.info(f'Rotor wind speed of all turbines:')
             lg.info(uv_r)
 
+            # Correct
+
+            # Control
+
+            # Visualize
+
             # Predict - iterate all states
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
                 tur.observation_points.propagate_ops(self.settings_sim['time step'])
                 lg.debug(tur.observation_points.get_world_coord())
-
-            # Correct
-
-            # Control
-
-            # Visualize
 
             lg.info(f'Ending time step: {t} s.')
 
