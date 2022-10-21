@@ -20,7 +20,7 @@ class OFF:
     settings_sim = dict()
     wind_farm = wfm.WindFarm
 
-    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict):
+    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict, settings_cor: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.__dir_init__( settings_sim )
@@ -28,6 +28,10 @@ class OFF:
         settings_wke['sim_dir'] = self.root_dir
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
+
+        if settings_cor['ambient']: 
+            states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
+            self.ambient_corrector =  amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -187,6 +191,9 @@ class OFF:
             lg.info(uv_r)
 
             # Correct
+            self.ambient_corrector.update(t)
+            for idx, tur in enumerate(self.wind_farm.turbines):
+                self.ambient_corrector(idx, tur.ambient_states)
 
             # Control
 
