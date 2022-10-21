@@ -12,6 +12,8 @@ import pandas as pd
 import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 
+from off import __file__ as OFF_PATH
+OFF_PATH = OFF_PATH.rsplit('/',3)[0]
 
 class OFF:
     """
@@ -41,13 +43,8 @@ class OFF:
         int
             Current run id.
         """
-        try:
-            run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
-            lg.info('RunID path: ' + run_id_path)
-        except KeyError:
-            # Works on my system (Marcus)
-            run_id_path = f'{os.environ["PWD"]}/off/.runid'
-            lg.warning('Initial RunID path retrieval was unsuccessful, used ' + run_id_path)
+        run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
+        lg.info('RunID path: ' + run_id_path)
 
         try:
             fid = open(run_id_path)
