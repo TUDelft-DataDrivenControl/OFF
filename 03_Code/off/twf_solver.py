@@ -76,6 +76,8 @@ class TWFSolver(ws.WakeSolver):
 
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
 
+        # TODO THIS IS UNNECESSARY - THE WAKE MODEL SEEMS TO ONLY NEED SIMPLE INFO, NOT A FULL WIND FARM MODEL.
+        # TODO CORRECT THIS AND THEN COUPLE AND TEST.
         # Create the tmp wind farm based on the influencing turbines
         # TODO This should create a wind farm "light" object. It would have the same structure, but its turbines would
         # TODO only have one state instread of the many OPs, Ambient & turbine states.
