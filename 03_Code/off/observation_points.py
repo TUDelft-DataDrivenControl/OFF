@@ -43,6 +43,19 @@ class ObservationPoints(States, ABC):
         pass
 
     @abstractmethod
+    def get_vec_op_to_turbine(self, index: int) -> np.ndarray:
+        """
+        Returns a x, y, z vector pointing from the OP to the turbine location in the OP coordinate system.
+        OP coordinate system is usually the wake coordinate system based on the OP data.
+
+        Returns
+        -------
+        np.ndarray
+            1 x 3 matrix where the columns are the x,y,z coordinates
+        """
+        pass
+
+    @abstractmethod
     def init_all_states(self, wind_speed_u: float, wind_speed_v: float, rotor_pos: np.ndarray, time_step: float):
         """
         Creates a downstream chain of OPs
@@ -88,7 +101,6 @@ class ObservationPoints(States, ABC):
         self.op_propagation_speed = op_propagation_speed
 
 
-
 class FLORIDynOPs4(ObservationPoints):
 
     def __init__(self, number_of_time_steps: int):
@@ -113,6 +125,18 @@ class FLORIDynOPs4(ObservationPoints):
             [x, y, z] coordinates in world coordinate system
         """
         return self.states[:, 0:3]
+
+    def get_vec_op_to_turbine(self, index: int) -> np.ndarray:
+        """
+        Returns a x, y, z vector pointing from the OP to the turbine location in the OP coordinate system.
+        OP coordinate system is usually the wake coordinate system based on the OP data.
+
+        Returns
+        -------
+        np.ndarray
+            1 x 3 matrix where the columns are the x,y,z coordinates
+        """
+        return np.array([-self.states[index, 3], 0.0, 0.0])
 
     def init_all_states(self, wind_speed_u: float, wind_speed_v: float, rotor_pos: np.ndarray, time_step: float):
         """        

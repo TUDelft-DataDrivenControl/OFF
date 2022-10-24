@@ -34,6 +34,30 @@ class WindFarm:
         self.turbines = turbines
         self.dependencies = np.full((self.nT, self.nT), True)
 
+    def get_sub_windfarm(self, indices):
+        """
+        Creates a subset of the wind farm with the turbines at the given indices
+
+        Parameters
+        ----------
+        indices: int[]
+
+        Returns
+        -------
+        turbines array
+        """
+        return self.turbines[indices]
+
+    def set_dependencies(self, dependencies: np.ndarray):
+        """
+
+        Parameters
+        ----------
+        dependencies: np.ndarray
+            boolean array with dependencies - true if there is a dependency, false if not
+        """
+        self.dependencies = dependencies
+
     def get_layout(self) -> np.ndarray:
         """
         Gets the current wind farm layout and diameters

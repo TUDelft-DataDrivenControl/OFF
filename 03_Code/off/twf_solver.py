@@ -76,6 +76,9 @@ class TWFSolver(ws.WakeSolver):
 
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
 
+        # Create the tmp wind farm based on the influencing turbines
+        tmp_wf = wfm.WindFarm(wind_farm.get_sub_windfarm(inf_turbines))
+
         # Go through dependencies
         for idx in np.arange(inf_turbines.shape[0]):
             if idx == i_t:
@@ -111,14 +114,14 @@ class TWFSolver(ws.WakeSolver):
             #   Reconstruct turbine location
             tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1
-            # TODO convert to deg
-            
+            tmp_phi = ot.ot_deg2rad(tmp_phi)
             #       1. Get vector from i_t to OP
-            vec_t2op = tmp_op - rotor_center_i_t
+            vec_ti2op = tmp_op - rotor_center_i_t
             #       2. Get vector from OP to related turbine
-
+            vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
             #       3. Set turbine location
-            twf_layout[idx, :] = 0
+            twf_layout[idx, :] = 0  # TODO Replace
             #   Create wind farm object
 
             # Based on settings either apply weighted retreval of flow field state or interpolation
