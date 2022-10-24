@@ -77,6 +77,8 @@ class TWFSolver(ws.WakeSolver):
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
 
         # Create the tmp wind farm based on the influencing turbines
+        # TODO This should create a wind farm "light" object. It would have the same structure, but its turbines would
+        # TODO only have one state instread of the many OPs, Ambient & turbine states.
         tmp_wf = wfm.WindFarm(wind_farm.get_sub_windfarm(inf_turbines))
 
         # Go through dependencies
@@ -115,14 +117,13 @@ class TWFSolver(ws.WakeSolver):
             tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1
             tmp_phi = ot.ot_deg2rad(tmp_phi)
-            #       1. Get vector from i_t to OP
-            vec_ti2op = tmp_op - rotor_center_i_t
-            #       2. Get vector from OP to related turbine
+            #       1. Get vector from OP to related turbine
             vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
-            #       3. Set turbine location
-            twf_layout[idx, :] = 0  # TODO Replace
-            #   Create wind farm object
+            #       2. Set turbine location
+            tmp_wf.turbines[idx].set_rotor_pos = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
+                                                                    [np.sin(tmp_phi), np.cos(tmp_phi),  0],
+                                                                    [0, 0, 1]])*np.transpose(vec_op2t)
 
             # Based on settings either apply weighted retreval of flow field state or interpolation
             if self.settings_sol("Weighted"):

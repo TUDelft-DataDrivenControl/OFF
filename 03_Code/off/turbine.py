@@ -258,6 +258,16 @@ class Turbine(ABC):
 
         return self.base_location + offset
 
+    def set_rotor_pos(self, pos_rot: np.ndarray):
+        """
+        Sets the base location, based on a rotor location and the nacelle position
+        Parameters
+        ----------
+        pos_rot
+        """
+        # TODO should pay attention to orientation of the turbine
+        self.base_location = pos_rot - self.nacellePos
+
 
 class HAWT_ADM(Turbine):
     # Attributes
