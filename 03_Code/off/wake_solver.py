@@ -283,6 +283,9 @@ class TWFSolver(WakeSolver):
         twf_t_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
         twf_a_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
 
+        # TODO ========== BIGGER TOPIC ==============
+        # Wake models need to receive the states not as vectors but as objects with the state relevant methods.
+
         # Get reference point of main wind turbine
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
 
