@@ -10,6 +10,8 @@ lg = logging.getLogger(__name__)
 
 
 class TWFSolver(ws.WakeSolver):
+    floris_wake: wm.FlorisGaussianWake
+
     def __init__(self, settings_wke: dict, settings_sol: dict):
         """
         FLORIDyn temporary wind farm wake solver, based on [1].
@@ -24,8 +26,7 @@ class TWFSolver(ws.WakeSolver):
         super(TWFSolver, self).__init__(settings_sol)
         lg.info('FLORIDyn wake solver created.')
 
-        # TODO Init FLORIS model
-        pass
+        self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
@@ -70,24 +71,26 @@ class TWFSolver(ws.WakeSolver):
 
         # Create an index range over all nT turbines and only select the ones saved in the dependencies
         inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
-        twf_layout = np.zeros(inf_turbines.shape[0], 2)  # Allocation of x & y coordinates of the turbines
-        twf_t_states = np.zeros(inf_turbines.shape[0], turbine_states.shape[1])
-        twf_a_states = np.zeros(inf_turbines.shape[0], ambient_states.shape[1])
+        # index i_t is not correct anymore as only a subset of turbines are considered
+        i_t_tmp = np.sum(wind_farm.dependencies[0:i_t+1, :])
 
+        twf_layout = np.zeros((inf_turbines.shape[0], 3))  # Allocation of x, y, z coordinates of the turbines
+        twf_t_states = np.zeros((inf_turbines.shape[0], turbine_states.shape[1]))
+        twf_a_states = np.zeros((inf_turbines.shape[0], ambient_states.shape[1]))
+
+        # Get reference point of main wind turbine
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
-
-        # TODO THIS IS UNNECESSARY - THE WAKE MODEL SEEMS TO ONLY NEED SIMPLE INFO, NOT A FULL WIND FARM MODEL.
-        # TODO CORRECT THIS AND THEN COUPLE AND TEST.
-        # Create the tmp wind farm based on the influencing turbines
-        # TODO This should create a wind farm "light" object. It would have the same structure, but its turbines would
-        # TODO only have one state instread of the many OPs, Ambient & turbine states.
-        tmp_wf = wfm.WindFarm(wind_farm.get_sub_windfarm(inf_turbines))
 
         # Go through dependencies
         for idx in np.arange(inf_turbines.shape[0]):
-            if idx == i_t:
+            if idx == i_t_tmp:
+                # Turbine itself
+                twf_layout[idx, :] = wind_farm_layout[i_t_tmp, 0:4]
+                twf_t_states[idx, :] = wind_farm.turbines[i_t_tmp].turbine_states.get_ind_state(0)
+                twf_a_states[idx, :] = wind_farm.turbines[i_t_tmp].ambient_states.get_ind_state(0)
                 continue
 
+            lg.debug('Ambient states: Two OP interpolation')
             # Interpolation of turbine states
             #   Step 1 retrieve closest up and downstream OPs
             op_locations = wind_farm.turbines[inf_turbines[idx]].observation_points.get_world_coord()
@@ -113,8 +116,8 @@ class TWFSolver(ws.WakeSolver):
             twf_a_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1
             #       3. Turbine state
-            twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
-                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1
+            twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[1]) * r1
             #   Reconstruct turbine location
             tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1
@@ -123,19 +126,16 @@ class TWFSolver(ws.WakeSolver):
             vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
             #       2. Set turbine location
-            tmp_wf.turbines[idx].set_rotor_pos = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
-                                                                    [np.sin(tmp_phi), np.cos(tmp_phi),  0],
-                                                                    [0, 0, 1]])*np.transpose(vec_op2t)
+            twf_layout[idx, :] = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
+                                                    [np.sin(tmp_phi), np.cos(tmp_phi),  0],
+                                                    [0, 0, 1]])*np.transpose(vec_op2t)
 
-            # Based on settings either apply weighted retreval of flow field state or interpolation
-            if self.settings_sol("Weighted"):
-                lg.debug('Ambient states: Weighted interpolation')
-            else:
-                lg.debug('Ambient states: Two OP interpolation')
-                # Use same weights as OP calculation
-
-        self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
-        ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
+        # TODO Debug plot of effective wind farm layout
+        # Set wind farm in the wake model
+        self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
+        # Get the measurements
+        ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
+        lg.info(f'Effective wind speed of turbine {i_t} : {ueff} m/s')
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
         return np.array([u_eff, v_eff]), m
 
