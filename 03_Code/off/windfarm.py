@@ -83,14 +83,14 @@ class WindFarm:
         Returns
         -------
         np.ndarray:
-            [n_t x 2] matrix with axial induction factor and yaw angle for each turbine
+            [n_t x m] matrix with current turbine states at the turbine locations
         """
-        t_states = np.zeros((len(self.turbines), 2))
+        tmp_t_state = self.turbines[0].turbine_states.get_ind_state(0)
+        t_states = np.zeros((len(self.turbines), len(tmp_t_state)))
         for idx, trb in enumerate(self.turbines):
-            t_states[idx, :] = np.array([
-                trb.turbine_states.get_current_ax_ind(), trb.turbine_states.get_current_yaw()])
+            t_states[idx, :] = trb.turbine_states.get_ind_state(0)
 
-        lg.info(f'Wind farm states (axial Induction, yaw):')
+        lg.info(f'Current wind farm states:')
         lg.info(t_states)
 
         return t_states
