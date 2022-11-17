@@ -16,11 +16,24 @@ class WakeModel(ABC):
     rp_s = np.array([])
     rp_w = float
 
-    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states: np.ndarray,
-                 ambient_states: np.ndarray):
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
-        Class to calculate the wake influence onto a certain turbine,
+        Class to calculate the impact of a wind farm onto a specific turbine
+
+        Parameters
+        ----------
+        settings: dict
+            wake settings, such as parameters
+        wind_farm_layout : np.ndarray
+            [n_t x 4] array with x,y,z,D entries for each turbine rotor (D = diameter)
+        turbine_states : array of TurbineStates objects
+            array with n_t TurbineStates objects with each one state
+            Obejcts have access to methods such as get_current_Ct()
+        ambient_states : array of AmbientStates objects
+            array with n_t AmbientStates objects with each one state
+            Obejcts have access to methods such as get_turbine_wind_dir()
         """
+
         self.settings = settings
         self.wind_farm_layout = wind_farm_layout
         self.turbine_states = turbine_states
@@ -164,8 +177,7 @@ class FlorisGaussianWake(WakeModel):
     FLORIS interface for the Gaussian Curl Hybrid model
     """
 
-    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states: np.ndarray,
-                 ambient_states: np.ndarray):
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
         FLORIS interface for the Gaussian Curl Hybrid model
 
@@ -176,6 +188,12 @@ class FlorisGaussianWake(WakeModel):
                 example file can be found at https://github.com/NREL/floris/tree/main/examples/inputs
         wind_farm_layout : np.ndarray
             n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states : array of TurbineStates objects
+            array with n_t TurbineStates objects with each one state
+            Obejcts have access to methods such as get_current_Ct()
+        ambient_states : array of AmbientStates objects
+            array with n_t AmbientStates objects with each one state
+            Obejcts have access to methods such as get_turbine_wind_dir()
         turbine_states : np.ndarray
             n_t x 2 array with [axial ind., yaw]
         ambient_states : np.ndarray
@@ -183,7 +201,7 @@ class FlorisGaussianWake(WakeModel):
         """
         super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
 
-    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: np.ndarray, ambient_states: np.ndarray):
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
         Changes the states of the stored wind farm
 
@@ -200,13 +218,12 @@ class FlorisGaussianWake(WakeModel):
         self.turbine_states = turbine_states
         self.ambient_states = ambient_states
 
-        #  self.fi = FlorisInterface('/home/cbay/floris_v3/examples/inputs/gch.yaml')
         self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
         self.fi.reinitialize(
             layout_x=wind_farm_layout[:, 0],
             layout_y=wind_farm_layout[:, 1],
-            wind_directions=[ambient_states[1]],
-            wind_speeds=[ambient_states[0]],
+            wind_directions=[ambient_states[0].get_turbine_wind_dir()],  # TODO Assign wind vel from main turbine
+            wind_speeds=[ambient_states[0].get_turbine_wind_speed_abs()],    # TODO Assign wind dir from main turbine
         )
 
     def get_measurements_i_t(self, i_t: int) -> tuple:
@@ -224,8 +241,13 @@ class FlorisGaussianWake(WakeModel):
             float: u_eff at turbine i_t
             pandas.dataframe: m other measurements (Power gen, added turbulence, etc.)
         """
+        nT = len(self.turbine_states)
+        yaw_ang = np.zeros(nT)
 
-        self.fi.calculate_wake(yaw_angles=self.turbine_states[:,1])
+        for i_t in np.arange(nT):
+            yaw_ang[i_t] = self.turbine_states[i_t].get_current_yaw()
+
+        self.fi.calculate_wake(yaw_angles=yaw_ang)
         
         avg_vel = self.fi.get_turbine_average_velocities()
         Cts = self.fi.get_turbine_Cts()

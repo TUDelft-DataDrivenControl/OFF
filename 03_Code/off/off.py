@@ -29,7 +29,9 @@ class OFF:
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
-        self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
+        # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
+        self.wake_solver = ws.TWFSolver(settings_wke, settings_sol)
+
 
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
