@@ -155,8 +155,8 @@ class FLORIDynOPs4(ObservationPoints):
             simulation time step in s
         """
 
-        self.states[:, 0] = np.arange(self.n_time_steps) * wind_speed_u + rotor_pos[0]
-        self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v + rotor_pos[1]
+        self.states[:, 0] = np.arange(self.n_time_steps) * wind_speed_u * time_step + rotor_pos[0]
+        self.states[:, 1] = np.arange(self.n_time_steps) * wind_speed_v * time_step + rotor_pos[1]
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
 
