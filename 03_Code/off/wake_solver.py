@@ -279,9 +279,11 @@ class TWFSolver(WakeSolver):
         # index i_t is not correct anymore as only a subset of turbines are considered
         i_t_tmp = np.sum(wind_farm.dependencies[i_t, 0:i_t])
 
-        twf_layout = np.zeros((inf_turbines.shape[0], 3))  # Allocation of x, y, z coordinates of the turbines # TODO D
-        twf_t_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
-        twf_a_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
+        twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines # TODO D
+        # twf_t_states = np.zeros((inf_turbines.shape[0], 3))  # TODO Change to TurbineState array
+        twf_t_states = []
+        # twf_a_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
+        twf_a_states = []
 
         # TODO ========== BIGGER TOPIC ==============
         # Wake models need to receive the states not as vectors but as objects with the state relevant methods.
@@ -293,9 +295,11 @@ class TWFSolver(WakeSolver):
         for idx in np.arange(inf_turbines.shape[0]):
             if idx == i_t_tmp:
                 # Turbine itself
-                twf_layout[idx, :] = wind_farm_layout[i_t_tmp, 0:3]
-                twf_t_states[idx, :] = wind_farm.turbines[i_t_tmp].turbine_states.get_ind_state(0)
-                twf_a_states[idx, :] = wind_farm.turbines[i_t_tmp].ambient_states.get_ind_state(0)
+                twf_layout[idx, :] = wind_farm_layout[i_t_tmp, :]
+                # twf_t_states[idx, :] = wind_farm.turbines[i_t_tmp].turbine_states.get_ind_state(0) # TODO delete
+                twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(0, 1, 0, 1))
+                # twf_a_states[idx, :] = wind_farm.turbines[i_t_tmp].ambient_states.get_ind_state(0) # TODO delete
+                twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(0, 1, 0, 1))
                 continue
 
             lg.debug('Ambient states: Two OP interpolation')
@@ -309,7 +313,7 @@ class TWFSolver(WakeSolver):
             b = op_locations[ind_op[1], 0:2].transpose()
             c = rotor_center_i_t[0:2].transpose()
 
-            # d = ((b - a).transpose() * (c - a)) / ((b - a).transpose() * (b - a))
+            # d = ((b - a).transpose() * (c - a)) / ((b - a).transpose() * (b - a)) # TODO delete
             d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
 
             lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
@@ -323,22 +327,31 @@ class TWFSolver(WakeSolver):
             #       1. OP location
             tmp_op = op_locations[ind_op[0], 0:3] * r0 + op_locations[ind_op[1], 0:3] * r1
             #       2. Ambient
-            twf_a_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
-                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1
+            twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(ind_op[0],
+                                                                                                     ind_op[1], r0, r1))
+            # twf_a_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
+            #     + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1 # TODO delete
+
             #       3. Turbine state
-            twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[0]) * r0 \
-                + wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[1]) * r1
+            twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(ind_op[0],
+                                                                                                     ind_op[1], r0, r1))
+            # twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[0]) * r0 \
+            #     + wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[1]) * r1 # TODO delete
+
             #   Reconstruct turbine location
-            tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
-                + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1
+            # tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
+            #     + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1 # TODO delete
+            tmp_phi = twf_a_states[-1].get_turbine_wind_dir()
             tmp_phi = ot.ot_deg2rad(tmp_phi)
             #       1. Get vector from OP to related turbine
             vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
             #       2. Set turbine location
-            twf_layout[idx, :] = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
+            twf_layout[idx, 0:3] = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
                                                     [np.sin(tmp_phi), np.cos(tmp_phi),  0],
                                                     [0, 0, 1]]) @ vec_op2t
+            #       3. Set diameter
+            twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
         # TODO Debug plot of effective wind farm layout
         # Set wind farm in the wake model
@@ -346,7 +359,7 @@ class TWFSolver(WakeSolver):
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
         lg.info(f'Effective wind speed of turbine {i_t} : {ueff} m/s')
-        [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
+        [u_eff, v_eff] = ot.ot_abs2uv(ueff, twf_a_states[i_t_tmp].get_turbine_wind_dir())
         return np.array([u_eff, v_eff]), m
 
     def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:

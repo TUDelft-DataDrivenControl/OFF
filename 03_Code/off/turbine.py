@@ -161,6 +161,30 @@ class TurbineStates(States, ABC):
         """
         pass
 
+    @abstractmethod
+    def create_interpolated_state(self, index1: int, index2: int, w1, w2):
+        """
+        Creates a TurbineStates object of its own kind with only one state entry, based on two weighted states.
+        The returned object then still has access to functions such as get_current_yaw()
+
+        Parameters
+        ----------
+        index1 : int
+            Index of the first state
+        index2 : int
+            Index of the second state
+        w1 : float
+            Weight for first index (has to be w1 = 1 - w2, and [0,1])
+        w2 : float
+            Weight for second index (has to be w2 = 1 - w1, and [0,1])
+
+        Returns
+        -------
+        TurbineStates
+            turbine state object with single entry
+        """
+        pass
+
 
 class Turbine(ABC):
     # Attributes
@@ -369,7 +393,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         np.ndarray:
             Axial induction factor (-)
         """
-        return self.states[0, 0]
+        if self.n_time_steps > 1:
+            return self.states[0, 0]
+        else:
+            return self.states[0]
 
     def get_current_yaw(self) -> float:
         """
@@ -395,8 +422,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         float:
             Thrust coefficient
         """
-        return 4 * self.states[index, 0] * (1 - self.states[index, 0]) * \
-               np.cos(self.states[index, 1]) ** 2.2  # TODO Insert correct Ct calculation
+        ax_i = self.get_ax_ind(index)
+        yaw = np.deg2rad(self.get_yaw(index))
+        return 4 * ax_i * (1 - ax_i) * \
+               np.cos(yaw) ** 2.2  # TODO Insert correct Ct calculation
 
     def get_ax_ind(self, index: int) -> np.ndarray:
         """
@@ -407,7 +436,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         np.ndarray:
             Axial induction factor (-)
         """
-        return self.states[index, 0]
+        if self.n_time_steps > 1:
+            return self.states[index, 0]
+        else:
+            return self.states[0]
 
     def get_yaw(self, index: int) -> float:
         """
@@ -422,7 +454,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         float:
             yaw misalignment in deg
         """
-        return self.states[index, 1]
+        if self.n_time_steps > 1:
+            return self.states[index, 1]
+        else:
+            return self.states[1]
 
     def get_all_ct(self) -> np.ndarray:
         """
@@ -457,6 +492,33 @@ class TurbineStatesFLORIDyn(TurbineStates):
             n x 1 vector with all yaw angles
         """
         return self.states[:, 1]
+
+    def create_interpolated_state(self, index1: int, index2: int, w1, w2):
+        """
+        Creates a TurbineStates object of its own kind with only one state entry, based on two weighted states.
+        The returned object then still has access to functions such as get_current_yaw()
+
+        Parameters
+        ----------
+        index1 : int
+            Index of the first state
+        index2 : int
+            Index of the second state
+        w1 : float
+            Weight for first index (has to be w1 = 1 - w2, and [0,1])
+        w2 : float
+            Weight for second index (has to be w2 = 1 - w1, and [0,1])
+
+        Returns
+        -------
+        TurbineStates
+            turbine state object with single entry
+        """
+        # TODO create check for weights
+        t_s = TurbineStatesFLORIDyn(1)
+        t_s.set_all_states(self.states[index1, :]*w1 + self.states[index2, :]*w2)
+        return t_s
+
 
 # SOURCES
 # [1] The Dtu 10-Mw Reference Wind Turbine, Bak et al., 2013

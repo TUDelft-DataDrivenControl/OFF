@@ -163,6 +163,30 @@ class AmbientStates(States, ABC):
         """
         pass
 
+    @abstractmethod
+    def create_interpolated_state(self, index1: int, index2: int, w1, w2):
+        """
+        Creates an AmbientStates object of its own kind with only one state entry, based on two weighted states.
+        The returned object then still has access to functions such as get_turbine_wind_dir()
+
+        Parameters
+        ----------
+        index1 : int
+            Index of the first state
+        index2 : int
+            Index of the second state
+        w1 : float
+            Weight for first index (has to be w1 = 1 - w2, and [0,1])
+        w2 : float
+            Weight for second index (has to be w2 = 1 - w1, and [0,1])
+
+        Returns
+        -------
+        AmbientStates
+            ambient state object with single entry
+        """
+        pass
+
 
 class FLORIDynAmbient(AmbientStates):
     def __init__(self, number_of_time_steps: int):
@@ -228,7 +252,10 @@ class FLORIDynAmbient(AmbientStates):
         np.float_
             absolute wind speed
         """
-        return self.states[0, 0]
+        if self.n_time_steps > 1:
+            return self.states[0, 0]
+        else:
+            return self.states[0]
 
     def get_turbine_wind_speed(self) -> np.ndarray:
         """
@@ -321,7 +348,10 @@ class FLORIDynAmbient(AmbientStates):
 
         :return: float of wind direction state at the turbine location in deg
         """
-        return self.states[0, 1]
+        if self.n_time_steps > 1:
+            return self.states[0, 1]
+        else:
+            return self.states[1]
 
     def get_wind_dir_ind(self, ind: int):
         """
@@ -338,3 +368,29 @@ class FLORIDynAmbient(AmbientStates):
             m x 1 vector of wind direction states in deg
         """
         return self.states[ind, 1]
+
+    def create_interpolated_state(self, index1: int, index2: int, w1, w2):
+        """
+        Creates an AmbientStates object of its own kind with only one state entry, based on two weighted states.
+        The returned object then still has access to functions such as get_turbine_wind_dir()
+
+        Parameters
+        ----------
+        index1 : int
+            Index of the first state
+        index2 : int
+            Index of the second state
+        w1 : float
+            Weight for first index (has to be w1 = 1 - w2, and [0,1])
+        w2 : float
+            Weight for second index (has to be w2 = 1 - w1, and [0,1])
+
+        Returns
+        -------
+        AmbientStates
+            ambient state object with single entry
+        """
+        # TODO create check for weights
+        a_s = FLORIDynAmbient(1)
+        a_s.set_all_states(self.states[index1, :]*w1 + self.states[index2, :]*w2)
+        return a_s
