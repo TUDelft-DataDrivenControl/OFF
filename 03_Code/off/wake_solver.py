@@ -270,23 +270,15 @@ class TWFSolver(WakeSolver):
         """
         # Load current data
         wind_farm_layout = wind_farm.get_layout()
-        turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])  # TODO
 
         # Create an index range over all nT turbines and only select the ones saved in the dependencies
         inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
         # index i_t is not correct anymore as only a subset of turbines are considered
         i_t_tmp = np.sum(wind_farm.dependencies[i_t, 0:i_t])
 
-        twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines # TODO D
-        # twf_t_states = np.zeros((inf_turbines.shape[0], 3))  # TODO Change to TurbineState array
+        twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines
         twf_t_states = []
-        # twf_a_states = np.zeros((inf_turbines.shape[0], 3))  # TODO fix second dimension
         twf_a_states = []
-
-        # TODO ========== BIGGER TOPIC ==============
-        # Wake models need to receive the states not as vectors but as objects with the state relevant methods.
 
         # Get reference point of main wind turbine
         rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
@@ -296,9 +288,7 @@ class TWFSolver(WakeSolver):
             if idx == i_t_tmp:
                 # Turbine itself
                 twf_layout[idx, :] = wind_farm_layout[i_t_tmp, :]
-                # twf_t_states[idx, :] = wind_farm.turbines[i_t_tmp].turbine_states.get_ind_state(0) # TODO delete
                 twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(0, 1, 0, 1))
-                # twf_a_states[idx, :] = wind_farm.turbines[i_t_tmp].ambient_states.get_ind_state(0) # TODO delete
                 twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(0, 1, 0, 1))
                 continue
 
@@ -313,7 +303,6 @@ class TWFSolver(WakeSolver):
             b = op_locations[ind_op[1], 0:2].transpose()
             c = rotor_center_i_t[0:2].transpose()
 
-            # d = ((b - a).transpose() * (c - a)) / ((b - a).transpose() * (b - a)) # TODO delete
             d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
 
             lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
@@ -329,18 +318,10 @@ class TWFSolver(WakeSolver):
             #       2. Ambient
             twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
-            # twf_a_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[0]) * r0 \
-            #     + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_ind_state(ind_op[1]) * r1 # TODO delete
-
             #       3. Turbine state
             twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
-            # twf_t_states[idx, :] = wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[0]) * r0 \
-            #     + wind_farm.turbines[inf_turbines[idx]].turbine_states.get_ind_state(ind_op[1]) * r1 # TODO delete
-
             #   Reconstruct turbine location
-            # tmp_phi = wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[0]) * r0 \
-            #     + wind_farm.turbines[inf_turbines[idx]].ambient_states.get_wind_dir_ind(ind_op[1]) * r1 # TODO delete
             tmp_phi = twf_a_states[-1].get_turbine_wind_dir()
             tmp_phi = ot.ot_deg2rad(tmp_phi)
             #       1. Get vector from OP to related turbine
