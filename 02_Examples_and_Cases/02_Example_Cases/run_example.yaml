@@ -5,7 +5,7 @@ sim:
   sim:
     time step: 4.0
     time start: 0.0
-    time end: 40.0
+    time end: 300.0
 
   logging:
     console:
@@ -59,8 +59,14 @@ ambient:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 270.0
+      - 270.0
+      - 240.0
+      - 240.0
     wind_directions_t:
       - 0.0
+      - 60.0
+      - 160.0
+      - 200.0
     wind_shear: 0.12
     wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 8.0
