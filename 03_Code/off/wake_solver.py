@@ -330,13 +330,16 @@ class TWFSolver(WakeSolver):
             vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
                 + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
             #       2. Set turbine location
-            twf_layout[idx, 0:3] = tmp_op - np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
+            twf_layout[idx, 0:3] = tmp_op + np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
                                                     [np.sin(tmp_phi), np.cos(tmp_phi),  0],
                                                     [0, 0, 1]]) @ vec_op2t
             #       3. Set diameter
             twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
         # TODO Debug plot of effective wind farm layout
+        lg.info(f'TWF layout for turbine {i_t}:')
+        lg.info(twf_layout)
+
         # Set wind farm in the wake model
         self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
         # Get the measurements

@@ -466,8 +466,9 @@ class AmbientCorrector():
                     buffer = [np.interp(t, self.time[i_s], v) for v in self.values[i_s].T]
                 else:
                     buffer = np.interp(t, self.time[i_s], self.values[i_s])
-                self.buffer[:,i_s] = buffer
-            self._init = False
+                self.buffer[:, i_s] = buffer
+
+        self._init = False
 
     def __call__(self, idx: int, states: AmbientStates):
         """_summary_
