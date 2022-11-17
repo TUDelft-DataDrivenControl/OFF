@@ -1,11 +1,11 @@
 import logging
+from typing import List
 lg = logging.getLogger(__name__)
 
 import numpy as np
 from abc import ABC, abstractmethod
 from off.states import States
 from off.utils import ot_deg2rad
-
 
 class AmbientStates(States, ABC):
 
@@ -348,6 +348,7 @@ class FLORIDynAmbient(AmbientStates):
 
         :return: float of wind direction state at the turbine location in deg
         """
+
         if self.n_time_steps > 1:
             return self.states[0, 1]
         else:
@@ -394,3 +395,87 @@ class FLORIDynAmbient(AmbientStates):
         a_s = FLORIDynAmbient(1)
         a_s.set_all_states(self.states[index1, :]*w1 + self.states[index2, :]*w2)
         return a_s
+
+FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds', 
+             'Wind direction (deg)':             'wind_directions', 
+             'Ambient turbulence intensity (%)': 'turbulence_intensity' , 
+             'Wind shear (-)':                   'wind_shear' , 
+             'Wind veer (-)':                    'wind_veer' }
+
+class AmbientCorrector():
+    def __init__(self, settings_cor: dict, nT: int, states_name: List[str]):
+        """ Feeds the ambient flow parameters to the simulation
+
+        Parameters
+        ----------
+        settings_cor : dict
+            A dictionary containing the inflow temporal and / or spacial discretization
+        nT : int
+            number of wind turbines in the farm
+        states_name : List[str]
+            name of the AmbientStates states
+
+        Raises
+        ------
+        ValueError
+            If no value is specified for one of the AmbientStates states
+        ValueError
+            If the time discretization used is not consistent
+        ValueError
+            If the number of values provided and the number of wind turbines does not match
+        """        
+        self.state_id = [ FIELD_MAP[n] for n in states_name ]
+
+        self.values    = [None] * len(self.state_id)
+        self.time      = [None] * len(self.state_id)
+        self.wt_flag   = [None] * len(self.state_id)
+        self.time_flag = [None] * len(self.state_id)
+
+        for i_s, s in enumerate(self.state_id):
+            if s not in settings_cor:
+                raise ValueError(f'No value provided for state {s}')
+            
+            self.values[i_s] = np.array(settings_cor[s])                 
+            self.time[i_s]   = settings_cor.get(f'{s}_t',[0.0])
+
+            self.time_flag[i_s] = len( self.time[i_s]  ) > 1 
+            if not len(self.values[i_s]) == len(self.time[i_s]):
+                raise ValueError(f'Time discretization for state {s} not consistent')
+            
+            self.wt_flag[i_s]   = hasattr( self.values[i_s][0], '__len__') 
+            if self.wt_flag[i_s]:
+                if not len(self.values[i_s]) == nT:
+                    raise ValueError(f'Mismatch between the number of values provided and the number of wind turbines for {s}.')
+
+        self.buffer = np.zeros( (nT, len(self.state_id)) )
+        self._init  = True
+
+    def update(self, t: float ):
+        """ updates the corrector buffer
+
+        Parameters
+        ----------
+        t : float
+            current time in s
+        """        
+        for i_s, s in enumerate(self.state_id):
+            if self.time_flag[i_s] or self._init:
+                if self.wt_flag[i_s]:
+                    buffer = [np.interp(t, self.time[i_s], v) for v in self.values[i_s].T]
+                else:
+                    buffer = np.interp(t, self.time[i_s], self.values[i_s])
+                self.buffer[:,i_s] = buffer
+            self._init = False
+
+    def __call__(self, idx: int, states: AmbientStates):
+        """_summary_
+
+        Parameters
+        ----------
+        idx : int
+            current wind turbine index
+        states : AmbientStates
+            ambient states of the selected wind turbine
+        """        
+        states.set_ind_state(0, self.buffer[idx,:]) 
+

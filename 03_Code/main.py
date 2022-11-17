@@ -1,4 +1,4 @@
-import logging
+import os, logging
 # logging.basicConfig(level=logging.DEBUG)
 
 import off.turbine as tur
@@ -18,15 +18,15 @@ def main():
         return 1
 
     # Call the run .yaml
-    stream = open('../02_Examples_and_Cases/02_Example_Cases/run_example.yaml', 'r')
+    stream = open(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml', 'r')
     sim_info = yaml.safe_load(stream)
 
     # Convert run data into settings and wind farm object
-    settings_sim, settings_sol, settings_wke = _run_yaml_to_dict(sim_info)
+    settings_sim, settings_sol, settings_wke, settings_cor = _run_yaml_to_dict(sim_info)
     wind_farm = _run_yaml_to_wind_farm(sim_info)
 
     # Create OFF simulation object
-    off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol)
+    off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor)
 
     # TODO init based on sim_info inputs & used ambient state model / turbine state model
     off_sim.init_sim(
@@ -97,7 +97,11 @@ def _run_yaml_to_dict(sim_info: dict) -> tuple:
 
     settings_wke = sim_info["wake"]["settings"]
 
-    return settings_sim, settings_sol, settings_wke
+    settings_cor = { 'ambient': sim_info["ambient"].get('flow_field', False),
+                     'turbine': sim_info["turbine"].get('feed', False),
+                     'wake': sim_info["wake"].get('feed', False) }
+
+    return settings_sim, settings_sol, settings_wke, settings_cor
 
 
 def _run_yaml_to_wind_farm(sim_info: dict) -> wfm.WindFarm:

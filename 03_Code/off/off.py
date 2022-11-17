@@ -12,6 +12,8 @@ import pandas as pd
 import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 
+from off import __file__ as OFF_PATH
+OFF_PATH = OFF_PATH.rsplit('/',3)[0]
 
 class OFF:
     """
@@ -20,7 +22,7 @@ class OFF:
     settings_sim = dict()
     wind_farm = wfm.WindFarm
 
-    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict):
+    def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict, settings_cor: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.__dir_init__( settings_sim )
@@ -31,6 +33,10 @@ class OFF:
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol)
 
 
+        if settings_cor['ambient']: 
+            states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
+            self.ambient_corrector =  amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
 
@@ -39,13 +45,8 @@ class OFF:
         int
             Current run id.
         """
-        try:
-            run_id_path = f'{os.environ["OFF_PATH"]}/03_Code/off/.runid'
-            lg.info('RunID path: ' + run_id_path)
-        except KeyError:
-            # Works on my system (Marcus)
-            run_id_path = f'{os.environ["PWD"]}/off/.runid'
-            lg.warning('Initial RunID path retrieval was unsuccessful, used ' + run_id_path)
+        run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
+        lg.info('RunID path: ' + run_id_path)
 
         try:
             fid = open(run_id_path)
@@ -189,6 +190,9 @@ class OFF:
             lg.info(uv_r)
 
             # Correct
+            self.ambient_corrector.update(t)
+            for idx, tur in enumerate(self.wind_farm.turbines):
+                self.ambient_corrector(idx, tur.ambient_states)
 
             # Control
 
