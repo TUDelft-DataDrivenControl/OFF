@@ -60,7 +60,7 @@ class WakeModel(ABC):
         """
         pass
 
-    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: np.ndarray, ambient_states: np.ndarray):
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
         Changes the states of the stored wind farm
 
@@ -83,8 +83,7 @@ class DummyWake(WakeModel):
     Dummy wake with funky shape for testing
     """
 
-    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states: np.ndarray,
-                 ambient_states: np.ndarray):
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
         Wake with funky shape for testing
 
@@ -123,8 +122,9 @@ class DummyWake(WakeModel):
         n_rps = self.rp_s.shape[0]
         rps = np.zeros((n_rps, 3))
         phi = ot.ot_deg2rad(
-            ot.ot_get_orientation(self.ambient_states[1], self.turbine_states[i_t, 1]))
-        phi_u = ot.ot_deg2rad(self.ambient_states[1])
+            ot.ot_get_orientation(self.ambient_states[i_t].get_turbine_wind_dir(),
+                                  self.turbine_states[i_t].get_current_yaw()))
+        phi_u = ot.ot_deg2rad(self.ambient_states[i_t].get_turbine_wind_dir())
 
         rps[:, 0] = self.wind_farm_layout[i_t, 0] - np.sin(phi) * self.rp_s[:, 0] * self.wind_farm_layout[i_t, 3]
         rps[:, 1] = self.wind_farm_layout[i_t, 1] + np.cos(phi) * self.rp_s[:, 0] * self.wind_farm_layout[i_t, 3]
@@ -150,7 +150,8 @@ class DummyWake(WakeModel):
                 lg.debug(f'Turbine {idx} has no influence on turbine {i_t}')
                 lg.debug(f'Location Turbine {idx}: {self.wind_farm_layout[idx, 0:3]}')
                 lg.debug(f'Location Turbine {i_t}: {self.wind_farm_layout[i_t, 0:3]}')
-                lg.debug(f'Wind direction: {ot.ot_get_orientation(self.ambient_states[1], self.turbine_states[i_t, 1])} deg')
+                lg.debug(f'Wind direction: {ot.ot_get_orientation(self.ambient_states[i_t].get_turbine_wind_dir())} '
+                         f'deg')
                 continue
 
             dist_cw = -np.sin(phi_u) * dist_wc[:, 0] + np.cos(phi_u) * dist_wc[:, 1]
@@ -167,9 +168,9 @@ class DummyWake(WakeModel):
             red[idx] = np.sum(r) / n_rps
 
         # Multiply with background wind speed and return
-        m = pd.DataFrame([[i_t, self.ambient_states[0] * np.prod(red), np.prod(red)]],
+        m = pd.DataFrame([[i_t, self.ambient_states[i_t].get_turbine_wind_speed_abs() * np.prod(red), np.prod(red)]],
                          columns=['t_idx', 'u_abs_eff', 'red'])
-        return self.ambient_states[0] * np.prod(red), m
+        return self.ambient_states[i_t].get_turbine_wind_speed_abs() * np.prod(red), m
 
 
 class FlorisGaussianWake(WakeModel):
