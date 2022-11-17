@@ -305,6 +305,8 @@ class TWFSolver(WakeSolver):
 
             d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
 
+            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, loc: {a}),'
+                    f' OP2 (index: {ind_op[1]}, loc: {b})')
             lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
             d = np.fmin(np.fmax(d, 0), 1)
             lg.info(f'TWF - Used OP interpolation weight: {d}')
