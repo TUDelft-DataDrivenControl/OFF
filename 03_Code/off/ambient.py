@@ -396,11 +396,13 @@ class FLORIDynAmbient(AmbientStates):
         a_s.set_all_states(self.states[index1, :]*w1 + self.states[index2, :]*w2)
         return a_s
 
+
 FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds', 
              'Wind direction (deg)':             'wind_directions', 
              'Ambient turbulence intensity (%)': 'turbulence_intensity' , 
              'Wind shear (-)':                   'wind_shear' , 
              'Wind veer (-)':                    'wind_veer' }
+
 
 class AmbientCorrector():
     def __init__(self, settings_cor: dict, nT: int, states_name: List[str]):
