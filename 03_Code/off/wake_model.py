@@ -244,8 +244,8 @@ class FlorisGaussianWake(WakeModel):
         nT = len(self.turbine_states)
         yaw_ang = np.zeros(nT)
 
-        for i_t in np.arange(nT):
-            yaw_ang[i_t] = self.turbine_states[i_t].get_current_yaw()
+        for ii_t in np.arange(nT):
+            yaw_ang[ii_t] = self.turbine_states[ii_t].get_current_yaw()
 
         self.fi.calculate_wake(yaw_angles=yaw_ang)
         
