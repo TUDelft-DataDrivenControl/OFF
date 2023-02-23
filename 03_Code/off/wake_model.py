@@ -201,6 +201,9 @@ class FlorisGaussianWake(WakeModel):
             1 x 2 : [u_abs, phi] - absolute background wind speed and direction
         """
         super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+        lg.info(f'FLORIS interface for the Gaussian Curl Hybrid model initialized')
+        self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
+        lg.info(f'FLORIS object created.')
 
     def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
@@ -219,7 +222,6 @@ class FlorisGaussianWake(WakeModel):
         self.turbine_states = turbine_states
         self.ambient_states = ambient_states
 
-        self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
         self.fi.reinitialize(
             layout_x=wind_farm_layout[:, 0],
             layout_y=wind_farm_layout[:, 1],
