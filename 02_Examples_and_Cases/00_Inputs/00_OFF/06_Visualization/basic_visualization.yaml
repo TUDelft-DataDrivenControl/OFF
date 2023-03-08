@@ -1,0 +1,39 @@
+name: basic visualization
+
+vis:
+  grid:
+    generate: True  # Master-switch to generate & store flow field data
+    boundaries:
+      - [ 0, 3000]                 # x in m
+      - [ 0, 3000]                 # y in m
+      - [ 0, 1000]                 # z in m
+    resolution: [ 10, 10, 10 ] # x, y, z in m
+    volume_3d: False
+    slice_2d: True
+    slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
+    slice_2d_xz: [ ]                # y-coordinates for xz slices
+    slice_2d_yz: [ ]                # x-coordinates for yz slices
+    slice_2d_p:                     # x,y,z coordinate of a point on a plane
+      - [ ]
+    slice_2d_n:                     # x,y,z coordinate of a normal vector on a plane
+      - [ ]
+    data_vel_background: True
+    data_vel_effective: True
+    data_dir_background: True
+    data_ti_background: False
+    data_ti_effective: True
+    data_op_markers: True
+
+  turbine:
+    generate: True  # Master-switch to generate & store turbine data
+    plot_together: False  # One plot of one QoI with all turbines above oneanother
+    plot_seperated: True  # One plot with a subplot for every turbine
+    plot_selection: False # One plot where you can choose which turbine to view
+    input_yaw: True
+    input_Ct: False
+    output_Power: True 
+    output_EffU: False
+    output_Red: False
+    farm_interaction: False
+    farm_layout: False
+    store_data: False
