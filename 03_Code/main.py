@@ -26,8 +26,11 @@ def main():
     settings_sim, settings_sol, settings_wke, settings_cor = _run_yaml_to_dict(sim_info)
     wind_farm = _run_yaml_to_wind_farm(sim_info)
 
+    # Visualization settings
+    vis = sim_info["vis"]
+
     # Create OFF simulation object
-    off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor)
+    off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, vis)
 
     # TODO init based on sim_info inputs & used ambient state model / turbine state model
     off_sim.init_sim(

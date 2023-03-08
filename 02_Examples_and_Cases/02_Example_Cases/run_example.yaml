@@ -124,3 +124,28 @@ turbine:
 io:                             # Needs to be written by the user
   data folder: ''
   simulation folder:
+
+vis:
+  grid_generate: True
+  grid_boundaries:
+    - [ 0, 3000]                 # x in m
+    - [ 0, 3000]                 # y in m
+    - [ 0, 1000]                 # z in m
+  grid_resolution: [ 10, 10, 10 ] # x, y, z in m
+  grid_3d: False
+  grid_2d: True
+  grid_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
+  grid_2d_xz: [ ]                # y-coordinates for xz slices
+  grid_2d_yz: [ ]                # x-coordinates for yz slices
+  grid_2d_p:                     # x,y,z coordinate of a point on a plane
+    - [ ]
+  grid_2d_n:                     # x,y,z coordinate of a normal vector on a plane
+    - [ ]
+  grid_vel_background: True
+  grid_vel_effective: True
+  grid_dir_background: True
+  grid_ti_background: False
+  grid_ti_effective: True
+  grid_op_markers: True
+
+
