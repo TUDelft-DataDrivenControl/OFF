@@ -245,14 +245,14 @@ class FlorisGaussianWake(WakeModel):
             pandas.dataframe: m other measurements (Power gen, added turbulence, etc.)
         """
         nT = len(self.turbine_states)
-        yaw_ang = np.zeros(nT)
+        yaw_ang = np.zeros([1, 1, nT])
 
         for ii_t in np.arange(nT):
-            yaw_ang[ii_t] = self.turbine_states[ii_t].get_current_yaw()
+            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
 
         self.fi.calculate_wake(yaw_angles=yaw_ang)
         
-        avg_vel = self.fi.get_turbine_average_velocities()
+        avg_vel = self.fi.turbine_average_velocities
         Cts = self.fi.get_turbine_Cts()
         AIs = self.fi.get_turbine_ais()
         TIs = self.fi.get_turbine_TIs()
