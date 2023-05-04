@@ -163,4 +163,7 @@ vis:
     farm_layout: False
     store_data: False
 
+  debug:
+    effective_wf_layout: True
+
 

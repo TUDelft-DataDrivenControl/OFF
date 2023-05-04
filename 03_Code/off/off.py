@@ -21,18 +21,20 @@ class OFF:
     """
     settings_sim = dict()
     wind_farm = wfm.WindFarm
+    settings_vis = dict()
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict,
                  settings_cor: dict, vis: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
+        self.settings_vis = vis
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
-        self.wake_solver = ws.TWFSolver(settings_wke, settings_sol)
-        self.vis = vis
+        self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
+        #self.vis = vis
 
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()

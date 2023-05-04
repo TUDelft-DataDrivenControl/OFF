@@ -1,16 +1,21 @@
+"""Wake solver classes, used to call the underlying parametric models."""
 import numpy as np
 from abc import ABC, abstractmethod
 import off.windfarm as wfm
 import off.wake_model as wm
 import off.utils as ot
 import logging
+import matplotlib.pyplot as plt
+
 lg = logging.getLogger(__name__)
 
-
+"""Abstract Wake Solver, enforces the common interface of the get_wind_speeds function"""
 class WakeSolver(ABC):
+    
     settings_sol: dict()
+    settings_vis: dict()
 
-    def __init__(self, settings_sol: dict):
+    def __init__(self, settings_sol: dict, settings_vis: dict):
         """
         Object to connect OFF to the wake model.
         The common interface is the get_wind_speeds function.
@@ -21,6 +26,7 @@ class WakeSolver(ABC):
             Wake solver settings
         """
         self.settings_sol = settings_sol
+        self.settings_vis = settings_vis
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
 
@@ -42,13 +48,12 @@ class WakeSolver(ABC):
             [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
             m further measurements, depending on the used wake model
         """
-        pass
 
-
+""" Wake solver connecting to the dummy wake """
 class FLORIDynTWFWakeSolver(WakeSolver):
     dummy_wake: wm.DummyWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake
 
@@ -59,7 +64,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         settings_sol: dict
             Wake solver settings
         """
-        super(FLORIDynTWFWakeSolver, self).__init__(settings_sol)
+        super(FLORIDynTWFWakeSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn wake solver created.')
 
         self.dummy_wake = wm.DummyWake(settings_wke, np.array([]), np.array([]), np.array([]))
@@ -100,9 +105,13 @@ class FLORIDynTWFWakeSolver(WakeSolver):
             [u,v] wind speeds at the rotor plane
         """
         wind_farm_layout = wind_farm.get_layout()
+
         turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+
+        ambient_states = np.array([
+            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
+            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+        
         self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
@@ -126,11 +135,11 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
 
-
+""" First version of the coupling with the FLORIS model """
 class FLORIDynFlorisWakeSolver(WakeSolver):
     floris_wake: wm.FlorisGaussianWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake
 
@@ -141,8 +150,9 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
         settings_sol: dict
             Wake solver settings
         """
-        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol)
+        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn FLORIS wake solver created.')
+        lg.warning('FLORIDyn FLORIS wake solver is deprecated.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
 
@@ -213,11 +223,11 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
 
-
+""" Temporary wind farm solver using the FLORIS model """
 class TWFSolver(WakeSolver):
     floris_wake: wm.FlorisGaussianWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake solver, based on [1].
 
@@ -227,8 +237,10 @@ class TWFSolver(WakeSolver):
             Wake settings, including all parameters the wake needs to run
         settings_sol: dict
             Wake solver settings
+        settings_vis: dict
+            Visualization settings
         """
-        super(TWFSolver, self).__init__(settings_sol)
+        super(TWFSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn wake solver created.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
@@ -305,6 +317,7 @@ class TWFSolver(WakeSolver):
 
             d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
 
+            # Logging Interpolation OPs
             lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, loc: {a}),'
                     f' OP2 (index: {ind_op[1]}, loc: {b})')
             lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
@@ -336,9 +349,12 @@ class TWFSolver(WakeSolver):
             #       3. Set diameter
             twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
-        # TODO Debug plot of effective wind farm layout
         lg.info(f'TWF layout for turbine {i_t}:')
         lg.info(twf_layout)
+
+        # Debug plot of effective wind farm layout
+        if self.settings_vis["debug"]["effective_wf_layout"]:
+            self._vis_twf(i_t_tmp, twf_layout)
 
         # Set wind farm in the wake model
         self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
@@ -365,6 +381,25 @@ class TWFSolver(WakeSolver):
         """
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
+
+    def _vis_twf(self, i_t: int, twf_layout:np.ndarray):
+        """
+        Plots the temporary wind farm used to calculate the wake impact on turbine i_t
+
+        Parameters
+        ----------
+        i_t : int
+            index of the turbine to find the wind speeds for
+        twf_layout : np.ndarray
+            array with [x,y,z,D] entries for all relevant turbines.
+        """
+        cols = np.zeros(twf_layout.shape[0])
+        cols[i_t] = 1
+        plt.scatter(twf_layout[:,0], twf_layout[:,1], s=20, c=cols)
+        plt.show()
+
+
+
 
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022
