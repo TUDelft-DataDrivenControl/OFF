@@ -12,7 +12,6 @@ import sys
 import yaml
 
 
-
 def main():
     if _check_requirements():
         print("Not all required packages installed, see terminal output for more info.")

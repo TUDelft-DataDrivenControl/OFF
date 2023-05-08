@@ -185,7 +185,8 @@ class OFF:
                            self.settings_sim['time step']):
             lg.info(f'Starting time step: {t} s.')
 
-            # Predict - Get wind speeds at the rotor plane and to propagate the OPs
+            # ///////////////////// PREDICT ///////////////////////
+            # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["effective_wf_layout_time"] and
@@ -199,24 +200,22 @@ class OFF:
                 m_tmp['time'] = t
                 # Append turbine measurements to general measurement data
                 measurements = pd.concat([measurements, m_tmp], ignore_index=True)
-
-            for idx, tur in enumerate(self.wind_farm.turbines):
-                # Propagate the OPs of the turbine 'tur'
+                # Set propagation speed of the OPs of the turbine 'tur'
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
             lg.info(f'Rotor wind speed of all turbines:')
             lg.info(uv_r)
 
-            # Correct
+            # ///////////////////// CORRECT ///////////////////////
             self.ambient_corrector.update(t)
             for idx, tur in enumerate(self.wind_farm.turbines):
                 self.ambient_corrector(idx, tur.ambient_states)
 
-            # Control
+            # ///////////////////// CONTROL ///////////////////////
 
-            # Visualize
+            # ///////////////////// VISUALIZE /////////////////////
 
-            # Predict - iterate all states
+            # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()

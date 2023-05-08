@@ -328,21 +328,22 @@ class TWFSolver(WakeSolver):
             ind_op = ot.ot_get_closest_2_points_3d_sorted(rotor_center_i_t, op_locations)
 
             #   Step 2 calculate interpolation weights
-            a = op_locations[ind_op[0], 0:2].transpose()
-            b = op_locations[ind_op[1], 0:2].transpose()
-            c = rotor_center_i_t[0:2].transpose()
+            point_a = op_locations[ind_op[0], 0:2].transpose()
+            point_b = op_locations[ind_op[1], 0:2].transpose()
+            point_c = rotor_center_i_t[0:2].transpose()
 
-            d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
+            weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
 
             # Logging Interpolation OPs
-            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, loc: {a}),'
-                    f' OP2 (index: {ind_op[1]}, loc: {b})')
-            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
-            d = np.fmin(np.fmax(d, 0), 1)
-            lg.info(f'TWF - Used OP interpolation weight: {d}')
+            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, '
+                    f'loc: {point_a}),'
+                    f' OP2 (index: {ind_op[1]}, loc: {point_b})')
+            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {weight_d} ')
+            weight_d = np.fmin(np.fmax(weight_d, 0), 1)
+            lg.info(f'TWF - Used OP interpolation weight: {weight_d}')
 
-            r0 = 1 - d
-            r1 = d
+            r0 = 1 - weight_d
+            r1 = weight_d
 
             #   Interpolate states
             #       1. OP location
