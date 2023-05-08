@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
 from floris.tools import FlorisInterface
+from floris.tools.visualization import visualize_cut_plane
+import matplotlib.pyplot as plt
 
 lg = logging.getLogger(__name__)
 
@@ -241,13 +243,15 @@ class FlorisGaussianWake(WakeModel):
         Returns
         -------
         tuple:
-            float: u_eff at turbine i_t
-            pandas.dataframe: m other measurements (Power gen, added turbulence, etc.)
+            float: u_eff
+                effective wind speed at turbine i_t
+            pandas.dataframe: measurements
+                all measurements (Power gen, added turbulence, etc.)
         """
-        nT = len(self.turbine_states)
-        yaw_ang = np.zeros([1, 1, nT])
+        n_t = len(self.turbine_states)
+        yaw_ang = np.zeros([1, 1, n_t])
 
-        for ii_t in np.arange(nT):
+        for ii_t in np.arange(n_t):
             yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
 
         self.fi.calculate_wake(yaw_angles=yaw_ang)
@@ -257,7 +261,7 @@ class FlorisGaussianWake(WakeModel):
         AIs = self.fi.get_turbine_ais()
         TIs = self.fi.get_turbine_TIs()
 
-        m = pd.DataFrame(
+        measurements = pd.DataFrame(
             [[
                 i_t,
                 avg_vel[:, :, i_t].flatten()[0],
@@ -268,4 +272,25 @@ class FlorisGaussianWake(WakeModel):
             columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
         )
 
-        return avg_vel[:, :, i_t].flatten()[0], m
+        return avg_vel[:, :, i_t].flatten()[0], measurements
+
+    def vis_flow_field(self):
+        """
+        Creates a plot of the wind farm applied to the given turbine
+        """
+
+        n_t = len(self.turbine_states)
+        yaw_ang = np.zeros([1, 1, n_t])
+
+        for ii_t in np.arange(n_t):
+            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
+
+        # Don't know if the calculate_wake is needed, but probably for yaw angles
+        self.fi.calculate_wake(yaw_angles=yaw_ang)
+        horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
+
+        fig, ax_horo_plane = plt.subplots()
+        visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        plt.show()
+
+

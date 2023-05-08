@@ -151,7 +151,7 @@ vis:
 
   turbine:
     generate: True  # Master-switch to generate & store turbine data
-    plot_together: False  # One plot of one QoI with all turbines above oneanother
+    plot_together: False  # One plot of one QoI with all turbines above one another
     plot_seperated: True  # One plot with a subplot for every turbine
     plot_selection: False # One plot where you can choose which turbine to view
     input_yaw: True
@@ -164,6 +164,7 @@ vis:
     store_data: True
 
   debug:
-    effective_wf_layout: False
+    effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
+    effective_wf_layout_time: [0, 200, 280] # Times at witch a debug plot of the wind farm is generated
 
 
