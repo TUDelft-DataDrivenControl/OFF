@@ -178,7 +178,7 @@ class OFF:
         lg.info(f'Time step: {self.settings_sim["time step"]} s.')
 
         # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as OP speed
-        m = pd.DataFrame()
+        measurements = pd.DataFrame()
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
@@ -187,10 +187,21 @@ class OFF:
 
             # Predict - Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
+                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                        t in self.settings_vis["debug"]["effective_wf_layout_time"] and
+                        idx in self.settings_vis["debug"]["effective_wf_layout_iT"]):
+                    self.wake_solver.raise_flag_plot_wakes()
+
+                # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+                # Add turbine index & timestamp to data
                 m_tmp.t_idx = idx
                 m_tmp['time'] = t
-                m = pd.concat([m, m_tmp], ignore_index=True)
+                # Append turbine measurements to general measurement data
+                measurements = pd.concat([measurements, m_tmp], ignore_index=True)
+
+            for idx, tur in enumerate(self.wind_farm.turbines):
+                # Propagate the OPs of the turbine 'tur'
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
             lg.info(f'Rotor wind speed of all turbines:')
@@ -215,8 +226,8 @@ class OFF:
             lg.info(f'Ending time step: {t} s.')
 
         lg.info('Simulation finished. Resulting measurements:')
-        lg.info(m)
-        return m
+        lg.info(measurements)
+        return measurements
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """

@@ -297,7 +297,7 @@ _get_wind_speed_op -&gt; [u,v]
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="170.70333839150229" width="434.0227233260621" x="1757.361257384588" y="1155.4988276796234"/>
+          <y:Geometry height="173.00000000000003" width="434.0227233260621" x="1757.361257384588" y="1155.4988276796234"/>
           <y:Fill color="#FF9900" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="152.890625" x="140.56604916303104" xml:space="preserve" y="3.0">{abstract} wake model<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -312,7 +312,6 @@ rp_w: float
             <y:MethodLabel xml:space="preserve">__init__(settings, wind_farm_layout, turbine_states,ambient_states)
 get_measurements_i_t(i_t: int) -&gt;[u, v, m]
 set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
-
 </y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
@@ -516,13 +515,13 @@ _run_yaml_to_wind_farm(sim_info) -&gt; WindFarm</y:MethodLabel>
       <data key="d4" xml:space="preserve"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="65.81585350523778" width="147.70068359375" x="2448.915134393601" y="931.8145270626163"/>
+          <y:Geometry height="73.26033383915035" width="170.71494413945857" x="2431.654254134989" y="924.3700467287038"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="137.70068359375" x="5.0" xml:space="preserve" y="3.0">FlorisGaussianWake<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="137.70068359375" x="16.507130272854283" xml:space="preserve" y="3.0">FlorisGaussianWake<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve">fi: FlorisInterface</y:AttributeLabel>
-            <y:MethodLabel xml:space="preserve">
+            <y:MethodLabel xml:space="preserve">vis_flow_field(self) -&gt; plot
 </y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
@@ -562,7 +561,6 @@ _get_wind_speed_op -&gt; [u,v]
       </data>
     </node>
     <node id="n35">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="120.41796875" x="1499.2509362599205" y="179.7304613639585"/>
@@ -574,7 +572,6 @@ _get_wind_speed_op -&gt; [u,v]
       </data>
     </node>
     <node id="n36">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="30.0" width="105.3125" x="1642.3207341269842" y="338.73031876641176"/>
@@ -877,7 +874,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-54.25284041575776" sy="-85.35166919575114" tx="0.0" ty="21.01890136570563">
+          <y:Path sx="-54.25284041575776" sy="-86.5" tx="0.0" ty="21.01890136570563">
             <y:Point x="1920.1197786318612" y="1001.2413551809409"/>
             <y:Point x="1811.9214285714284" y="1001.2413551809409"/>
           </y:Path>
@@ -890,7 +887,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     <edge id="e17" source="n14" target="n15">
       <data key="d10">
         <y:BezierEdge>
-          <y:Path sx="0.0" sy="36.63016691957516" tx="54.25284041575776" ty="-85.35166919575114">
+          <y:Path sx="0.0" sy="36.63016691957516" tx="54.25284041575776" ty="-86.5">
             <y:Point x="2119.7130952380953" y="1016.8526207348104"/>
             <y:Point x="2028.625459463377" y="1016.8526207348104"/>
           </y:Path>
@@ -923,7 +920,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     <edge id="e20" source="n12" target="n15">
       <data key="d10">
         <y:BezierEdge>
-          <y:Path sx="40.867453009412884" sy="71.50597660178732" tx="-162.75852124727317" ty="-85.35166919575113">
+          <y:Path sx="40.867453009412884" sy="71.50597660178732" tx="-162.75852124727317" ty="-86.49999999999994">
             <y:Point x="1588.7491990411588" y="881.5799453958135"/>
             <y:Point x="1656.557142857143" y="881.5799453958135"/>
             <y:Point x="1656.557142857143" y="1017.2413551809409"/>
@@ -1155,7 +1152,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       <data key="d8" xml:space="preserve"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="162.75852124727328" sy="-85.35166919575114" tx="-36.9251708984375" ty="32.90792675261889">
+          <y:Path sx="162.75852124727328" sy="-86.5" tx="-31.171420912679878" ty="36.65372804356639">
             <y:Point x="2137.1311402948922" y="1016.8526207348104"/>
             <y:Point x="2485.8403052920385" y="1016.8526207348104"/>
           </y:Path>
@@ -1168,7 +1165,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     <edge id="e42" source="n33" target="n32">
       <data key="d10">
         <y:BezierEdge>
-          <y:Path sx="48.336669921875" sy="14.0" tx="-36.9251708984375" ty="-32.90792675261889">
+          <y:Path sx="48.336669921875" sy="14.0" tx="-42.67873603486465" ty="-36.63016691957517">
             <y:Point x="2271.55730484251" y="864.2881538843698"/>
             <y:Point x="2485.8403052920385" y="864.2881538843698"/>
           </y:Path>
@@ -1205,7 +1202,7 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     <edge id="e45" source="n34" target="n32">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="69.93212890625" sy="54.21418509034362" tx="36.9251708984375" ty="-32.90792675261889"/>
+          <y:Path sx="69.93212890625" sy="54.21418509034362" tx="42.67873603486465" ty="-36.63016691957517"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="false"/>
@@ -1213,7 +1210,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       </data>
     </edge>
     <edge id="e46" source="n35" target="n23">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="15.0" tx="22.19636501446604" ty="-15.0">
@@ -1227,7 +1223,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       </data>
     </edge>
     <edge id="e47" source="n36" target="n31">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="15.0" tx="147.0950793548226" ty="-47.16883671291356"/>
@@ -1238,10 +1233,9 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       </data>
     </edge>
     <edge id="e48" source="n32" target="n37">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="36.9251708984375" sy="32.90792675261889" tx="0.0" ty="-161.48553464071784"/>
+          <y:Path sx="42.67873603486465" sy="36.63016691957517" tx="0.0" ty="-161.48553464071784"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="false"/>
@@ -1250,7 +1244,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     </edge>
     <edge id="e49" source="n39" target="n38">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-53.85364776314293" sy="-17.055892903401343" tx="114.54638847287902" ty="109.52609035717109">
@@ -1264,7 +1257,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
       </data>
     </edge>
     <edge id="e50" source="n37" target="n38">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-169.15312071303072" sy="161.48553464071784" tx="0.0" ty="-109.52609035717109"/>
@@ -1276,7 +1268,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     </edge>
     <edge id="e51" source="n40" target="n38">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="-37.75160376210221" tx="-114.54638847287902" ty="109.52609035717109"/>
@@ -1288,7 +1279,6 @@ as_dict(self) -&gt; dict</y:MethodLabel>
     </edge>
     <edge id="e52" source="n39" target="n37">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="53.85364776314282" sy="-17.0558929034014" tx="169.1531207130306" ty="161.4855346407178"/>

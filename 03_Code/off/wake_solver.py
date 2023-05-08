@@ -14,6 +14,7 @@ class WakeSolver(ABC):
     
     settings_sol: dict()
     settings_vis: dict()
+    _flag_plot_wakes: bool()
 
     def __init__(self, settings_sol: dict, settings_vis: dict):
         """
@@ -27,6 +28,7 @@ class WakeSolver(ABC):
         """
         self.settings_sol = settings_sol
         self.settings_vis = settings_vis
+        self._flag_plot_wakes = False
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
 
@@ -48,6 +50,19 @@ class WakeSolver(ABC):
             [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
             m further measurements, depending on the used wake model
         """
+
+    def raise_flag_plot_wakes(self):
+        """
+        Raises a flag to plot the wakes duing the next call of the wake model
+        """
+        self._flag_plot_wakes = True
+
+    def _lower_flag_plot_wakes(self):
+        """
+        Lowers the flag to plot the wakes after they have been plotted
+        """
+        self._flag_plot_wakes = False
+
 
 
 class FLORIDynTWFWakeSolver(WakeSolver):
@@ -358,9 +373,9 @@ class TWFSolver(WakeSolver):
         self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
 
         # Debug plot of effective wind farm layout
-        if self.settings_vis["debug"]["effective_wf_layout"]:
-            # self._vis_twf(i_t_tmp, twf_layout)
+        if self._flag_plot_wakes:
             self.floris_wake.vis_flow_field()
+            self._lower_flag_plot_wakes()
 
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)

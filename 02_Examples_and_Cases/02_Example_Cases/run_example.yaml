@@ -164,7 +164,8 @@ vis:
     store_data: True
 
   debug:
-    effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
+    effective_wf_layout: True  # Triggers a debug plot during runtime of the wakes passed on to the wake model
     effective_wf_layout_time: [0, 200, 280] # Times at witch a debug plot of the wind farm is generated
+    effective_wf_layout_iT: [0,1,2] # Turbines for which the debug plot is created
 
 
