@@ -161,9 +161,9 @@ vis:
     output_Red: False
     farm_interaction: False
     farm_layout: False
-    store_data: False
+    store_data: True
 
   debug:
-    effective_wf_layout: True
+    effective_wf_layout: False
 
 

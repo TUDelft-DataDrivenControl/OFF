@@ -13,7 +13,8 @@ import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 
 from off import __file__ as OFF_PATH
-OFF_PATH = OFF_PATH.rsplit('/',3)[0]
+OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
+
 
 class OFF:
     """
@@ -34,7 +35,7 @@ class OFF:
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
-        #self.vis = vis
+        # self.vis = vis
 
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
