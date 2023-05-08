@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from off.states import States
 from off.utils import ot_deg2rad
 
+
 class AmbientStates(States, ABC):
 
     def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
@@ -399,9 +400,9 @@ class FLORIDynAmbient(AmbientStates):
 
 FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds', 
              'Wind direction (deg)':             'wind_directions', 
-             'Ambient turbulence intensity (%)': 'turbulence_intensity' , 
-             'Wind shear (-)':                   'wind_shear' , 
-             'Wind veer (-)':                    'wind_veer' }
+             'Ambient turbulence intensity (%)': 'turbulence_intensity',
+             'Wind shear (-)':                   'wind_shear',
+             'Wind veer (-)':                    'wind_veer'}
 
 
 class AmbientCorrector():
@@ -438,21 +439,22 @@ class AmbientCorrector():
                 raise ValueError(f'No value provided for state {s}')
             
             self.values[i_s] = np.array(settings_cor[s])                 
-            self.time[i_s]   = settings_cor.get(f'{s}_t',[0.0])
+            self.time[i_s]   = settings_cor.get(f'{s}_t', [0.0])
 
-            self.time_flag[i_s] = len( self.time[i_s]  ) > 1 
+            self.time_flag[i_s] = len(self.time[i_s]) > 1
             if not len(self.values[i_s]) == len(self.time[i_s]):
                 raise ValueError(f'Time discretization for state {s} not consistent')
             
-            self.wt_flag[i_s]   = hasattr( self.values[i_s][0], '__len__') 
+            self.wt_flag[i_s]   = hasattr(self.values[i_s][0], '__len__')
             if self.wt_flag[i_s]:
                 if not len(self.values[i_s]) == nT:
-                    raise ValueError(f'Mismatch between the number of values provided and the number of wind turbines for {s}.')
+                    raise ValueError(f'Mismatch between the number of values provided and the number of wind turbines '
+                                     f'for {s}.')
 
-        self.buffer = np.zeros( (nT, len(self.state_id)) )
+        self.buffer = np.zeros((nT, len(self.state_id)))
         self._init  = True
 
-    def update(self, t: float ):
+    def update(self, t: float):
         """ updates the corrector buffer
 
         Parameters
@@ -471,7 +473,7 @@ class AmbientCorrector():
         self._init = False
 
     def __call__(self, idx: int, states: AmbientStates):
-        """_summary_
+        """Feeds in the buffer values into the states of the first particles
 
         Parameters
         ----------
@@ -480,5 +482,5 @@ class AmbientCorrector():
         states : AmbientStates
             ambient states of the selected wind turbine
         """        
-        states.set_ind_state(0, self.buffer[idx,:]) 
+        states.set_ind_state(0, self.buffer[idx, :])
 

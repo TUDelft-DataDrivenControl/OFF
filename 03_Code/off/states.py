@@ -69,7 +69,6 @@ class States(ABC):
         """
         shift_states shifts all states and but keeps the first entry the same
 
-        :param new_state: 1 x n vector
         :return: none
         """
         # TODO check vector size

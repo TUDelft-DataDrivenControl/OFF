@@ -35,11 +35,10 @@ class OFF:
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
-        # self.vis = vis
 
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
-            self.ambient_corrector =  amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+            self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -207,8 +206,10 @@ class OFF:
             lg.info(uv_r)
 
             # ///////////////////// CORRECT ///////////////////////
+            # Load new values for the flow field
             self.ambient_corrector.update(t)
             for idx, tur in enumerate(self.wind_farm.turbines):
+                # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
 
             # ///////////////////// CONTROL ///////////////////////
