@@ -187,6 +187,7 @@ class OFF:
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
+                # Debug flags
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["effective_wf_layout_time"] and
                         idx in self.settings_vis["debug"]["effective_wf_layout_iT"]):

@@ -276,7 +276,7 @@ class FlorisGaussianWake(WakeModel):
 
     def vis_flow_field(self):
         """
-        Creates a plot of the wind farm applied to the given turbine
+        Creates a plot of the wind farm applied to the given turbine using the FLORIS interface
         """
 
         n_t = len(self.turbine_states)

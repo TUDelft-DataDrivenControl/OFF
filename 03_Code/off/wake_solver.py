@@ -64,7 +64,6 @@ class WakeSolver(ABC):
         self._flag_plot_wakes = False
 
 
-
 class FLORIDynTWFWakeSolver(WakeSolver):
     """ Wake solver connecting to the dummy wake """
     dummy_wake: wm.DummyWake

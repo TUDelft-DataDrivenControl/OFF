@@ -398,8 +398,8 @@ class FLORIDynAmbient(AmbientStates):
         return a_s
 
 
-FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds', 
-             'Wind direction (deg)':             'wind_directions', 
+FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds',
+             'Wind direction (deg)':             'wind_directions',
              'Ambient turbulence intensity (%)': 'turbulence_intensity',
              'Wind shear (-)':                   'wind_shear',
              'Wind veer (-)':                    'wind_veer'}
@@ -426,9 +426,9 @@ class AmbientCorrector():
             If the time discretization used is not consistent
         ValueError
             If the number of values provided and the number of wind turbines does not match
-        """        
+        """
         self.state_id = [ FIELD_MAP[n] for n in states_name ]
-
+        self.settings_cor = settings_cor
         self.values    = [None] * len(self.state_id)
         self.time      = [None] * len(self.state_id)
         self.wt_flag   = [None] * len(self.state_id)
@@ -437,14 +437,14 @@ class AmbientCorrector():
         for i_s, s in enumerate(self.state_id):
             if s not in settings_cor:
                 raise ValueError(f'No value provided for state {s}')
-            
-            self.values[i_s] = np.array(settings_cor[s])                 
+
+            self.values[i_s] = np.array(settings_cor[s])
             self.time[i_s]   = settings_cor.get(f'{s}_t', [0.0])
 
             self.time_flag[i_s] = len(self.time[i_s]) > 1
             if not len(self.values[i_s]) == len(self.time[i_s]):
                 raise ValueError(f'Time discretization for state {s} not consistent')
-            
+
             self.wt_flag[i_s]   = hasattr(self.values[i_s][0], '__len__')
             if self.wt_flag[i_s]:
                 if not len(self.values[i_s]) == nT:
@@ -461,7 +461,7 @@ class AmbientCorrector():
         ----------
         t : float
             current time in s
-        """        
+        """
         for i_s, s in enumerate(self.state_id):
             if self.time_flag[i_s] or self._init:
                 if self.wt_flag[i_s]:
@@ -481,6 +481,9 @@ class AmbientCorrector():
             current wind turbine index
         states : AmbientStates
             ambient states of the selected wind turbine
-        """        
-        states.set_ind_state(0, self.buffer[idx, :])
+        """
+        if self.settings_cor["corr_overwrite_direction"]:
+            states.init_all_states(self.buffer[idx, :])
+        else:
+            states.set_ind_state(0, self.buffer[idx, :])
 
