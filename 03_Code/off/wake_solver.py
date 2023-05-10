@@ -401,5 +401,35 @@ class TWFSolver(WakeSolver):
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
 
+    def _vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm):
+        """
+        Moves a dummy turbine around to extract the effective wind speed at a given grid
+
+        Parameters
+        ----------
+        wind_farm: wfm.WindFarm
+            Object containing all real wind turbines
+
+        """
+        # Create Meshgrid according to settings
+        X, Y = np.meshgrid(
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][0, 0],
+                self.settings_vis["grid"]["boundaries"][0, 1],
+                self.settings_vis["grid"]["resolution"][0]),
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][1, 0],
+                self.settings_vis["grid"]["boundaries"][1, 1],
+                self.settings_vis["grid"]["resolution"][1]))
+
+        u_eff = np.zeros(X.shape)
+
+        # Add dummy turbine to the wind farm
+
+
+        # For loop moving the turbine through all grid points and storing the effective wind speed
+
+
+
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022
