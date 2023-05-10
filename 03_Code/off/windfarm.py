@@ -156,3 +156,19 @@ class WindFarm:
 
         # Remove and return turbine
         return self.turbines.pop(ind)
+
+    def get_op_world_coordinates(self) -> np.ndarray:
+        """
+        Collects and returns all OP world locations
+
+        Returns
+        -------
+        np.ndarray
+            x,y,z coordiates of the OPs (in m)
+        """
+        collected_coordinates = []
+
+        for turbine in self.turbines:
+            collected_coordinates.append(turbine.observation_points.get_world_coord())
+
+        return np.array(collected_coordinates)

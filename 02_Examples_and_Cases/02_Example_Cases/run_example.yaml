@@ -5,7 +5,7 @@ sim:
   sim:
     time step: 4.0
     time start: 0.0
-    time end: 300.0
+    time end: 1200.0
 
   logging:
     console:
@@ -17,7 +17,7 @@ sim:
 
 wind_farm:
   name: turbine array
-  description: Three turbine case with DTU 10 MW turbines at 5D distance in a row
+  description: Nine turbine case with DTU 10 MW turbines at 5D distance in a row
 
   farm:
     layout_x:
@@ -25,17 +25,37 @@ wind_farm:
       - 5.0
       - 10.0
       - 0.0
+      - 5.0
+      - 10.0
+      - 0.0
+      - 5.0
+      - 10.0
     layout_y:
       - 0.0
       - 0.0
       - 0.0
-      - -2.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 10.0
+      - 10.0
+      - 10.0
     layout_z:
       - 0.0
       - 0.0
       - 0.0
       - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
     turbine_type:
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
       - dtu_10mw
       - dtu_10mw
       - dtu_10mw
@@ -62,15 +82,15 @@ ambient:
     turbulence_intensity:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 270.0
-      - 270.0
-      - 240.0
-      - 240.0
+      - 255.0
+      - 255.0
+      - 195.0
+      - 195.0
     wind_directions_t:
       - 0.0
-      - 60.0
-      - 160.0
-      - 200.0
+      - 600.0
+      - 900.0
+      - 1200.0
     wind_shear: 0.12
     wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 8.0
@@ -134,10 +154,14 @@ vis:
   grid:
     generate: True  # Master-switch to generate & store flow field data
     boundaries:
-      - [ 0, 3000]                 # x in m
-      - [ 0, 3000]                 # y in m
-      - [ 0, 1000]                 # z in m
-    resolution: [ 10, 10, 10 ] # x, y, z in m
+      - [ -2, 12]                 # x in D or m
+      - [ -2, 12]                 # y in D or m
+      - [ 0, 3]                 # z in D or m
+    unit:
+      - D
+    diameter: # Only needed if unit was set to D
+      - 178.4
+    resolution: [ 301, 301, 10 ] # x, y, z in points
     volume_3d: False
     slice_2d: True
     slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
@@ -153,6 +177,7 @@ vis:
     data_ti_background: False
     data_ti_effective: True
     data_op_markers: True
+
 
   turbine:
     generate: True  # Master-switch to generate & store turbine data
@@ -170,7 +195,15 @@ vis:
 
   debug:
     effective_wf_layout: True  # Triggers a debug plot during runtime of the wakes passed on to the wake model
-    effective_wf_layout_time: [0, 200, 280] # Times at witch a debug plot of the wind farm is generated
-    effective_wf_layout_iT: [0,1,2] # Turbines for which the debug plot is created
+    time: [0, 600, 700, 900] # Times at witch a debug plot of the wind farm is generated
+    iT: [0,1,2] # Turbines for which the debug plot is created
+    turbine_effective_wind_speed: True # Generates the effective wind speed across the farm based on a ghost turbine
+    turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_plot_ops: True # Adds dots for the particles
+    turbine_effective_wind_speed_show_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_store_plot: True # Stores the contour plot as .png
+    turbine_effective_wind_speed_store_data: True # Stores the data as .csv in the run folder
+
+
 
 

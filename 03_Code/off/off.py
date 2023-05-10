@@ -189,8 +189,8 @@ class OFF:
             for idx, tur in enumerate(self.wind_farm.turbines):
                 # Debug flags
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
-                        t in self.settings_vis["debug"]["effective_wf_layout_time"] and
-                        idx in self.settings_vis["debug"]["effective_wf_layout_iT"]):
+                        t in self.settings_vis["debug"]["time"] and
+                        idx in self.settings_vis["debug"]["iT"]):
                     self.wake_solver.raise_flag_plot_wakes()
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
@@ -216,6 +216,9 @@ class OFF:
             # ///////////////////// CONTROL ///////////////////////
 
             # ///////////////////// VISUALIZE /////////////////////
+            if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
+                    t in self.settings_vis["debug"]["time"]):
+                self.wake_solver.vis_turbine_eff_wind_speed_field(self.wind_farm, self.sim_dir, t)
 
             # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):

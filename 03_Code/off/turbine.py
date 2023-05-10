@@ -217,7 +217,7 @@ class Turbine(ABC):
         self.observation_points = observation_points
         self.ambient_states = ambient_states
 
-    def calc_yaw(self, wind_direction):
+    def calc_yaw(self, wind_direction: float) -> float:
         """
         Get the yaw misalignment of the turbine
 
@@ -231,7 +231,22 @@ class Turbine(ABC):
         float:
             yaw misalignment (deg)
         """
-        return ot.get_yaw(wind_direction, self.orientation[0])
+        return ot.ot_get_yaw(wind_direction, self.orientation[0])
+
+    def set_yaw(self, wind_direction: float, yaw: float):
+        """
+        Sets the orientation based on the given wind direction and yaw angle
+
+        Parameters
+        ----------
+        wind_direction : float
+            Wind direction in degrees
+        yaw : float
+            Turbine yaw misalignment angle in degrees
+
+        """
+        # TODO: this should also set the turbine states
+        self.orientation[0] = ot.ot_get_orientation(wind_direction, yaw)
 
     def calc_tilt(self):
         """
