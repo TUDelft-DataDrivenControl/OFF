@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 import off.windfarm as wfm
 import off.wake_model as wm
 import off.utils as ot
+import copy
 from os import path
-import itertools
 import logging
 import matplotlib.pyplot as plt
 
@@ -94,7 +94,7 @@ class WakeSolver(ABC):
 
         # Create measurement turbine
         #   Copy first turbine
-        measurement_turbine = wind_farm.turbines[0]
+        measurement_turbine = copy.deepcopy(wind_farm.turbines[0])  # TODO: Probably creates an unwanted reference here, not copy
         #   Move turbine to grid point
         measurement_turbine.base_location = np.array([grid_x[0, 0], grid_y[0, 0], 0])
 
@@ -149,13 +149,13 @@ class WakeSolver(ABC):
                     ylim=(self.settings_vis["grid"]["boundaries"][1][0], self.settings_vis["grid"]["boundaries"][1][1]))
 
             if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
-                plt.show()
+                plt.savefig(sim_dir + "/turbine_effective_wind_speed_at_" + str(int(t)).zfill(6) + "s.png")
 
             if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
-                plt.savefig(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.png")
+                plt.show()
 
         if self.settings_vis["debug"]["turbine_effective_wind_speed_store_data"]:
-            np.savetxt(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.csv",
+            np.savetxt(sim_dir + "/turbine_effective_wind_speed_at_" + str(int(t)).zfill(6) + "s.csv",
                        grid_u_eff, delimiter=',')
             if not path.exists(sim_dir + "/turbine_effective_wind_speed_x_grid.csv"):
                 np.savetxt(sim_dir + "/turbine_effective_wind_speed_x_grid.csv",
