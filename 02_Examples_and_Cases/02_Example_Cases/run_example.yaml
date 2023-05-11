@@ -195,7 +195,7 @@ vis:
 
   debug:
     effective_wf_layout: True  # Triggers a debug plot during runtime of the wakes passed on to the wake model
-    time: [0, 600, 700, 900] # Times at witch a debug plot of the wind farm is generated
+    time: [ 700, 900] # Times at witch a debug plot of the wind farm is generated
     iT: [0,1,2] # Turbines for which the debug plot is created
     turbine_effective_wind_speed: True # Generates the effective wind speed across the farm based on a ghost turbine
     turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true

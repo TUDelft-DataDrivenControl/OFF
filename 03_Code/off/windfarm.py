@@ -171,4 +171,4 @@ class WindFarm:
         for turbine in self.turbines:
             collected_coordinates.append(turbine.observation_points.get_world_coord())
 
-        return np.array(collected_coordinates)
+        return np.concatenate(collected_coordinates, axis=0)

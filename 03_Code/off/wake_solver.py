@@ -108,11 +108,13 @@ class WakeSolver(ABC):
         ind_m_turbine = wind_farm.add_turbine(measurement_turbine)
 
         # For loop moving the turbine through all grid points and storing the effective wind speed
+        # TODO: This would be a prime spot for a parallelized  approach
         for (row_index, col_index), x in np.ndenumerate(grid_x):
             wind_farm.turbines[ind_m_turbine].base_location = np.array([x, grid_y[row_index, col_index], 0])
             u_rp, measurements = self._get_wind_speeds_rp(ind_m_turbine, wind_farm)
             grid_u_eff[row_index, col_index] = ot.ot_uv2abs(u_rp[0], u_rp[1])
 
+        # Remove the measurement turbine again from the wind farm
         wind_farm.rmv_turbine(ind_m_turbine)
 
         # Plot the flow field if desired
@@ -136,7 +138,11 @@ class WakeSolver(ABC):
             # Add observation points
             if self.settings_vis["debug"]["turbine_effective_wind_speed_plot_ops"]:
                 coord = wind_farm.get_op_world_coordinates()
-                plt.scatter(coord[:, 0], coord[:, 1], color='white', s=10)
+                if self.settings_vis["grid"]["unit"][0] == 'D':
+                    plt.scatter(coord[:, 0]/self.settings_vis["grid"]["diameter"][0],
+                                coord[:, 1]/self.settings_vis["grid"]["diameter"][0], color='white', s=5)
+                else:
+                    plt.scatter(coord[:, 0], coord[:, 1], color='white', s=10)
 
             # Enforce axis limits
             axs.set(xlim=(self.settings_vis["grid"]["boundaries"][0][0], self.settings_vis["grid"]["boundaries"][0][1]),
