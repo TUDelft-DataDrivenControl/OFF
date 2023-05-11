@@ -161,7 +161,7 @@ vis:
       - D
     diameter: # Only needed if unit was set to D
       - 178.4
-    resolution: [ 301, 301, 10 ] # x, y, z in points
+    resolution: [ 101, 101, 10 ] # x, y, z in points
     volume_3d: False
     slice_2d: True
     slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices

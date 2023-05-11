@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import off.windfarm as wfm
 import off.wake_model as wm
 import off.utils as ot
+from os import path
 import itertools
 import logging
 import matplotlib.pyplot as plt
@@ -63,6 +64,98 @@ class WakeSolver(ABC):
         Lowers the flag to plot the wakes after they have been plotted
         """
         self._flag_plot_wakes = False
+
+    def vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm, sim_dir, t):
+        """
+        Moves a dummy turbine around to extract the effective wind speed at a given grid
+
+        Parameters
+        ----------
+        wind_farm: wfm.WindFarm
+            Object containing all real wind turbines
+
+        """
+        # Create meshgrid according to settings
+        grid_x, grid_y = np.meshgrid(
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][0][0],
+                self.settings_vis["grid"]["boundaries"][0][1],
+                self.settings_vis["grid"]["resolution"][0]),
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][1][0],
+                self.settings_vis["grid"]["boundaries"][1][1],
+                self.settings_vis["grid"]["resolution"][1]))
+
+        if self.settings_vis["grid"]["unit"][0] == 'D':
+            grid_x = grid_x * self.settings_vis["grid"]["diameter"][0]
+            grid_y = grid_y * self.settings_vis["grid"]["diameter"][0]
+
+        grid_u_eff = np.zeros(shape=grid_x.shape)
+
+        # Create measurement turbine
+        #   Copy first turbine
+        measurement_turbine = wind_farm.turbines[0]
+        #   Move turbine to grid point
+        measurement_turbine.base_location = np.array([grid_x[0, 0], grid_y[0, 0], 0])
+
+        #   Set the yaw angle of the Turbine to 0
+        # TODO: The wind direction at the grid point should be a product of the surrounding particles or of an external
+        #  source, the current solution assumes a uniform wind direction:
+        wind_dir_at_grid_point = measurement_turbine.ambient_states.get_turbine_wind_dir()
+        measurement_turbine.set_yaw(wind_dir_at_grid_point, 0.0)
+
+        # Add measurement turbine to the wind farm
+        ind_m_turbine = wind_farm.add_turbine(measurement_turbine)
+
+        # For loop moving the turbine through all grid points and storing the effective wind speed
+        for (row_index, col_index), x in np.ndenumerate(grid_x):
+            wind_farm.turbines[ind_m_turbine].base_location = np.array([x, grid_y[row_index, col_index], 0])
+            u_rp, measurements = self._get_wind_speeds_rp(ind_m_turbine, wind_farm)
+            grid_u_eff[row_index, col_index] = ot.ot_uv2abs(u_rp[0], u_rp[1])
+
+        wind_farm.rmv_turbine(ind_m_turbine)
+
+        # Plot the flow field if desired
+        if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+            fig, axs = plt.subplots()
+            axs.axis('equal')
+
+            if self.settings_vis["grid"]["unit"][0] == 'D':
+                plt.contourf(grid_x/self.settings_vis["grid"]["diameter"][0],
+                             grid_y/self.settings_vis["grid"]["diameter"][0], grid_u_eff, 20)
+                plt.xlabel('Distance (D)')
+                plt.ylabel('Distance (D)')
+            else:
+                plt.contourf(grid_x, grid_y, grid_u_eff, 20)
+                plt.xlabel('Distance (m)')
+                plt.ylabel('Distance (m)')
+
+            plt.colorbar()
+            plt.title('Turbine effective wind speed (m/s)')
+
+            # Add observation points
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot_ops"]:
+                coord = wind_farm.get_op_world_coordinates()
+                plt.scatter(coord[:, 0], coord[:, 1], color='white', s=10)
+
+            # Enforce axis limits
+            axs.set(xlim=(self.settings_vis["grid"]["boundaries"][0][0], self.settings_vis["grid"]["boundaries"][0][1]),
+                    ylim=(self.settings_vis["grid"]["boundaries"][1][0], self.settings_vis["grid"]["boundaries"][1][1]))
+
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+                plt.show()
+
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+                plt.savefig(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.png")
+
+        if self.settings_vis["debug"]["turbine_effective_wind_speed_store_data"]:
+            np.savetxt(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.csv",
+                       grid_u_eff, delimiter=',')
+            if not path.exists(sim_dir + "/turbine_effective_wind_speed_x_grid.csv"):
+                np.savetxt(sim_dir + "/turbine_effective_wind_speed_x_grid.csv",
+                           grid_x, delimiter=',')
+                np.savetxt(sim_dir + "/turbine_effective_wind_speed_y_grid.csv",
+                           grid_y, delimiter=',')
 
 
 class FLORIDynTWFWakeSolver(WakeSolver):
@@ -402,97 +495,7 @@ class TWFSolver(WakeSolver):
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
 
-    def vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm, sim_dir, t):
-        """
-        Moves a dummy turbine around to extract the effective wind speed at a given grid
 
-        Parameters
-        ----------
-        wind_farm: wfm.WindFarm
-            Object containing all real wind turbines
-
-        """
-        # Create meshgrid according to settings
-        grid_x, grid_y = np.meshgrid(
-            np.linspace(
-                self.settings_vis["grid"]["boundaries"][0][0],
-                self.settings_vis["grid"]["boundaries"][0][1],
-                self.settings_vis["grid"]["resolution"][0]),
-            np.linspace(
-                self.settings_vis["grid"]["boundaries"][1][0],
-                self.settings_vis["grid"]["boundaries"][1][1],
-                self.settings_vis["grid"]["resolution"][1]))
-
-        if self.settings_vis["grid"]["unit"][0] == 'D':
-            grid_x = grid_x * self.settings_vis["grid"]["diameter"][0]
-            grid_y = grid_y * self.settings_vis["grid"]["diameter"][0]
-
-        grid_u_eff = np.zeros(shape=grid_x.shape)
-
-        # Create measurement turbine
-        #   Copy first turbine
-        measurement_turbine = wind_farm.turbines[0]
-        #   Move turbine to grid point
-        measurement_turbine.base_location = np.array([grid_x[0, 0], grid_y[0, 0], 0])
-
-        #   Set the yaw angle of the Turbine to 0
-        # TODO: The wind direction at the grid point should be a product of the surrounding particles or of an external
-        #  source, the current solution assumes a uniform wind direction:
-        wind_dir_at_grid_point = measurement_turbine.ambient_states.get_turbine_wind_dir()
-        measurement_turbine.set_yaw(wind_dir_at_grid_point, 0.0)
-
-        # Add measurement turbine to the wind farm
-        ind_m_turbine = wind_farm.add_turbine(measurement_turbine)
-
-        # For loop moving the turbine through all grid points and storing the effective wind speed
-        for (row_index, col_index), x in np.ndenumerate(grid_x):
-            wind_farm.turbines[ind_m_turbine].base_location = np.array([x, grid_y[row_index, col_index], 0])
-            u_rp, measurements = self._get_wind_speeds_rp(ind_m_turbine, wind_farm)
-            grid_u_eff[row_index, col_index] = ot.ot_uv2abs(u_rp[0], u_rp[1])
-
-        wind_farm.rmv_turbine(ind_m_turbine)
-
-        # Plot the flow field if desired
-        if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
-            fig, axs = plt.subplots()
-            axs.axis('equal')
-
-            if self.settings_vis["grid"]["unit"][0] == 'D':
-                plt.contourf(grid_x/self.settings_vis["grid"]["diameter"][0],
-                             grid_y/self.settings_vis["grid"]["diameter"][0], grid_u_eff, 20)
-                plt.xlabel('Distance (D)')
-                plt.ylabel('Distance (D)')
-            else:
-                plt.contourf(grid_x, grid_y, grid_u_eff, 20)
-                plt.xlabel('Distance (m)')
-                plt.ylabel('Distance (m)')
-
-            plt.colorbar()
-            plt.title('Turbine effective wind speed (m/s)')
-
-            # Add observation points
-            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot_ops"]:
-                coord = wind_farm.get_op_world_coordinates()
-                plt.scatter(coord[:, 0], coord[:, 1], color='white', s=10)
-
-            # Enforce axis limits
-            axs.set(xlim=(self.settings_vis["grid"]["boundaries"][0][0], self.settings_vis["grid"]["boundaries"][0][1]),
-                    ylim=(self.settings_vis["grid"]["boundaries"][1][0], self.settings_vis["grid"]["boundaries"][1][1]))
-
-            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
-                plt.show()
-
-            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
-                plt.savefig(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.png")
-
-        if self.settings_vis["debug"]["turbine_effective_wind_speed_store_data"]:
-            np.savetxt(sim_dir + "/turbine_effective_wind_speed_at_" + str(t).zfill(6) + "s.csv",
-                       grid_u_eff, delimiter=',')
-            # TODO: Check if grid is already stored
-            np.savetxt(sim_dir + "/turbine_effective_wind_speed_x_grid.csv",
-                       grid_x, delimiter=',')
-            np.savetxt(sim_dir + "/turbine_effective_wind_speed_y_grid.csv",
-                       grid_y, delimiter=',')
 
 
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
