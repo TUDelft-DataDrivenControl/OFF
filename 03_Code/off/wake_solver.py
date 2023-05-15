@@ -1,16 +1,24 @@
+"""Wake solver classes, used to call the underlying parametric models."""
 import numpy as np
 from abc import ABC, abstractmethod
 import off.windfarm as wfm
 import off.wake_model as wm
 import off.utils as ot
+import copy
+from os import path
 import logging
+import matplotlib.pyplot as plt
+
 lg = logging.getLogger(__name__)
 
 
 class WakeSolver(ABC):
+    
     settings_sol: dict()
+    settings_vis: dict()
+    _flag_plot_wakes: bool()
 
-    def __init__(self, settings_sol: dict):
+    def __init__(self, settings_sol: dict, settings_vis: dict):
         """
         Object to connect OFF to the wake model.
         The common interface is the get_wind_speeds function.
@@ -21,6 +29,8 @@ class WakeSolver(ABC):
             Wake solver settings
         """
         self.settings_sol = settings_sol
+        self.settings_vis = settings_vis
+        self._flag_plot_wakes = False
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
 
@@ -42,13 +52,123 @@ class WakeSolver(ABC):
             [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
             m further measurements, depending on the used wake model
         """
-        pass
+
+    def raise_flag_plot_wakes(self):
+        """
+        Raises a flag to plot the wakes duing the next call of the wake model
+        """
+        self._flag_plot_wakes = True
+
+    def _lower_flag_plot_wakes(self):
+        """
+        Lowers the flag to plot the wakes after they have been plotted
+        """
+        self._flag_plot_wakes = False
+
+    def vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm, sim_dir, t):
+        """
+        Moves a dummy turbine around to extract the effective wind speed at a given grid
+
+        Parameters
+        ----------
+        wind_farm: wfm.WindFarm
+            Object containing all real wind turbines
+
+        """
+        # Create meshgrid according to settings
+        grid_x, grid_y = np.meshgrid(
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][0][0],
+                self.settings_vis["grid"]["boundaries"][0][1],
+                self.settings_vis["grid"]["resolution"][0]),
+            np.linspace(
+                self.settings_vis["grid"]["boundaries"][1][0],
+                self.settings_vis["grid"]["boundaries"][1][1],
+                self.settings_vis["grid"]["resolution"][1]))
+
+        if self.settings_vis["grid"]["unit"][0] == 'D':
+            grid_x = grid_x * self.settings_vis["grid"]["diameter"][0]
+            grid_y = grid_y * self.settings_vis["grid"]["diameter"][0]
+
+        grid_u_eff = np.zeros(shape=grid_x.shape)
+
+        # Create measurement turbine
+        #   Copy first turbine
+        measurement_turbine = copy.deepcopy(wind_farm.turbines[0])  # TODO: Probably creates an unwanted reference here, not copy
+        #   Move turbine to grid point
+        measurement_turbine.base_location = np.array([grid_x[0, 0], grid_y[0, 0], 0])
+
+        #   Set the yaw angle of the Turbine to 0
+        # TODO: The wind direction at the grid point should be a product of the surrounding particles or of an external
+        #  source, the current solution assumes a uniform wind direction:
+        wind_dir_at_grid_point = measurement_turbine.ambient_states.get_turbine_wind_dir()
+        measurement_turbine.set_yaw(wind_dir_at_grid_point, 0.0)
+
+        # Add measurement turbine to the wind farm
+        ind_m_turbine = wind_farm.add_turbine(measurement_turbine)
+
+        # For loop moving the turbine through all grid points and storing the effective wind speed
+        # TODO: This would be a prime spot for a parallelized  approach
+        for (row_index, col_index), x in np.ndenumerate(grid_x):
+            wind_farm.turbines[ind_m_turbine].base_location = np.array([x, grid_y[row_index, col_index], 0])
+            u_rp, measurements = self._get_wind_speeds_rp(ind_m_turbine, wind_farm)
+            grid_u_eff[row_index, col_index] = ot.ot_uv2abs(u_rp[0], u_rp[1])
+
+        # Remove the measurement turbine again from the wind farm
+        wind_farm.rmv_turbine(ind_m_turbine)
+
+        # Plot the flow field if desired
+        if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+            fig, axs = plt.subplots()
+            axs.axis('equal')
+
+            if self.settings_vis["grid"]["unit"][0] == 'D':
+                plt.contourf(grid_x/self.settings_vis["grid"]["diameter"][0],
+                             grid_y/self.settings_vis["grid"]["diameter"][0], grid_u_eff, 20)
+                plt.xlabel('Distance (D)')
+                plt.ylabel('Distance (D)')
+            else:
+                plt.contourf(grid_x, grid_y, grid_u_eff, 20)
+                plt.xlabel('Distance (m)')
+                plt.ylabel('Distance (m)')
+
+            plt.colorbar()
+            plt.title('Turbine effective wind speed (m/s)')
+
+            # Add observation points
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot_ops"]:
+                coord = wind_farm.get_op_world_coordinates()
+                if self.settings_vis["grid"]["unit"][0] == 'D':
+                    plt.scatter(coord[:, 0]/self.settings_vis["grid"]["diameter"][0],
+                                coord[:, 1]/self.settings_vis["grid"]["diameter"][0], color='white', s=5)
+                else:
+                    plt.scatter(coord[:, 0], coord[:, 1], color='white', s=10)
+
+            # Enforce axis limits
+            axs.set(xlim=(self.settings_vis["grid"]["boundaries"][0][0], self.settings_vis["grid"]["boundaries"][0][1]),
+                    ylim=(self.settings_vis["grid"]["boundaries"][1][0], self.settings_vis["grid"]["boundaries"][1][1]))
+
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+                plt.savefig(sim_dir + "/turbine_effective_wind_speed_at_" + str(int(t)).zfill(6) + "s.png")
+
+            if self.settings_vis["debug"]["turbine_effective_wind_speed_plot"]:
+                plt.show()
+
+        if self.settings_vis["debug"]["turbine_effective_wind_speed_store_data"]:
+            np.savetxt(sim_dir + "/turbine_effective_wind_speed_at_" + str(int(t)).zfill(6) + "s.csv",
+                       grid_u_eff, delimiter=',')
+            if not path.exists(sim_dir + "/turbine_effective_wind_speed_x_grid.csv"):
+                np.savetxt(sim_dir + "/turbine_effective_wind_speed_x_grid.csv",
+                           grid_x, delimiter=',')
+                np.savetxt(sim_dir + "/turbine_effective_wind_speed_y_grid.csv",
+                           grid_y, delimiter=',')
 
 
 class FLORIDynTWFWakeSolver(WakeSolver):
+    """ Wake solver connecting to the dummy wake """
     dummy_wake: wm.DummyWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake
 
@@ -59,7 +179,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
         settings_sol: dict
             Wake solver settings
         """
-        super(FLORIDynTWFWakeSolver, self).__init__(settings_sol)
+        super(FLORIDynTWFWakeSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn wake solver created.')
 
         self.dummy_wake = wm.DummyWake(settings_wke, np.array([]), np.array([]), np.array([]))
@@ -100,9 +220,13 @@ class FLORIDynTWFWakeSolver(WakeSolver):
             [u,v] wind speeds at the rotor plane
         """
         wind_farm_layout = wind_farm.get_layout()
+
         turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+
+        ambient_states = np.array([
+            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
+            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
+        
         self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
@@ -128,9 +252,10 @@ class FLORIDynTWFWakeSolver(WakeSolver):
 
 
 class FLORIDynFlorisWakeSolver(WakeSolver):
+    """ First version of the coupling with the FLORIS model """
     floris_wake: wm.FlorisGaussianWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake
 
@@ -141,8 +266,9 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
         settings_sol: dict
             Wake solver settings
         """
-        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol)
+        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn FLORIS wake solver created.')
+        lg.warning('FLORIDyn FLORIS wake solver is deprecated.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
 
@@ -217,7 +343,7 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
 class TWFSolver(WakeSolver):
     floris_wake: wm.FlorisGaussianWake
 
-    def __init__(self, settings_wke: dict, settings_sol: dict):
+    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
         FLORIDyn temporary wind farm wake solver, based on [1].
 
@@ -227,8 +353,10 @@ class TWFSolver(WakeSolver):
             Wake settings, including all parameters the wake needs to run
         settings_sol: dict
             Wake solver settings
+        settings_vis: dict
+            Visualization settings
         """
-        super(TWFSolver, self).__init__(settings_sol)
+        super(TWFSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn wake solver created.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
@@ -299,20 +427,22 @@ class TWFSolver(WakeSolver):
             ind_op = ot.ot_get_closest_2_points_3d_sorted(rotor_center_i_t, op_locations)
 
             #   Step 2 calculate interpolation weights
-            a = op_locations[ind_op[0], 0:2].transpose()
-            b = op_locations[ind_op[1], 0:2].transpose()
-            c = rotor_center_i_t[0:2].transpose()
+            point_a = op_locations[ind_op[0], 0:2].transpose()
+            point_b = op_locations[ind_op[1], 0:2].transpose()
+            point_c = rotor_center_i_t[0:2].transpose()
 
-            d = ((b - a) @ (c - a)) / ((b - a) @ (b - a))
+            weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
 
-            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, loc: {a}),'
-                    f' OP2 (index: {ind_op[1]}, loc: {b})')
-            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {d} ')
-            d = np.fmin(np.fmax(d, 0), 1)
-            lg.info(f'TWF - Used OP interpolation weight: {d}')
+            # Logging Interpolation OPs
+            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, '
+                    f'loc: {point_a}),'
+                    f' OP2 (index: {ind_op[1]}, loc: {point_b})')
+            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {weight_d} ')
+            weight_d = np.fmin(np.fmax(weight_d, 0), 1)
+            lg.info(f'TWF - Used OP interpolation weight: {weight_d}')
 
-            r0 = 1 - d
-            r1 = d
+            r0 = 1 - weight_d
+            r1 = weight_d
 
             #   Interpolate states
             #       1. OP location
@@ -336,12 +466,17 @@ class TWFSolver(WakeSolver):
             #       3. Set diameter
             twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
-        # TODO Debug plot of effective wind farm layout
         lg.info(f'TWF layout for turbine {i_t}:')
         lg.info(twf_layout)
 
         # Set wind farm in the wake model
         self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
+
+        # Debug plot of effective wind farm layout
+        if self._flag_plot_wakes:
+            self.floris_wake.vis_flow_field()
+            self._lower_flag_plot_wakes()
+
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
         lg.info(f'Effective wind speed of turbine {i_t} : {ueff} m/s')
@@ -365,6 +500,9 @@ class TWFSolver(WakeSolver):
         """
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
+
+
+
 
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022

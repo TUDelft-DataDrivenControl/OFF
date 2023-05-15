@@ -13,7 +13,8 @@ import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 
 from off import __file__ as OFF_PATH
-OFF_PATH = OFF_PATH.rsplit('/',3)[0]
+OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
+
 
 class OFF:
     """
@@ -21,22 +22,23 @@ class OFF:
     """
     settings_sim = dict()
     wind_farm = wfm.WindFarm
+    settings_vis = dict()
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict,
                  settings_cor: dict, vis: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
+        self.settings_vis = vis
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
-        self.wake_solver = ws.TWFSolver(settings_wke, settings_sol)
-        self.vis = vis
+        self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
 
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
-            self.ambient_corrector =  amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+            self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -175,34 +177,50 @@ class OFF:
         lg.info(f'Time step: {self.settings_sim["time step"]} s.')
 
         # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as OP speed
-        m = pd.DataFrame()
+        measurements = pd.DataFrame()
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
             lg.info(f'Starting time step: {t} s.')
 
-            # Predict - Get wind speeds at the rotor plane and to propagate the OPs
+            # ///////////////////// PREDICT ///////////////////////
+            # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
+                # Debug flags
+                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                        t in self.settings_vis["debug"]["time"] and
+                        idx in self.settings_vis["debug"]["iT"]):
+                    self.wake_solver.raise_flag_plot_wakes()
+
+                # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+                # Add turbine index & timestamp to data
                 m_tmp.t_idx = idx
                 m_tmp['time'] = t
-                m = pd.concat([m, m_tmp], ignore_index=True)
+                # Append turbine measurements to general measurement data
+                measurements = pd.concat([measurements, m_tmp], ignore_index=True)
+                # Set propagation speed of the OPs of the turbine 'tur'
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
             lg.info(f'Rotor wind speed of all turbines:')
             lg.info(uv_r)
 
-            # Correct
+            # ///////////////////// CORRECT ///////////////////////
+            # Load new values for the flow field
             self.ambient_corrector.update(t)
             for idx, tur in enumerate(self.wind_farm.turbines):
+                # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
 
-            # Control
+            # ///////////////////// CONTROL ///////////////////////
 
-            # Visualize
+            # ///////////////////// VISUALIZE /////////////////////
+            if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
+                    t in self.settings_vis["debug"]["time"]):
+                self.wake_solver.vis_turbine_eff_wind_speed_field(self.wind_farm, self.sim_dir, t)
 
-            # Predict - iterate all states
+            # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
@@ -212,8 +230,8 @@ class OFF:
             lg.info(f'Ending time step: {t} s.')
 
         lg.info('Simulation finished. Resulting measurements:')
-        lg.info(m)
-        return m
+        lg.info(measurements)
+        return measurements
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """

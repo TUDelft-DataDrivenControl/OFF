@@ -10,7 +10,6 @@ import off.off as off
 import importlib.util
 import sys
 import yaml
-import matplotlib.pyplot as plt
 
 
 def main():
@@ -40,17 +39,11 @@ def main():
         np.array([1 / 3, 0, 0]))
 
     # Run simulation
-    m = off_sim.run_sim()
+    measurements = off_sim.run_sim()
 
-    # plot m
-    fig, ax = plt.subplots()
-    ax.plot(m["time"][0::3], m["u_abs_eff"][0::3], linewidth=2.0, label='T0')
-    ax.plot(m["time"][1::3], m["u_abs_eff"][1::3], linewidth=2.0, label='T1')
-    ax.plot(m["time"][2::3], m["u_abs_eff"][2::3], linewidth=2.0, label='T2')
-    ax.set_xlabel('time (s)')  # Add an x-label to the axes.
-    ax.set_ylabel('eff. wind speed (m/s)')  # Add a y-label to the axes.
-    ax.legend()
-    plt.show()
+    # Store output
+    if vis["turbine"]["store_data"]:
+        measurements.to_csv(path_or_buf=off_sim.sim_dir + "/measurements.csv")
 
 
 def _check_requirements() -> bool:

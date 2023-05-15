@@ -83,6 +83,24 @@ def ot_abs2uv(wind_speed_abs, wind_dir):
     return np.array([np.cos(phi) * wind_speed_abs, np.sin(phi) * wind_speed_abs])
 
 
+def ot_uv2abs(u, v):
+    """
+    Connects the u & v component and returns the absolute wind speed
+
+    Parameters
+    ----------
+    u:
+        x component of the wind speed
+    v:
+        y component of the wind speed
+
+    Returns
+    -------
+    absolute wind speed (in x, y direction)
+    """
+    return np.sqrt(u**2 + v**2)
+
+
 def ot_isocell(n_rp: int) -> tuple:
     """
     Isocell algorithm to discretize the rotor plane (or any circle)
