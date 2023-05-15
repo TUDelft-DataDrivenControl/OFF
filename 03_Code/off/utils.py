@@ -1,111 +1,116 @@
+from typing import List
 import logging
 lg = logging.getLogger(__name__)
 
 """
 Utilities for the OFF toolbox
-    functions which are handy in multiple places but do not have a true parent object they could belong to.
+functions which are handy in multiple places but do not have a true parent object they could belong to.
 """
 import numpy as np
 
 
-def ot_deg2rad(deg):
-    """
-    Function to convert the in LES common degree convention into radians for calculation
+def ot_deg2rad(deg) -> float:   
+    # """
+    # Function to convert the in LES common degree convention into radians for calculation
 
-    Parameters
-    ----------
-    deg : number
-        LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
+    # Parameters
+    # ----------
+    # deg : number
+    #     LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
 
-    Returns
-    -------
-    number
-        radians (0 rad pointing along the x-axis, pi/2 rad along the y axis)
-    """
+    # Returns
+    # -------
+    # float
+    #     radians (0 rad pointing along the x-axis, pi/2 rad along the y axis)
+    # """
     return np.deg2rad(270 - deg)
 
 
-def ot_uv2deg(u, v):
-    """
-    Function to convert u and v component to the in LES common degree convention
-    Parameters
-    ----------
-    u
-        wind speed in x direction
-    v
-        wind speed in y direction
+def ot_uv2deg(u, v) -> float:
+    # """
+    # Function to convert u and v component to the in LES common degree convention
+    
+    # Parameters
+    # ----------
+    # u
+    #     wind speed in x direction
+    # v
+    #     wind speed in y direction
 
-    Returns
-    -------
-    deg
-        LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
-    """
+    # Returns
+    # -------
+    # float
+    #     LES degrees (270 deg pointing along the x-axis, 190 deg along the y axis)
+    # """
     return 270 - np.arctan2(v, u)*180 / np.pi
 
 
-def ot_abs_wind_speed(u, v):
-    """
-    Calculates the magnitude of the wind speed based on u and v component
+def ot_abs_wind_speed(u, v) -> float:
+    # """
+    # Calculates the magnitude of the wind speed based on u and v component
 
-    Parameters
-    ----------
-    u:
-        wind speed in x direction
-    v:
-        wind speed in y direction
+    # Parameters
+    # ----------
+    # u:
+    #     wind speed in x direction
+    # v:
+    #     wind speed in y direction
 
-    Returns
-    -------
-    number
-        absolute wind speed
-    """
+    # Returns
+    # -------
+    # float
+    #     absolute wind speed
+    # """
 
     return np.sqrt(u**2 + v**2)
 
 
-def ot_abs2uv(wind_speed_abs, wind_dir):
-    """
-    Calculates the u, v components of the wind speed based on the absolute speed and wind direction
+def ot_abs2uv(wind_speed_abs, wind_dir) -> np.ndarray:
+    # """
+    # Calculates the u, v components of the wind speed based on the absolute speed and wind direction
 
-    Parameters
-    ----------
-    wind_speed_abs:
-        absolute wind speed in x direction
-    wind_dir:
-        wind direction (deg)
+    # Parameters
+    # ----------
+    # wind_speed_abs:
+    #     absolute wind speed in x direction
+    # wind_dir:
+    #     wind direction (deg)
 
-    Returns
-    -------
-    np.ndarray
-        u,v component of the wind in [m, 2] matrix
-    """
+    # Returns
+    # -------
+    # np.ndarray
+    #     u,v component of the wind in [m, 2] matrix
+    # """
     phi = ot_deg2rad(wind_dir)
     return np.array([np.cos(phi) * wind_speed_abs, np.sin(phi) * wind_speed_abs])
 
 
-def ot_uv2abs(u, v):
-    """
-    Connects the u & v component and returns the absolute wind speed
+def ot_uv2abs(u, v) -> float:
+    # """
+    # Connects the u & v component and returns the absolute wind speed
 
-    Parameters
-    ----------
-    u:
-        x component of the wind speed
-    v:
-        y component of the wind speed
+    # Parameters
+    # ----------
+    # u:
+    #     x component of the wind speed
+    # v:
+    #     y component of the wind speed
 
-    Returns
-    -------
-    absolute wind speed (in x, y direction)
-    """
+    # Returns
+    # -------
+    # float
+    #     absolute wind speed (in x, y direction)
+    # """
     return np.sqrt(u**2 + v**2)
 
 
 def ot_isocell(n_rp: int) -> tuple:
     """
     Isocell algorithm to discretize the rotor plane (or any circle)
-     Masset et al.:
-        https://orbi.uliege.be/bitstream/2268/91953/1/masset_isocell_orbi.pdf
+    Masset et al.
+    
+    https://orbi.uliege.be/bitstream/2268/91953/1/masset_isocell_orbi.pdf
+    
     We choose N = 3 here, 4 or 5 are also viable options, 3 is close to optimal
 
     Parameters
@@ -115,7 +120,7 @@ def ot_isocell(n_rp: int) -> tuple:
 
     Returns
     -------
-    tuple:
+    tuple
         [yRP, zRP] : np.ndarray location of the rotor points with values between -0.5 and 0.5
         w : float weight of the RPs (1/number)
     """
@@ -153,7 +158,7 @@ def ot_get_orientation(wind_dir: float, yaw: float) -> float:
 
     Returns
     -------
-    float:
+    float
         Orientation in LES degree
     """
     return wind_dir + yaw
@@ -172,13 +177,13 @@ def ot_get_yaw(wind_dir: float, orientation: float) -> float:
 
     Returns
     -------
-    float:
+    float
         yaw angle in LES degree (clockwise)
     """
     return orientation - wind_dir
 
 
-def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
+def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray) -> int:
     """
     Function to find the index of the closes point to a reference location in 3D.
     The function can expect the list of points to be sorted / trailing each other.
@@ -192,7 +197,7 @@ def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
 
     Returns
     -------
-    int:
+    int
         index
     """
     # Calculate squared distance
@@ -200,7 +205,7 @@ def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
     return np.argmin(distSqr)
 
 
-def ot_get_closest_2_points_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
+def ot_get_closest_2_points_3d_sorted(ref_loc: np.ndarray, points: np.ndarray) -> List[int]:
     """
     Function to find the index of the closest 2 points to a reference location in 3D.
     The function can expect the list of points to be sorted / trailing each other.
@@ -213,10 +218,8 @@ def ot_get_closest_2_points_3d_sorted(ref_loc: np.ndarray, points: np.ndarray):
         [n x 3] np.ndarray Points
 
     Returns
-        [1 x 2] int array
-
     -------
-
+        [1 x 2] int array
     """
     distSqr = (ref_loc[0] - points[:, 0]) ** 2 + (ref_loc[1] - points[:, 1]) ** 2 + (ref_loc[2] - points[:, 2]) ** 2
     i_1 = np.argmin(distSqr)

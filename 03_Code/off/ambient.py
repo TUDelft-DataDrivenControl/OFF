@@ -105,13 +105,13 @@ class AmbientStates(States, ABC):
         pass
 
     @abstractmethod
-    def get_turbine_wind_speed_abs(self) -> np.float_:
+    def get_turbine_wind_speed_abs(self) -> float:
         """
         Returns the absolute wind speed at the turbine location (first entry)
 
         Returns
         -------
-        np.float_
+        float
             absolute wind speed
         """
         pass
@@ -129,37 +129,37 @@ class AmbientStates(States, ABC):
         pass
 
     @abstractmethod
-    def get_turbine_wind_speed_u(self) -> np.float_:
+    def get_turbine_wind_speed_u(self) -> float:
         """
         Returns the u component of the wind speed (x direction) at the turbine location
 
         Returns
         -------
-        np.float_
+        float
             u wind speed
         """
         pass
 
     @abstractmethod
-    def get_turbine_wind_speed_v(self) -> np.float_:
+    def get_turbine_wind_speed_v(self) -> float:
         """
         Returns the v component of the wind speed (y direction) at the turbine location
 
         Returns
         -------
-        np.float_
+        float
             v wind speed
         """
         pass
 
     @abstractmethod
-    def get_turbine_wind_dir(self) -> np.float_:
+    def get_turbine_wind_dir(self) -> float:
         """
         Returns wind direction at the turbine location
 
         Returns
         -------
-        np.float_
+        float
             wind direction (deg)
         """
         pass
@@ -244,13 +244,13 @@ class FLORIDynAmbient(AmbientStates):
         # TODO
         pass
 
-    def get_turbine_wind_speed_abs(self) -> np.float_:
+    def get_turbine_wind_speed_abs(self) -> float:
         """
         Returns the absolute wind speed at the turbine location (first entry)
 
         Returns
         -------
-        np.float_
+        float
             absolute wind speed
         """
         if self.n_time_steps > 1:
@@ -269,24 +269,24 @@ class FLORIDynAmbient(AmbientStates):
         """
         return np.array([self.get_turbine_wind_speed_u(), self.get_turbine_wind_speed_v()])
 
-    def get_turbine_wind_speed_u(self) -> np.float_:
+    def get_turbine_wind_speed_u(self) -> float:
         """
         Returns the u component of the wind speed (x direction) at the turbine location
 
         Returns
         -------
-        np.float_
+        float
             u wind speed
         """
         return self.states[0, 0] * np.cos(ot_deg2rad(self.states[0, 1]))
 
-    def get_turbine_wind_speed_v(self) -> np.float_:
+    def get_turbine_wind_speed_v(self) -> float:
         """
         Returns the v component of the wind speed (y direction) at the turbine location
 
         Returns
         -------
-        np.float_
+        float
             v wind speed
         """
         return self.states[0, 0] * np.sin(ot_deg2rad(self.states[0, 1]))
@@ -343,7 +343,7 @@ class FLORIDynAmbient(AmbientStates):
         """
         return self.states[:, 1]
 
-    def get_turbine_wind_dir(self) -> np.float_:
+    def get_turbine_wind_dir(self) -> float:
         """
         Returns all wind directions
 
