@@ -12,10 +12,11 @@ Run the main.py in the `03_Code <https://github.com/TUDelft-DataDrivenControl/OF
 
 To change the simulation, you have to change the .yaml file OFF calls. This is defined by one of the first limes of code in the main function. The .yaml structure is showed in `run_example.yaml <https://github.com/TUDelft-DataDrivenControl/OFF/blob/main/02_Examples_and_Cases/02_Example_Cases/run_example.yaml>`_ . This is where you can change the wind farm layout, the flow conditions, the wake model etc.
 
-.. image:: media/turbine_effective_wind_speed_at_0700s.png
-   :width: 50%
+.. image:: media/9T_ueff_2x2.png
+   :width: 75%
 
-*A six-wind turbines configuration with a time-varying homogeneous inflow.*
+.. image:: media/Results_power_9T.png
+   :width: 75%
 
 Code
 ----
