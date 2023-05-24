@@ -27,7 +27,7 @@ The toolbox allows you to run dynamic wind farm simulations using a prescribed (
 
 *Features include:*
 - Logging is impemented
-- There is an auto-documentation framework
+- There is an [auto-documentation framework](https://tudelft-datadrivencontrol.github.io/OFF/)
 - UML diagram of the code
 - Measurements are stored in run-folders
 - Effective wind speed flow field plots are possible (calculates the wind speed at a virtual turbine at a given grid point, facing the wind direction)
@@ -59,6 +59,8 @@ The Git is also meant as a place to discuss and propose new changes.
 Run the main.py in the 03_Code folder.
 
 To change the simulation, you have to change the .yaml file OFF calls. This is defined by one of the first limes of code in the main function. The .yaml structure is showed in 02_Examples_and_Cases/02_Example_Cases/run_example.yaml . This is where you can change the wind farm layout, the flow conditions, the wake model etc.
+
+A thorough description of the code is available [here](https://tudelft-datadrivencontrol.github.io/OFF/). The documentation is handled automatically using Sphinx.
 
 ## Contact and sources
 ### Core Developers
