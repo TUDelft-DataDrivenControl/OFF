@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>observation_points &mdash; OFF 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utils" href="off.utils.html" />
+    <link rel="prev" title="ambient" href="off.ambient.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OFF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="off.off.html">off</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.turbine.html">turbine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.windfarm.html">windfarm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.states.html">states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.ambient.html">ambient</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">observation_points</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#off.observation_points.FLORIDynOPs4"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs4</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs4.get_vec_op_to_turbine"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs4.get_vec_op_to_turbine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs4.get_world_coord"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs4.get_world_coord()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs4.init_all_states"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs4.init_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs4.propagate_ops"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs4.propagate_ops()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.observation_points.FLORIDynOPs6"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs6</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs6.get_world_coord"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs6.get_world_coord()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs6.init_all_states"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs6.init_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.FLORIDynOPs6.propagate_ops"><code class="docutils literal notranslate"><span class="pre">FLORIDynOPs6.propagate_ops()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.observation_points.ObservationPoints"><code class="docutils literal notranslate"><span class="pre">ObservationPoints</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.ObservationPoints.get_vec_op_to_turbine"><code class="docutils literal notranslate"><span class="pre">ObservationPoints.get_vec_op_to_turbine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.ObservationPoints.get_world_coord"><code class="docutils literal notranslate"><span class="pre">ObservationPoints.get_world_coord()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.ObservationPoints.init_all_states"><code class="docutils literal notranslate"><span class="pre">ObservationPoints.init_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.ObservationPoints.propagate_ops"><code class="docutils literal notranslate"><span class="pre">ObservationPoints.propagate_ops()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.observation_points.ObservationPoints.set_op_propagation_speed"><code class="docutils literal notranslate"><span class="pre">ObservationPoints.set_op_propagation_speed()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="off.utils.html">utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OFF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">observation_points</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/off.observation_points.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-off.observation_points">
+<span id="observation-points"></span><h1>observation_points<a class="headerlink" href="#module-off.observation_points" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs4">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.observation_points.</span></span><span class="sig-name descname"><span class="pre">FLORIDynOPs4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs4" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#off.observation_points.ObservationPoints" title="off.observation_points.ObservationPoints"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObservationPoints</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs4.get_vec_op_to_turbine">
+<span class="sig-name descname"><span class="pre">get_vec_op_to_turbine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.observation_points.FLORIDynOPs4.get_vec_op_to_turbine" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a x, y, z vector pointing from the OP to the turbine location in the OP coordinate system.
+OP coordinate system is usually the wake coordinate system based on the OP data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 x 3 matrix where the columns are the x,y,z coordinates</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs4.get_world_coord">
+<span class="sig-name descname"><span class="pre">get_world_coord</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.observation_points.FLORIDynOPs4.get_world_coord" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the world coordinates of the OPs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[x, y, z] coordinates in world coordinate system</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs4.init_all_states">
+<span class="sig-name descname"><span class="pre">init_all_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_speed_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotor_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs4.init_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a downstream chain of OPs
+Overwrites the base method of the States class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_speed_u</strong> (<em>float</em>) – wind speed in x direction in m/s</p></li>
+<li><p><strong>wind_speed_v</strong> (<em>float</em>) – wind speed in y direction in m/s</p></li>
+<li><p><strong>rotor_pos</strong> (<em>np.ndarray</em>) – 1 x 3 vector with x,y,z location of the rotor in the world coordinate system</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – simulation time step in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs4.propagate_ops">
+<span class="sig-name descname"><span class="pre">propagate_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs4.propagate_ops" title="Permalink to this definition"></a></dt>
+<dd><p>Propagates the OPs based on the u and v velocity component</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uv_op</strong> (<em>np.ndarray</em>) – m x 2 matrix with wind speeds of all OPs in x and y direction in m/s</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – Time step of the simulation in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs6">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.observation_points.</span></span><span class="sig-name descname"><span class="pre">FLORIDynOPs6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs6" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#off.observation_points.ObservationPoints" title="off.observation_points.ObservationPoints"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObservationPoints</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs6.get_world_coord">
+<span class="sig-name descname"><span class="pre">get_world_coord</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.observation_points.FLORIDynOPs6.get_world_coord" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the world coordinates of the OPs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[x, y, z] coordinates in world coordinate system</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs6.init_all_states">
+<span class="sig-name descname"><span class="pre">init_all_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_speed_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotor_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs6.init_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a downstream chain of OPs
+Overwrites the base method of the States class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_speed_u</strong> (<em>float</em>) – wind speed in x direction in m/s</p></li>
+<li><p><strong>wind_speed_v</strong> (<em>float</em>) – wind speed in y direction in m/s</p></li>
+<li><p><strong>rotor_pos</strong> (<em>np.ndarray</em>) – 1 x 3 vector with x,y,z location of the rotor in the world coordinate system</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – simulation time step in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.FLORIDynOPs6.propagate_ops">
+<span class="sig-name descname"><span class="pre">propagate_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.FLORIDynOPs6.propagate_ops" title="Permalink to this definition"></a></dt>
+<dd><p>Propagates the OPs based on the u and v velocity component</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uv_op</strong> (<em>np.ndarray</em>) – m x 2 matrix with wind speeds of all OPs in x and y direction in m/s</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – Time step of the simulation in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.observation_points.</span></span><span class="sig-name descname"><span class="pre">ObservationPoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.ObservationPoints" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="off.states.html#off.states.States" title="off.states.States"><code class="xref py py-class docutils literal notranslate"><span class="pre">States</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>ObservationPoints is the abstract base class for a list of wake tracers / particles
+The class inherits get, set &amp; iterate methods from the abstract States class, init is overwritten</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints.get_vec_op_to_turbine">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_vec_op_to_turbine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.observation_points.ObservationPoints.get_vec_op_to_turbine" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a x, y, z vector pointing from the OP to the turbine location in the OP coordinate system.
+OP coordinate system is usually the wake coordinate system based on the OP data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 x 3 matrix where the columns are the x,y,z coordinates</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints.get_world_coord">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_world_coord</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.observation_points.ObservationPoints.get_world_coord" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the x, y, z coordinates of all OPs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 3 matrix where the columns are the x,y,z coordinates</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints.init_all_states">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_all_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed_u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_speed_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotor_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.ObservationPoints.init_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a downstream chain of OPs
+Overwrites the base method of the States class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_speed_u</strong> (<em>float</em>) – Wind speed in x direction in m/s</p></li>
+<li><p><strong>wind_speed_v</strong> (<em>float</em>) – Wind speed in y direction in m/s</p></li>
+<li><p><strong>rotor_pos</strong> (<em>np.ndarray</em>) – 1 x 3 vector with x,y,z location of the rotor in the world coordinate system</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – simulation time step in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints.propagate_ops">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">propagate_ops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.ObservationPoints.propagate_ops" title="Permalink to this definition"></a></dt>
+<dd><p>Propagates the OPs based on the u and v velocity component</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uv_op</strong> (<em>np.ndarray</em>) – m x 2 matrix with wind speeds of all OPs in x and y direction in m/s</p></li>
+<li><p><strong>time_step</strong> (<em>float</em>) – Time step of the simulation in s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.observation_points.ObservationPoints.set_op_propagation_speed">
+<span class="sig-name descname"><span class="pre">set_op_propagation_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_propagation_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.observation_points.ObservationPoints.set_op_propagation_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the propagation speed of the OPs, meant as a temporay storage, which ensures that different lengths of OP
+chains can be used in the simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>op_propagation_speed</strong> (<em>np.ndarray</em>) – m x 2 matrix with [u,v] velocity component for all OPs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="off.ambient.html" class="btn btn-neutral float-left" title="ambient" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="off.utils.html" class="btn btn-neutral float-right" title="utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Marcus BECKER and Maxime LEJEUNE.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ambient &mdash; OFF 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="observation_points" href="off.observation_points.html" />
+    <link rel="prev" title="states" href="off.states.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OFF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="off.off.html">off</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.turbine.html">turbine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.windfarm.html">windfarm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.states.html">states</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ambient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#off.ambient.AmbientCorrector"><code class="docutils literal notranslate"><span class="pre">AmbientCorrector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientCorrector.update"><code class="docutils literal notranslate"><span class="pre">AmbientCorrector.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.ambient.AmbientStates"><code class="docutils literal notranslate"><span class="pre">AmbientStates</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.create_interpolated_state"><code class="docutils literal notranslate"><span class="pre">AmbientStates.create_interpolated_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_turbine_wind_dir"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_turbine_wind_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_turbine_wind_speed"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_turbine_wind_speed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_turbine_wind_speed_abs"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_turbine_wind_speed_abs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_turbine_wind_speed_u"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_turbine_wind_speed_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_turbine_wind_speed_v"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_turbine_wind_speed_v()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_dir"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_dir_ind"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_dir_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_speed"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_speed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_speed_abs"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_speed_abs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_speed_u"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_speed_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.AmbientStates.get_wind_speed_v"><code class="docutils literal notranslate"><span class="pre">AmbientStates.get_wind_speed_v()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.ambient.FLORIDynAmbient"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.create_interpolated_state"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.create_interpolated_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_dir"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_turbine_wind_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_turbine_wind_speed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_abs"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_turbine_wind_speed_abs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_u"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_turbine_wind_speed_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_v"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_turbine_wind_speed_v()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_dir"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_dir_ind"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_dir_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_direction_at"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_direction_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_speed"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_speed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_speed_abs"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_speed_abs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_speed_at"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_speed_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_speed_u"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_speed_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.ambient.FLORIDynAmbient.get_wind_speed_v"><code class="docutils literal notranslate"><span class="pre">FLORIDynAmbient.get_wind_speed_v()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="off.observation_points.html">observation_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.utils.html">utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OFF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ambient</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/off.ambient.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-off.ambient">
+<span id="ambient"></span><h1>ambient<a class="headerlink" href="#module-off.ambient" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="off.ambient.AmbientCorrector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.ambient.</span></span><span class="sig-name descname"><span class="pre">AmbientCorrector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_cor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">states_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.AmbientCorrector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientCorrector.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.AmbientCorrector.update" title="Permalink to this definition"></a></dt>
+<dd><p>updates the corrector buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>float</em>) – current time in s</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.ambient.</span></span><span class="sig-name descname"><span class="pre">AmbientStates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.AmbientStates" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="off.states.html#off.states.States" title="off.states.States"><code class="xref py py-class docutils literal notranslate"><span class="pre">States</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.create_interpolated_state">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_interpolated_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.AmbientStates.create_interpolated_state" title="Permalink to this definition"></a></dt>
+<dd><p>Creates an AmbientStates object of its own kind with only one state entry, based on two weighted states.
+The returned object then still has access to functions such as get_turbine_wind_dir()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index1</strong> (<em>int</em>) – Index of the first state</p></li>
+<li><p><strong>index2</strong> (<em>int</em>) – Index of the second state</p></li>
+<li><p><strong>w1</strong> (<em>float</em>) – Weight for first index (has to be w1 = 1 - w2, and [0,1])</p></li>
+<li><p><strong>w2</strong> (<em>float</em>) – Weight for second index (has to be w2 = 1 - w1, and [0,1])</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ambient state object with single entry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#off.ambient.AmbientStates" title="off.ambient.AmbientStates">AmbientStates</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_turbine_wind_dir">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_turbine_wind_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_turbine_wind_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Returns wind direction at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>wind direction (deg)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_turbine_wind_speed">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_turbine_wind_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_turbine_wind_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Returns u,v component wind speed at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 x 2 vector of [u,v] wind speeds in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_turbine_wind_speed_abs">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_turbine_wind_speed_abs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_turbine_wind_speed_abs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the absolute wind speed at the turbine location (first entry)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>absolute wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_turbine_wind_speed_u">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_turbine_wind_speed_u</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_turbine_wind_speed_u" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the u component of the wind speed (x direction) at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>u wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_turbine_wind_speed_v">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_turbine_wind_speed_v</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_turbine_wind_speed_v" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the v component of the wind speed (y direction) at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>v wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_dir">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all wind directions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of wind direction states in deg</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_dir_ind">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_dir_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_dir_ind" title="Permalink to this definition"></a></dt>
+<dd><p>Returns wind directions at an index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind</strong> (<em>int</em>) – Index</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>m x 1 vector of wind direction states in deg</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_speed">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Returns u,v component of all wind speeds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 2 matrix of [u,v] wind speeds in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_speed_abs">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_speed_abs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_speed_abs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the absolute wind speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the absolute wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_speed_u">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_speed_u</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_speed_u" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the u component of the wind speed (x direction)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the u wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.AmbientStates.get_wind_speed_v">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wind_speed_v</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.AmbientStates.get_wind_speed_v" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the v component of the wind speed (y direction)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the v wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.ambient.</span></span><span class="sig-name descname"><span class="pre">FLORIDynAmbient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.FLORIDynAmbient" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#off.ambient.AmbientStates" title="off.ambient.AmbientStates"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmbientStates</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.create_interpolated_state">
+<span class="sig-name descname"><span class="pre">create_interpolated_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.create_interpolated_state" title="Permalink to this definition"></a></dt>
+<dd><p>Creates an AmbientStates object of its own kind with only one state entry, based on two weighted states.
+The returned object then still has access to functions such as get_turbine_wind_dir()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index1</strong> (<em>int</em>) – Index of the first state</p></li>
+<li><p><strong>index2</strong> (<em>int</em>) – Index of the second state</p></li>
+<li><p><strong>w1</strong> (<em>float</em>) – Weight for first index (has to be w1 = 1 - w2, and [0,1])</p></li>
+<li><p><strong>w2</strong> (<em>float</em>) – Weight for second index (has to be w2 = 1 - w1, and [0,1])</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ambient state object with single entry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#off.ambient.AmbientStates" title="off.ambient.AmbientStates">AmbientStates</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_turbine_wind_dir">
+<span class="sig-name descname"><span class="pre">get_turbine_wind_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all wind directions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float of wind direction state at the turbine location in deg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_turbine_wind_speed">
+<span class="sig-name descname"><span class="pre">get_turbine_wind_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Returns u,v component of u &amp; v wind speed at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 x 2 matrix of [u,v] wind speeds in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_turbine_wind_speed_abs">
+<span class="sig-name descname"><span class="pre">get_turbine_wind_speed_abs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_abs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the absolute wind speed at the turbine location (first entry)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>absolute wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_turbine_wind_speed_u">
+<span class="sig-name descname"><span class="pre">get_turbine_wind_speed_u</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_u" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the u component of the wind speed (x direction) at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>u wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_turbine_wind_speed_v">
+<span class="sig-name descname"><span class="pre">get_turbine_wind_speed_v</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_turbine_wind_speed_v" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the v component of the wind speed (y direction) at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>v wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_dir">
+<span class="sig-name descname"><span class="pre">get_wind_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Returns all stored wind directions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of wind direction states in deg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_dir_ind">
+<span class="sig-name descname"><span class="pre">get_wind_dir_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_dir_ind" title="Permalink to this definition"></a></dt>
+<dd><p>Returns wind directions at an index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind</strong> (<em>int</em>) – Index</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>m x 1 vector of wind direction states in deg</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_direction_at">
+<span class="sig-name descname"><span class="pre">get_wind_direction_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_direction_at" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the wind direction at a requested location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>location</strong> (<em>np.ndarray</em>) – m x 3 matrix where the columns are [x,y,z] locations in m</p></li>
+<li><p><strong>op_coord</strong> (<em>np.ndarray</em>) – n x 3 matrix of the OP world coordinate states in m</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>m x 1 vector with absolute wind speeds in deg</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_speed">
+<span class="sig-name descname"><span class="pre">get_wind_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_speed" title="Permalink to this definition"></a></dt>
+<dd><p>Returns u,v component of all wind speeds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 2 matrix of [u,v] wind speeds in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_speed_abs">
+<span class="sig-name descname"><span class="pre">get_wind_speed_abs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_speed_abs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the absolute wind speed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the absolute wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_speed_at">
+<span class="sig-name descname"><span class="pre">get_wind_speed_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_speed_at" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the absolute wind speed at a requested location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>location</strong> (<em>np.ndarray</em>) – m x 3 matrix where the columns are [x,y,z] locations in m</p></li>
+<li><p><strong>op_coord</strong> (<em>np.ndarray</em>) – n x 3 matrix of the OP world coordinate states in m</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>m x 1 vector with absolute wind speeds in m/s</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_speed_u">
+<span class="sig-name descname"><span class="pre">get_wind_speed_u</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_speed_u" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the u component of the wind speed (x direction)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the u wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.ambient.FLORIDynAmbient.get_wind_speed_v">
+<span class="sig-name descname"><span class="pre">get_wind_speed_v</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.ambient.FLORIDynAmbient.get_wind_speed_v" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the v component of the wind speed (y direction)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x 1 vector of the v wind speed in m/s</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="off.states.html" class="btn btn-neutral float-left" title="states" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="off.observation_points.html" class="btn btn-neutral float-right" title="observation_points" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Marcus BECKER and Maxime LEJEUNE.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>states &mdash; OFF 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ambient" href="off.ambient.html" />
+    <link rel="prev" title="windfarm" href="off.windfarm.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OFF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="off.off.html">off</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.turbine.html">turbine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.windfarm.html">windfarm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">states</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#off.states.States"><code class="docutils literal notranslate"><span class="pre">States</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.get_all_states"><code class="docutils literal notranslate"><span class="pre">States.get_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.get_ind_state"><code class="docutils literal notranslate"><span class="pre">States.get_ind_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.get_state_names"><code class="docutils literal notranslate"><span class="pre">States.get_state_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.init_all_states"><code class="docutils literal notranslate"><span class="pre">States.init_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.iterate_states"><code class="docutils literal notranslate"><span class="pre">States.iterate_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.iterate_states_and_keep"><code class="docutils literal notranslate"><span class="pre">States.iterate_states_and_keep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.n_states"><code class="docutils literal notranslate"><span class="pre">States.n_states</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.n_time_steps"><code class="docutils literal notranslate"><span class="pre">States.n_time_steps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.set_all_states"><code class="docutils literal notranslate"><span class="pre">States.set_all_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.set_ind_state"><code class="docutils literal notranslate"><span class="pre">States.set_ind_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.state_names"><code class="docutils literal notranslate"><span class="pre">States.state_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.states.States.states"><code class="docutils literal notranslate"><span class="pre">States.states</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="off.ambient.html">ambient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.observation_points.html">observation_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.utils.html">utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OFF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">states</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/off.states.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-off.states">
+<span id="states"></span><h1>states<a class="headerlink" href="#module-off.states" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="off.states.States">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.states.</span></span><span class="sig-name descname"><span class="pre">States</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract state class
+Provides basic functions for state lists, such as get, set, initialize and iterate</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.get_all_states">
+<span class="sig-name descname"><span class="pre">get_all_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.states.States.get_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Returns state matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m x n matrix, columns mark different states, rows time steps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.get_ind_state">
+<span class="sig-name descname"><span class="pre">get_ind_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.states.States.get_ind_state" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the state at a given index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – index of the state to return</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>state</strong> – 1 x n state vector</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.get_state_names">
+<span class="sig-name descname"><span class="pre">get_state_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#off.states.States.get_state_names" title="Permalink to this definition"></a></dt>
+<dd><p>List with names of the stored states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List with the names of the stored states in the corresponding order</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.init_all_states">
+<span class="sig-name descname"><span class="pre">init_all_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States.init_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Copies a given state across all state entries as initialisation.
+For more advanced initialisation, use set_all_states()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>init_state</strong> (<em>np.ndarray</em>) – 1 x n vector of init state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.iterate_states">
+<span class="sig-name descname"><span class="pre">iterate_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States.iterate_states" title="Permalink to this definition"></a></dt>
+<dd><p>shift_states shifts all states and adds a new entry in first place</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_state</strong> – 1 x n vector</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>none</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.iterate_states_and_keep">
+<span class="sig-name descname"><span class="pre">iterate_states_and_keep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States.iterate_states_and_keep" title="Permalink to this definition"></a></dt>
+<dd><p>shift_states shifts all states and but keeps the first entry the same</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>none</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.states.States.n_states">
+<span class="sig-name descname"><span class="pre">n_states</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#off.states.States.n_states" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.states.States.n_time_steps">
+<span class="sig-name descname"><span class="pre">n_time_steps</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#off.states.States.n_time_steps" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.set_all_states">
+<span class="sig-name descname"><span class="pre">set_all_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States.set_all_states" title="Permalink to this definition"></a></dt>
+<dd><p>Overwrites the states with the given matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_states</strong> – m x n matrix with new states, columns mark different states, rows time steps</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>none</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.states.States.set_ind_state">
+<span class="sig-name descname"><span class="pre">set_ind_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.states.States.set_ind_state" title="Permalink to this definition"></a></dt>
+<dd><p>Overwrites a state at the given index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>int</em>) – index of state to overwrite</p></li>
+<li><p><strong>new_state</strong> (<em>np.ndarray</em>) – 1 x n vector which overwrites the state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.states.States.state_names">
+<span class="sig-name descname"><span class="pre">state_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#off.states.States.state_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.states.States.states">
+<span class="sig-name descname"><span class="pre">states</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></em><a class="headerlink" href="#off.states.States.states" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="off.windfarm.html" class="btn btn-neutral float-left" title="windfarm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="off.ambient.html" class="btn btn-neutral float-right" title="ambient" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Marcus BECKER and Maxime LEJEUNE.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

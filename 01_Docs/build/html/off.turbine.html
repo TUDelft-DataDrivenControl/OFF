@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>turbine &mdash; OFF 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="windfarm" href="off.windfarm.html" />
+    <link rel="prev" title="off" href="off.off.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OFF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="off.off.html">off</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">turbine</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#off.turbine.HAWT_ADM"><code class="docutils literal notranslate"><span class="pre">HAWT_ADM</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.HAWT_ADM.calc_power"><code class="docutils literal notranslate"><span class="pre">HAWT_ADM.calc_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.HAWT_ADM.diameter"><code class="docutils literal notranslate"><span class="pre">HAWT_ADM.diameter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.HAWT_ADM.nacellePos"><code class="docutils literal notranslate"><span class="pre">HAWT_ADM.nacellePos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.HAWT_ADM.turbine_type"><code class="docutils literal notranslate"><span class="pre">HAWT_ADM.turbine_type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.turbine.Turbine"><code class="docutils literal notranslate"><span class="pre">Turbine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.calc_power"><code class="docutils literal notranslate"><span class="pre">Turbine.calc_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.calc_tilt"><code class="docutils literal notranslate"><span class="pre">Turbine.calc_tilt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.calc_yaw"><code class="docutils literal notranslate"><span class="pre">Turbine.calc_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.diameter"><code class="docutils literal notranslate"><span class="pre">Turbine.diameter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.get_rotor_pos"><code class="docutils literal notranslate"><span class="pre">Turbine.get_rotor_pos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.nacellePos"><code class="docutils literal notranslate"><span class="pre">Turbine.nacellePos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.orientation"><code class="docutils literal notranslate"><span class="pre">Turbine.orientation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.set_rotor_pos"><code class="docutils literal notranslate"><span class="pre">Turbine.set_rotor_pos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.set_yaw"><code class="docutils literal notranslate"><span class="pre">Turbine.set_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.Turbine.turbine_type"><code class="docutils literal notranslate"><span class="pre">Turbine.turbine_type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.turbine.TurbineStates"><code class="docutils literal notranslate"><span class="pre">TurbineStates</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.create_interpolated_state"><code class="docutils literal notranslate"><span class="pre">TurbineStates.create_interpolated_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_all_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_all_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_all_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_all_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_all_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_all_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_current_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_current_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_current_cp"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_current_cp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_current_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_current_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_current_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_current_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStates.get_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStates.get_yaw()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.create_interpolated_state"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.create_interpolated_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_all_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_all_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_all_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_all_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_all_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_all_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_current_ax_ind"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_current_ax_ind()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_current_cp"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_current_cp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_current_ct"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_current_ct()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_current_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_current_yaw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#off.turbine.TurbineStatesFLORIDyn.get_yaw"><code class="docutils literal notranslate"><span class="pre">TurbineStatesFLORIDyn.get_yaw()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="off.windfarm.html">windfarm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.states.html">states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.ambient.html">ambient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.observation_points.html">observation_points</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.utils.html">utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OFF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">turbine</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/off.turbine.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-off.turbine">
+<span id="turbine"></span><h1>turbine<a class="headerlink" href="#module-off.turbine" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="off.turbine.HAWT_ADM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.turbine.</span></span><span class="sig-name descname"><span class="pre">HAWT_ADM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#off.turbine.TurbineStates" title="off.turbine.TurbineStates"><span class="pre">TurbineStates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="off.observation_points.html#off.observation_points.ObservationPoints" title="off.observation_points.ObservationPoints"><span class="pre">ObservationPoints</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ambient_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="off.ambient.html#off.ambient.AmbientStates" title="off.ambient.AmbientStates"><span class="pre">AmbientStates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.HAWT_ADM" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#off.turbine.Turbine" title="off.turbine.Turbine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Turbine</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.HAWT_ADM.calc_power">
+<span class="sig-name descname"><span class="pre">calc_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">air_den</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.HAWT_ADM.calc_power" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the power based on turbine, ambient and OP states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_speed</strong> (<em>float</em>) – Wind speed (m/s)</p></li>
+<li><p><strong>air_den</strong> (<em>float</em>) – air density</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Power generated (W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.HAWT_ADM.diameter">
+<span class="sig-name descname"><span class="pre">diameter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">178.4</span></em><a class="headerlink" href="#off.turbine.HAWT_ADM.diameter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.HAWT_ADM.nacellePos">
+<span class="sig-name descname"><span class="pre">nacellePos</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([</span>&#160; <span class="pre">0,</span>&#160;&#160; <span class="pre">0,</span> <span class="pre">119])</span></em><a class="headerlink" href="#off.turbine.HAWT_ADM.nacellePos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.HAWT_ADM.turbine_type">
+<span class="sig-name descname"><span class="pre">turbine_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'name'</span></em><a class="headerlink" href="#off.turbine.HAWT_ADM.turbine_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.turbine.Turbine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.turbine.</span></span><span class="sig-name descname"><span class="pre">Turbine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#off.turbine.TurbineStates" title="off.turbine.TurbineStates"><span class="pre">TurbineStates</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="off.observation_points.html#off.observation_points.ObservationPoints" title="off.observation_points.ObservationPoints"><span class="pre">ObservationPoints</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ambient_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="off.ambient.html#off.ambient.AmbientStates" title="off.ambient.AmbientStates"><span class="pre">AmbientStates</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.Turbine" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.calc_power">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calc_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">air_den</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.Turbine.calc_power" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the power based on turbine, ambient and OP states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_speed</strong> (<em>float</em>) – Wind speed (m/s)</p></li>
+<li><p><strong>air_den</strong> (<em>float</em>) – air density</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Power generated (W)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.calc_tilt">
+<span class="sig-name descname"><span class="pre">calc_tilt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.Turbine.calc_tilt" title="Permalink to this definition"></a></dt>
+<dd><p>Get the tilt of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tilt (deg)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.calc_yaw">
+<span class="sig-name descname"><span class="pre">calc_yaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.Turbine.calc_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>Get the yaw misalignment of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>wind_direction</strong> (<em>number</em>) – Wind direction (deg)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>yaw misalignment (deg)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.Turbine.diameter">
+<span class="sig-name descname"><span class="pre">diameter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#off.turbine.Turbine.diameter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.get_rotor_pos">
+<span class="sig-name descname"><span class="pre">get_rotor_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float64</span></span></span><a class="headerlink" href="#off.turbine.Turbine.get_rotor_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the rotor position based on the current yaw and tilt</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1 x 3 vector with x,y,z location of the rotor in the world coordinate system</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.Turbine.nacellePos">
+<span class="sig-name descname"><span class="pre">nacellePos</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([0,</span> <span class="pre">0,</span> <span class="pre">1])</span></em><a class="headerlink" href="#off.turbine.Turbine.nacellePos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.Turbine.orientation">
+<span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([0,</span> <span class="pre">0])</span></em><a class="headerlink" href="#off.turbine.Turbine.orientation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.set_rotor_pos">
+<span class="sig-name descname"><span class="pre">set_rotor_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_rot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.Turbine.set_rotor_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the base location, based on a rotor location and the nacelle position
+:param pos_rot:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.Turbine.set_yaw">
+<span class="sig-name descname"><span class="pre">set_yaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.Turbine.set_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the orientation based on the given wind direction and yaw angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_direction</strong> (<em>float</em>) – Wind direction in degrees</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – Turbine yaw misalignment angle in degrees</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="off.turbine.Turbine.turbine_type">
+<span class="sig-name descname"><span class="pre">turbine_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'base'</span></em><a class="headerlink" href="#off.turbine.Turbine.turbine_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.turbine.</span></span><span class="sig-name descname"><span class="pre">TurbineStates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.TurbineStates" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="off.states.html#off.states.States" title="off.states.States"><code class="xref py py-class docutils literal notranslate"><span class="pre">States</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.create_interpolated_state">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_interpolated_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.TurbineStates.create_interpolated_state" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a TurbineStates object of its own kind with only one state entry, based on two weighted states.
+The returned object then still has access to functions such as get_current_yaw()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index1</strong> (<em>int</em>) – Index of the first state</p></li>
+<li><p><strong>index2</strong> (<em>int</em>) – Index of the second state</p></li>
+<li><p><strong>w1</strong> (<em>float</em>) – Weight for first index (has to be w1 = 1 - w2, and [0,1])</p></li>
+<li><p><strong>w2</strong> (<em>float</em>) – Weight for second index (has to be w2 = 1 - w1, and [0,1])</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>turbine state object with single entry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#off.turbine.TurbineStates" title="off.turbine.TurbineStates">TurbineStates</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_all_ax_ind">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_ax_ind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_all_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_axInd returns the all axial induction factors of the saved turbine states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axial induction factor (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_all_ct">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_ct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_all_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_ct(index) returns the Ct coefficients for all turbine states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Thrust coefficient at all turbine states (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_all_yaw">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_yaw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_all_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_ct(index) returns the yaw misalignment for all turbine states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Yaw misalignment at all turbine states (deg)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_ax_ind">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_ax_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_ax_ind(index) returns the axial induction coefficient at a requested index of the turbine state chain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – Turbine state list index at which a should be calculated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Axial induction factor</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_ct">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_ct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – Turbine state list index at which Ct should be calculated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Thrust coefficient</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_current_ax_ind">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_ax_ind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_current_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_axInd returns the current axial induction factor of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axial induction factor (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_current_cp">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_cp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_current_cp" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_cp returns the current power coefficient of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Power coefficient (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_current_ct">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_ct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_current_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_ct returns the current thrust coefficient of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Thrust coefficient (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_current_yaw">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_yaw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_current_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_yaw returns the current yaw misalignment at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>yaw misalignment at the turbine location (deg)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStates.get_yaw">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_yaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStates.get_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>get_yaw(index) returns the yaw misalignment at a requested index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>yaw misalignment in deg</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">off.turbine.</span></span><span class="sig-name descname"><span class="pre">TurbineStatesFLORIDyn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_time_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#off.turbine.TurbineStates" title="off.turbine.TurbineStates"><code class="xref py py-class docutils literal notranslate"><span class="pre">TurbineStates</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.create_interpolated_state">
+<span class="sig-name descname"><span class="pre">create_interpolated_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.create_interpolated_state" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a TurbineStates object of its own kind with only one state entry, based on two weighted states.
+The returned object then still has access to functions such as get_current_yaw()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index1</strong> (<em>int</em>) – Index of the first state</p></li>
+<li><p><strong>index2</strong> (<em>int</em>) – Index of the second state</p></li>
+<li><p><strong>w1</strong> (<em>float</em>) – Weight for first index (has to be w1 = 1 - w2, and [0,1])</p></li>
+<li><p><strong>w2</strong> (<em>float</em>) – Weight for second index (has to be w2 = 1 - w1, and [0,1])</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>turbine state object with single entry</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#off.turbine.TurbineStates" title="off.turbine.TurbineStates">TurbineStates</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_all_ax_ind">
+<span class="sig-name descname"><span class="pre">get_all_ax_ind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_all_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_axInd returns the all axial induction factors of the saved turbine states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axial induction factor (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_all_ct">
+<span class="sig-name descname"><span class="pre">get_all_ct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_all_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_ct(index) returns the Ct coefficients for all turbine states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Thrust coefficient at all turbine states (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_all_yaw">
+<span class="sig-name descname"><span class="pre">get_all_yaw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_all_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>returns the yaw misalignment for all turbine states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>n x 1 vector with all yaw angles</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_ax_ind">
+<span class="sig-name descname"><span class="pre">get_ax_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_axInd returns the all axial induction factors of the saved turbine states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axial induction factor (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_ct">
+<span class="sig-name descname"><span class="pre">get_ct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – Turbine state list index at which Ct should be calculated</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Thrust coefficient</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_current_ax_ind">
+<span class="sig-name descname"><span class="pre">get_current_ax_ind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_current_ax_ind" title="Permalink to this definition"></a></dt>
+<dd><p>get_all_axInd returns the all axial induction factors of the saved turbine states</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axial induction factor (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_current_cp">
+<span class="sig-name descname"><span class="pre">get_current_cp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_current_cp" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_cp returns the current power coefficient of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Power coefficient (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_current_ct">
+<span class="sig-name descname"><span class="pre">get_current_ct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_current_ct" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_ct returns the current thrust coefficient of the turbine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Thrust coefficient (-)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_current_yaw">
+<span class="sig-name descname"><span class="pre">get_current_yaw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_current_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>get_current_yaw returns the current yaw misalignment at the turbine location</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>yaw misalignment at the turbine location (deg)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="off.turbine.TurbineStatesFLORIDyn.get_yaw">
+<span class="sig-name descname"><span class="pre">get_yaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.turbine.TurbineStatesFLORIDyn.get_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>get_yaw(index) returns the yaw misalignment at a requested index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>yaw misalignment in deg</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="off.off.html" class="btn btn-neutral float-left" title="off" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="off.windfarm.html" class="btn btn-neutral float-right" title="windfarm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Marcus BECKER and Maxime LEJEUNE.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils &mdash; OFF 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="observation_points" href="off.observation_points.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OFF
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="off.off.html">off</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.turbine.html">turbine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.windfarm.html">windfarm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.states.html">states</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.ambient.html">ambient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="off.observation_points.html">observation_points</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.lg"><code class="docutils literal notranslate"><span class="pre">lg</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_abs2uv"><code class="docutils literal notranslate"><span class="pre">ot_abs2uv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_abs_wind_speed"><code class="docutils literal notranslate"><span class="pre">ot_abs_wind_speed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_deg2rad"><code class="docutils literal notranslate"><span class="pre">ot_deg2rad()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_get_closest_2_points_3d_sorted"><code class="docutils literal notranslate"><span class="pre">ot_get_closest_2_points_3d_sorted()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_get_closest_point_3d_sorted"><code class="docutils literal notranslate"><span class="pre">ot_get_closest_point_3d_sorted()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_get_orientation"><code class="docutils literal notranslate"><span class="pre">ot_get_orientation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_get_yaw"><code class="docutils literal notranslate"><span class="pre">ot_get_yaw()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_isocell"><code class="docutils literal notranslate"><span class="pre">ot_isocell()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_uv2abs"><code class="docutils literal notranslate"><span class="pre">ot_uv2abs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#off.utils.ot_uv2deg"><code class="docutils literal notranslate"><span class="pre">ot_uv2deg()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OFF</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/off.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-off.utils">
+<span id="utils"></span><h1>utils<a class="headerlink" href="#module-off.utils" title="Permalink to this heading"></a></h1>
+<dl class="py data">
+<dt class="sig sig-object py" id="off.utils.lg">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">lg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">off.utils</span> <span class="pre">(WARNING)&gt;</span></em><a class="headerlink" href="#off.utils.lg" title="Permalink to this definition"></a></dt>
+<dd><p>Utilities for the OFF toolbox
+functions which are handy in multiple places but do not have a true parent object they could belong to.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_abs2uv">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_abs2uv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_speed_abs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_dir</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#off.utils.ot_abs2uv" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_abs_wind_speed">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_abs_wind_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_abs_wind_speed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_deg2rad">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_deg2rad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_deg2rad" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_get_closest_2_points_3d_sorted">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_get_closest_2_points_3d_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#off.utils.ot_get_closest_2_points_3d_sorted" title="Permalink to this definition"></a></dt>
+<dd><p>Function to find the index of the closest 2 points to a reference location in 3D.
+The function can expect the list of points to be sorted / trailing each other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_loc</strong> – [1 x 3] np.ndarray Reference location</p></li>
+<li><p><strong>points</strong> – [n x 3] np.ndarray Points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>[1 x 2] int array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_get_closest_point_3d_sorted">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_get_closest_point_3d_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#off.utils.ot_get_closest_point_3d_sorted" title="Permalink to this definition"></a></dt>
+<dd><p>Function to find the index of the closes point to a reference location in 3D.
+The function can expect the list of points to be sorted / trailing each other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_loc</strong> – [1 x 3] np.ndarray Reference location</p></li>
+<li><p><strong>points</strong> – [n x 3] np.ndarray Points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_get_orientation">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_get_orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_get_orientation" title="Permalink to this definition"></a></dt>
+<dd><p>Return the turbine orientation based on the wind direction and the yaw angle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_dir</strong> (<em>float</em>) – Wind direction in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – Yaw angle in degree</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Orientation in LES degree</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_get_yaw">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_get_yaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wind_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_get_yaw" title="Permalink to this definition"></a></dt>
+<dd><p>Return the turbine yaw angle based on the wind direction and turbine orientation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wind_dir</strong> (<em>float</em>) – Wind direction in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)</p></li>
+<li><p><strong>orientation</strong> (<em>float</em>) – Turbine orientation in LES degree (270 deg pointing along the x-axis, 190 deg along the y axis)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>yaw angle in LES degree (clockwise)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_isocell">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_isocell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_rp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#off.utils.ot_isocell" title="Permalink to this definition"></a></dt>
+<dd><p>Isocell algorithm to discretize the rotor plane (or any circle)
+Masset et al.</p>
+<p><a class="reference external" href="https://orbi.uliege.be/bitstream/2268/91953/1/masset_isocell_orbi.pdf">https://orbi.uliege.be/bitstream/2268/91953/1/masset_isocell_orbi.pdf</a></p>
+<p>We choose N = 3 here, 4 or 5 are also viable options, 3 is close to optimal</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_rp</strong> (<em>int</em>) – desired number of Rotor points (algorithm can not work with all numbers, takes the closest one)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[yRP, zRP] : np.ndarray location of the rotor points with values between -0.5 and 0.5
+w : float weight of the RPs (1/number)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_uv2abs">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_uv2abs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_uv2abs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="off.utils.ot_uv2deg">
+<span class="sig-prename descclassname"><span class="pre">off.utils.</span></span><span class="sig-name descname"><span class="pre">ot_uv2deg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#off.utils.ot_uv2deg" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="off.observation_points.html" class="btn btn-neutral float-left" title="observation_points" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Marcus BECKER and Maxime LEJEUNE.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
