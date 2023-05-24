@@ -21,7 +21,7 @@ The toolbox allows you to run dynamic wind farm simulations using a prescribed (
 - Heterogeneous flow field behaviour is not included, 
 - Wake steerig and induction control is not included yet (soon to be added), 
 - The dynamic solver is a preliminary implementation, and cannot be changed
-  -  OnWaRDS approach not yet impemented
+  -  OnWaRDS \[3\] approach not yet impemented
   -  Particle model and behaviour not yet changable
 -  There is no API yet
 
@@ -62,10 +62,11 @@ To change the simulation, you have to change the .yaml file OFF calls. This is d
 
 ## Contact and sources
 ### Core Developers
-Marcus Becker, Maxime Lejeune
+[Marcus Becker](https://www.tudelft.nl/staff/marcus.becker/?cHash=4e16fc5842bde9873a2a322dcbc17453) (TU Delft) and 
+[Maxime Lejeune](https://uclouvain.be/fr/repertoires/maxime.lejeune) (UCLouvain) are the current core developers of the OFF toolbox.
 ### Sources
-\[1\] FLORIDyn - A dynamic and flexible framework for real-time wind farm control M. Becker, D. Allaerts, J.W. van Wingerden, 2022 J. Phys.: Conf. Ser. 2265(2022) 032103
-\[2\] A Meandering-Capturing Wake Model Coupled to Rotor-Based Flow-Sensing for Operational Wind Farm Flow PredictionM. Lejeune, M. Moens, P. Chatelain
-2022 Front. Energy Res., Sec. Wind Energy
-\[3\] FLORIS Wake Modeling and Wind Farm Controls Software
-National Renewable Energy Laboratory, 2023, GitHub
+\[1\] FLORIDyn - A dynamic and flexible framework for real-time wind farm control, M. Becker, D. Allaerts, J.W. van Wingerden, 2022 J. Phys.: Conf. Ser. 2265(2022) 032103
+
+\[2\] FLORIS Wake Modeling and Wind Farm Controls Software, National Renewable Energy Laboratory, 2023, GitHub
+
+\[3\] A Meandering-Capturing Wake Model Coupled to Rotor-Based Flow-Sensing for Operational Wind Farm Flow Prediction, M. Lejeune, M. Moens, P. Chatelain, 2022 Front. Energy Res., Sec. Wind Energy
