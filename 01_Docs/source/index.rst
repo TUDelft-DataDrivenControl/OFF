@@ -1,17 +1,30 @@
-Welcome to OFF's documentation!
-===============================
-*An unified framework for OnWaRDS, FLORIDyn and FLORIS.*
 
-.. image:: ../../99_Design/01_Logo/OFF_Logo_light.svg
-   :width: 150px
+
+.. image:: ../../99_Design/01_Logo/OFF_Logo_wide.png
+   :width: 100%
+
+a dynamic parametric wake toolbox which combines and connects OnWaRDS [1]_, FLORIDyn [2]_ and FLORIS [3]_
 
 Documentation
--------------
+=============
+
+Run the main.py in the `03_Code <https://github.com/TUDelft-DataDrivenControl/OFF/tree/main/03_Code>`_ folder.
+
+To change the simulation, you have to change the .yaml file OFF calls. This is defined by one of the first limes of code in the main function. The .yaml structure is showed in `run_example.yaml <https://github.com/TUDelft-DataDrivenControl/OFF/blob/main/02_Examples_and_Cases/02_Example_Cases/run_example.yaml>`_ . This is where you can change the wind farm layout, the flow conditions, the wake model etc.
+
+.. image:: media/turbine_effective_wind_speed_at_0700s.png
+   :width: 50%
+
+*A six-wind turbines configuration with a time-varying homogeneous inflow.*
+
+Code
+----
+
+The documentation is handled automatically using Sphinx and available here.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
 
 .. toctree::
    :maxdepth: 1
@@ -24,9 +37,15 @@ Documentation
    off.observation_points
    off.utils
 
+License
+-------
+The documentation for this program is under a creative commons attribution share-alike 4.0 license. http://creativecommons.org/licenses/by-sa/4.0/
+
 Publications
 ------------
 
-`\[1\] <https://doi.org/10.3389/fenrg.2022.884068>`_ M. Lejeune, M. Moens, and P. Chatelain. *A meandering-capturing wake model coupled to rotor-based flow-sensing for operational wind farm flow prediction*. Frontiers in Energy Research, 10, jul 2022.
+.. [1] FLORIDyn - A dynamic and flexible framework for real-time wind farm control, M. Becker, D. Allaerts, J.W. van Wingerden, 2022 J. Phys.: Conf. Ser. 2265(2022) 032103
 
-`\[2\] <https://doi.org/10.1088/1742-6596/2265/3/032103>`_ M. Becker, D. Allaerts and J.W. van Wingerden. *FLORIDyn - A dynamic and flexible framework for real-time wind farm control*. Journal of Physics: Conference Series, 2265(2):032103, may 2022.
+.. [2] FLORIS Wake Modeling and Wind Farm Controls Software, National Renewable Energy Laboratory, 2023, GitHub
+
+.. [3] A Meandering-Capturing Wake Model Coupled to Rotor-Based Flow-Sensing for Operational Wind Farm Flow Prediction, M. Lejeune, M. Moens, P. Chatelain, 2022 Front. Energy Res., Sec. Wind Energy
