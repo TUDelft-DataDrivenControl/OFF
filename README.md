@@ -60,18 +60,12 @@ Run the main.py in the 03_Code folder.
 
 To change the simulation, you have to change the .yaml file OFF calls. This is defined by one of the first limes of code in the main function. The .yaml structure is showed in 02_Examples_and_Cases/02_Example_Cases/run_example.yaml . This is where you can change the wind farm layout, the flow conditions, the wake model etc.
 
-## License
-
-
-
-
-
-
-## Contact, sources and citation
+## Contact and sources
 ### Core Developers
 Marcus Becker, Maxime Lejeune
 ### Sources
-\[1\] 
-\[2\]
-\[3\]
-### Citation
+\[1\] FLORIDyn - A dynamic and flexible framework for real-time wind farm control M. Becker, D. Allaerts, J.W. van Wingerden, 2022 J. Phys.: Conf. Ser. 2265(2022) 032103
+\[2\] A Meandering-Capturing Wake Model Coupled to Rotor-Based Flow-Sensing for Operational Wind Farm Flow PredictionM. Lejeune, M. Moens, P. Chatelain
+2022 Front. Energy Res., Sec. Wind Energy
+\[3\] FLORIS Wake Modeling and Wind Farm Controls Software
+National Renewable Energy Laboratory, 2023, GitHub
