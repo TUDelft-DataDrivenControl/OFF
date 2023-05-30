@@ -100,13 +100,13 @@ ambient:
     corr_overwrite_direction: true # All states are overwritten instead of only the first particle state
 
 wake:
-  name: GCH
-  description: Gaussian Curl Hybrid wake model
+  name: JENSEN
+  description: Jensen wake model
 
   settings:
     nRP: 10               # Not used yet but required
     rotor discretization: Isocell  # Not used yet but required
-    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
+    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/jensen.yaml"
 
 solver:
   name: TWF FLORIS
@@ -195,9 +195,9 @@ vis:
 
   debug:
     effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
-    time: [ 700, 900] # Times at witch a debug plot of the wind farm is generated
+    time: [ 700 ] # Times at witch a debug plot of the wind farm is generated
     iT: [0,1,2] # Turbines for which the debug plot is created
-    turbine_effective_wind_speed: False # Generates the effective wind speed across the farm based on a ghost turbine
+    turbine_effective_wind_speed: True # Generates the effective wind speed across the farm based on a ghost turbine
     turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
     turbine_effective_wind_speed_plot_ops: True # Adds dots for the particles
     turbine_effective_wind_speed_show_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true

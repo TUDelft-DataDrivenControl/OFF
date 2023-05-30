@@ -18,7 +18,7 @@ def main():
         return 1
 
     # Call the run .yaml
-    stream = open(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml', 'r')
+    stream = open(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example_gch.yaml', 'r')
     sim_info = yaml.safe_load(stream)
 
     # Convert run data into settings and wind farm object
