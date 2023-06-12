@@ -276,7 +276,7 @@ class FlorisGaussianWake(WakeModel):
         
         avg_vel = self.fi.turbine_average_velocities
         Cts = self.fi.get_turbine_Cts()
-        AIs = self.fi.get_turbine_ais()
+        # AIs = self.fi.get_turbine_ais()               # TODO: Fix since FLORIS v3.4 has a bug causing this line to crash
         TIs = self.fi.get_turbine_TIs()
 
         measurements = pd.DataFrame(
@@ -284,10 +284,11 @@ class FlorisGaussianWake(WakeModel):
                 i_t,
                 avg_vel[:, :, i_t].flatten()[0],
                 Cts[:, :, i_t].flatten()[0],
-                AIs[:, :, i_t].flatten()[0],
+                # AIs[:, :, i_t].flatten()[0],          # TODO: FLORIS v3.4 fix
                 TIs[:, :, i_t].flatten()[0],
             ]],
-            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
+            # columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']  # TODO: FLORIS v3.4 fix
+            columns=['t_idx', 'u_abs_eff', 'Ct', 'TI']
         )
 
         return avg_vel[:, :, i_t].flatten()[0], measurements
