@@ -439,37 +439,14 @@ class PythonGaussianWake(WakeModel):
 
         return np.sqrt( np.sum( du ** 2 , axis=0) )
 
-<<<<<<< Updated upstream
+
     def _du_xi_r(self, xi, r_h, r_v, ct, yaw_angle, ti):
-        # r_h += self._deflection_xi(xi)
-=======
-    def _du_xi_r(self, xi, r, ct, yaw_ang, ti):
         x0   = np.ones_like(ct)     # TODO replace
         sigy = np.ones_like(ct)     # TODO replace
         sigz = np.ones_like(ct)     # TODO replace
         D    = np.ones_like(ct)     # TODO replace
 
-        r += self._deflection_xi(xi, x0, sigy, sigz, ct, yaw_ang, D)
-        return np.zeros_like(xi)
->>>>>>> Stashed changes
-
-        # # Initialize the velocity deficit
-        # uR = u_initial * ct / ( 2.0 * (1 - np.sqrt(1 - ct) ) )
-        # u0 = u_initial * np.sqrt(1 - ct_i)
-
-        # # Initial lateral bounds
-        # sigma_z0 = self.wind_farm_layout[:,4] * 0.5 * np.sqrt(uR / (u_initial + u0))
-        # sigma_y0 = sigma_z0 * np.cosd(yaw_angle) * cos(wind_veer)
-
-        # xR = x_i
-
-        # # Start of the far wake
-        # x0 = np.ones_like(u_initial)
-        # x0 *= self.wind_farm_layout[:,4] * np.cos(yaw_angle) * (1 + np.sqrt(1 - ct) )
-        # x0 /= np.sqrt(2) * (
-        #     4 * self.alpha * ti + 2 * self.beta * (1 - np.sqrt(1 - ct) )
-        # )
-        # x0 += x_i
+        r_h += self._deflection_xi(xi, x0, sigy, sigz, ct, yaw_angle, D)
 
         kstar = self.param['ka_ti'] + self.param['kb_ti'] * ti
         
