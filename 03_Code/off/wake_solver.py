@@ -183,6 +183,7 @@ class WakeSolver(ABC):
 
 
 class FLORIDynTWFWakeSolver(WakeSolver):
+    # TODO: Delete as it is not used anymore!!
     """ Wake solver connecting to the dummy wake """
     dummy_wake: wm.DummyWake
 
@@ -270,6 +271,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
 
 
 class FLORIDynFlorisWakeSolver(WakeSolver):
+    # TODO: Delete as it is not used anymore!!
     """ First version of the coupling with the FLORIS model """
     floris_wake: wm.FlorisGaussianWake
 

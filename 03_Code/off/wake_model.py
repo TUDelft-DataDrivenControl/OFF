@@ -195,18 +195,18 @@ class DummyWake(WakeModel):
 
 class FlorisGaussianWake(WakeModel):
     """
-    FLORIS interface for the Gaussian Curl Hybrid model
+    Interface to the FLORIS wake models
     """
 
     def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
-        FLORIS interface for the Gaussian Curl Hybrid model
+        Interface to the FLORIS wake models
 
         Parameters
         ----------
         settings : dict
-            .["gch_yaml_path"] path to settings gch.yaml
-                example file can be found at https://github.com/NREL/floris/tree/main/examples/inputs
+            .["yaml_path"] path to settings, e.g. gch.yaml
+                example files can be found at https://github.com/NREL/floris/tree/main/examples/inputs
         wind_farm_layout : np.ndarray
             n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
         turbine_states : array of TurbineStates objects
@@ -221,7 +221,7 @@ class FlorisGaussianWake(WakeModel):
             1 x 2 : [u_abs, phi] - absolute background wind speed and direction
         """
         super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
-        lg.info(f'FLORIS interface for the Gaussian Curl Hybrid model initialized')
+        lg.info(f'Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
         self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
         lg.info(f'FLORIS object created.')
 

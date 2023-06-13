@@ -28,9 +28,16 @@ import off.off as off
 import importlib.util
 import sys
 import yaml
+import off.off_interface as offi
 
 
 def main():
+    oi = offi.OFFInterface()
+    oi.initSimulatioByPath(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
+    oi.runSim()
+    oi.storeMeasurements()
+
+
     if _check_requirements():
         print("Not all required packages installed, see terminal output for more info.")
         return 1
