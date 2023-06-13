@@ -377,7 +377,7 @@ class TWFSolver(WakeSolver):
             Visualization settings
         """
         super(TWFSolver, self).__init__(settings_sol, settings_vis)
-        lg.info('FLORIDyn wake solver created.')
+        lg.info('FLORIDyn TWF solver created.')
 
         self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
 
