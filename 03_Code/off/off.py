@@ -181,6 +181,7 @@ class OFF:
             t.observation_points.init_all_states(t.ambient_states.get_turbine_wind_speed_u(),
                                                  t.ambient_states.get_turbine_wind_speed_v(),
                                                  t.get_rotor_pos(), self.settings_sim['time step'])
+            pass
 
     def run_sim(self) -> pd.DataFrame:
         """
