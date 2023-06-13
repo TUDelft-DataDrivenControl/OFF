@@ -114,7 +114,7 @@ solver:
 
   settings:
     wake_solver: "TWFSolver"
-    wake_model: "Floris GCH"
+    wake_model: "PythonGaussianWake" # "FLORIS GCH"
     op_propagation: "frozen turbulence"
     extrapolation: "pair"
     n_op: 120

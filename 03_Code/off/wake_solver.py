@@ -361,7 +361,7 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
 
 
 class TWFSolver(WakeSolver):
-    floris_wake: wm.FlorisGaussianWake
+    floris_wake: wm.WakeModel
 
     def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
@@ -379,7 +379,12 @@ class TWFSolver(WakeSolver):
         super(TWFSolver, self).__init__(settings_sol, settings_vis)
         lg.info('FLORIDyn TWF solver created.')
 
-        self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        if settings_sol["wake_model"].startswith("FLORIS"):
+            self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        elif settings_sol["wake_model"] == "PythonGaussianWake":
+            self.floris_wake = wm.PythonGaussianWake(settings_wke)
+        else:
+            raise ImportError('Wake model unknown!')
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
