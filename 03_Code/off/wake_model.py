@@ -24,17 +24,21 @@ import logging
 from floris.tools import FlorisInterface
 from floris.tools.visualization import visualize_cut_plane
 import matplotlib.pyplot as plt
+import yaml
+
+from typing import List
+from .turbine import TurbineStates, AmbientStates
 
 lg = logging.getLogger(__name__)
 
 
 class WakeModel(ABC):
-    settings = dict()
-    wind_farm_layout = np.array([])
-    turbine_states = np.array([])
-    ambient_states = np.array([])
-    rp_s = np.array([])
-    rp_w = float
+    settings : dict
+    wind_farm_layout : np.ndarray
+    turbine_states : List[TurbineStates]
+    ambient_states : List[AmbientStates]
+    rp_s = np.ndarray
+    rp_w : float
 
     def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
@@ -292,6 +296,206 @@ class FlorisGaussianWake(WakeModel):
         )
 
         return avg_vel[:, :, i_t].flatten()[0], measurements
+
+    def vis_flow_field(self):
+        """
+        Creates a plot of the wind farm applied to the given turbine using the FLORIS interface
+        """
+
+        n_t = len(self.turbine_states)
+        yaw_ang = np.zeros([1, 1, n_t])
+
+        for ii_t in np.arange(n_t):
+            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
+
+        # Don't know if the calculate_wake is needed, but probably for yaw angles
+        self.fi.calculate_wake(yaw_angles=yaw_ang)
+        horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
+
+        fig, ax_horo_plane = plt.subplots()
+        visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        plt.show()
+
+
+
+class PythonGaussianWake(WakeModel):
+    """
+    Python interface for the Gaussian Curl Hybrid model
+    """
+
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
+        """
+        FLORIS interface for the Gaussian Curl Hybrid model
+
+        Parameters
+        ----------
+        settings : dict
+            .["gch_yaml_path"] path to settings gch.yaml
+                example file can be found at https://github.com/NREL/floris/tree/main/examples/inputs
+        wind_farm_layout : np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states : array of TurbineStates objects
+            array with n_t TurbineStates objects with each one state
+            Obejcts have access to methods such as get_current_Ct()
+        ambient_states : array of AmbientStates objects
+            array with n_t AmbientStates objects with each one state
+            Obejcts have access to methods such as get_turbine_wind_dir()
+        turbine_states : np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states : np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        super(PythonGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+        lg.info(f'Loading input file for Gaussian Wake model (Build in)')
+
+        stream = open(self.settings['sim_dir'] + self.settings['gch_yaml_path'], 'r')
+        sim_info = yaml.safe_load(stream)
+
+        self.param = {}
+        self.param['ka_ti']  = 1
+        self.param['kb_ti']  = 1
+        self.param['epsfac'] = 1
+        self.param['D']      = 1
+
+        # sim_info["wake"]["wake_deflection_parameters"]["gauss"]["ad"]
+
+        lg.info(f'Gaussian Wake model created.')
+
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: List[TurbineStates], ambient_states:List[AmbientStates]):
+        """
+        Changes the states of the stored wind farm
+
+        Parameters
+        ----------
+        wind_farm_layout: np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states: np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states: np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        self.wind_farm_layout = wind_farm_layout
+        self.turbine_states = turbine_states
+        self.ambient_states = ambient_states
+
+        # self.fi.reinitialize(
+        #     layout_x=wind_farm_layout[:, 0],
+        #     layout_y=wind_farm_layout[:, 1],
+        #     wind_directions=[ambient_states[0].get_turbine_wind_dir()],  # TODO Assign wind vel from main turbine
+        #     wind_speeds=[ambient_states[0].get_turbine_wind_speed_abs()],    # TODO Assign wind dir from main turbine
+        # )
+
+    def get_measurements_i_t(self, i_t: int) -> tuple:
+        """
+        Returns the measurements of the wake model including the effective wind speed at the turbine i_t
+
+        Parameters
+        ----------
+        i_t : int
+            Index of the turbine of interest
+
+        Returns
+        -------
+        tuple:
+            float: u_eff
+                effective wind speed at turbine i_t
+            pandas.dataframe: measurements
+                all measurements (Power gen, added turbulence, etc.)
+        """
+        n_t = len(self.turbine_states)
+
+        yaw_ang = [s.get_current_yaw() for s in self.turbine_states]
+        ct      = [s.get_current_ct()  for s in self.turbine_states]
+        ti      = 0.06
+        avg_vel = self._u_rotors(ct, yaw_ang, ti)
+
+        measurements = pd.DataFrame(
+            [[
+                i_t,
+                avg_vel[i_t],
+            ]],
+            columns=['t_idx', 'u_abs_eff']
+        )
+
+        return avg_vel[i_t], measurements
+
+    def _u_rotors(self, ct, yaw_ang, ti): # for now, only velocity at the center
+        return self._u(self.wind_farm_layout, ct, yaw_ang, ti)
+
+    def _u(self, pos, ct, yaw_ang, ti): # for now, only velocity at the center
+        return self.ambient_states[0].get_turbine_wind_speed_abs() - self._du(pos, ct, yaw_ang, ti)
+
+    def _du(self, pos, ct, yaw_ang, ti) -> np.ndarray:
+        dx = np.array([np.subtract.outer(pos[:,comp], self.wind_farm_layout[:,comp]) for comp in range(3)])
+        
+        streamwise_axis = self.ambient_states[0].get_turbine_wind_speed() / self.ambient_states[0].get_turbine_wind_speed_abs()
+        crosswind_axis  = np.array([-streamwise_axis[1], streamwise_axis[0]])
+
+        xi = np.moveaxis(dx[0:2,:,:], 0, -1)@streamwise_axis 
+        r  = np.moveaxis(dx[0:2,:,:], 0, -1)@crosswind_axis 
+        
+        du = self._du_xi_r(xi, r, ct, yaw_ang, ti)
+
+        return np.sqrt( np.sum( du ** 2 , axis=0) )
+
+    def _du_xi_r(self, xi, r, ct, yaw_ang, ti):
+        r += self._deflection_xi(xi)
+        return np.zeros_like(xi)
+
+        # kstar = self.param["ka_ti"] + self.param["kb_ti"] * ti
+        
+        # _tmp = np.sqrt(1-ct)
+        # eps = self.param.epsfac * np.sqrt(0.5*(1+_tmp)/_tmp)
+        # xi0 = (np.sqrt(.125) - eps) * self.param.D/kstar
+        
+        # idx_cone = np.where(np.abs(r) < self.param.D/2*(1. - xi/xi0) * (xi < xi0) * (xi>0)) 
+        # idx_us = np.where((xi<0)) 
+            
+        # sig_o_d_sqr = ( kstar * xi/self.param.D + eps ) ** 2
+        # rad = 1 - ct / (8.*sig_o_d_sqr)
+
+        # u = self.ambient_states[0].get_turbine_wind_speed_u()
+        # du   =  u * (1 - np.sqrt(rad * (rad > 0)))* np.exp( -1./(2*sig_o_d_sqr) * (r/self.param.D)**2. )  
+        # du_nw = u * (1 - (np.sqrt(1-ct)))
+
+        # du[du>du_nw] = du_nw 
+        # du[idx_cone] = du_nw
+        # du[idx_us] = 0
+
+    def _deflection_xi(self, xi):
+        return np.zeros_like(xi)
+    
+        # self.fi.calculate_wake(yaw_angles=yaw_ang)
+        
+        # avg_vel = self.fi.turbine_average_velocities
+        # Cts = self.fi.get_turbine_Cts()
+        # AIs = self.fi.get_turbine_ais()
+        # TIs = self.fi.get_turbine_TIs()
+
+        # measurements = pd.DataFrame(
+        #     [[
+        #         i_t,
+        #         avg_vel[:, :, i_t].flatten()[0],
+        #         Cts[:, :, i_t].flatten()[0],
+        #         AIs[:, :, i_t].flatten()[0],
+        #         TIs[:, :, i_t].flatten()[0],
+        #     ]],
+        #     columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
+        # )
+ 
+        # n_t = len(self.turbine_states)
+        # yaw_ang = np.zeros([1, 1, n_t])
+
+        # for ii_t in np.arange(n_t):
+        #     yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
+
+        # self.fi.calculate_wake(yaw_angles=yaw_ang)
+        
+        # avg_vel = self.fi.turbine_average_velocities
+        # Cts = self.fi.get_turbine_Cts()
+        # AIs = self.fi.get_turbine_ais()
+        # TIs = self.fi.get_turbine_TIs()
+
 
     def vis_flow_field(self):
         """

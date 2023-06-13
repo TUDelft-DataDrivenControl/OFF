@@ -382,7 +382,7 @@ class TWFSolver(WakeSolver):
         if settings_sol["wake_model"].startswith("FLORIS"):
             self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
         elif settings_sol["wake_model"] == "PythonGaussianWake":
-            self.floris_wake = wm.PythonGaussianWake(settings_wke)
+            self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
         else:
             raise ImportError('Wake model unknown!')
 

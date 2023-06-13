@@ -296,7 +296,10 @@ class FLORIDynAmbient(AmbientStates):
         float
             u wind speed
         """
-        return self.states[0, 0] * np.cos(ot_deg2rad(self.states[0, 1]))
+        if self.n_time_steps > 1:
+            return self.states[0, 0] * np.cos(ot_deg2rad(self.states[0, 1]))
+        else:
+            return self.states[0] * np.cos(ot_deg2rad(self.states[1]))
 
     def get_turbine_wind_speed_v(self) -> float:
         """
@@ -307,7 +310,10 @@ class FLORIDynAmbient(AmbientStates):
         float
             v wind speed
         """
-        return self.states[0, 0] * np.sin(ot_deg2rad(self.states[0, 1]))
+        if self.n_time_steps > 1:
+            return self.states[0, 0] * np.sin(ot_deg2rad(self.states[0, 1]))
+        else:
+            return self.states[0] * np.sin(ot_deg2rad(self.states[1]))
 
     def get_wind_speed_abs(self) -> np.ndarray:
         """
