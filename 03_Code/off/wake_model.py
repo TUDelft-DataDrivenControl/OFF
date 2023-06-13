@@ -404,10 +404,10 @@ class PythonGaussianWake(WakeModel):
         """
         n_t = len(self.turbine_states)
 
-        yaw_ang = [s.get_current_yaw() for s in self.turbine_states]
-        ct      = [s.get_current_ct()  for s in self.turbine_states]
+        yaw_angle = np.array([s.get_current_yaw() for s in self.turbine_states])
+        ct      = np.array([s.get_current_ct()  for s in self.turbine_states])
         ti      = 0.06
-        avg_vel = self._u_rotors(ct, yaw_ang, ti)
+        avg_vel = self._u_rotors(ct, yaw_angle, ti)
 
         measurements = pd.DataFrame(
             [[
@@ -419,48 +419,73 @@ class PythonGaussianWake(WakeModel):
 
         return avg_vel[i_t], measurements
 
-    def _u_rotors(self, ct, yaw_ang, ti): # for now, only velocity at the center
-        return self._u(self.wind_farm_layout, ct, yaw_ang, ti)
+    def _u_rotors(self, ct, yaw_angle, ti): # for now, only velocity at the center
+        return self._u(self.wind_farm_layout, ct, yaw_angle, ti)
 
-    def _u(self, pos, ct, yaw_ang, ti): # for now, only velocity at the center
-        return self.ambient_states[0].get_turbine_wind_speed_abs() - self._du(pos, ct, yaw_ang, ti)
+    def _u(self, pos, ct, yaw_angle, ti): # for now, only velocity at the center
+        return self.ambient_states[0].get_turbine_wind_speed_abs() - self._du(pos, ct, yaw_angle, ti)
 
-    def _du(self, pos, ct, yaw_ang, ti) -> np.ndarray:
+    def _du(self, pos, ct, yaw_angle, ti) -> np.ndarray:
         dx = np.array([np.subtract.outer(pos[:,comp], self.wind_farm_layout[:,comp]) for comp in range(3)])
         
-        streamwise_axis = self.ambient_states[0].get_turbine_wind_speed() / self.ambient_states[0].get_turbine_wind_speed_abs()
-        crosswind_axis  = np.array([-streamwise_axis[1], streamwise_axis[0]])
+        streamwise_axis = np.array([*self.ambient_states[0].get_turbine_wind_speed(), 0]) / self.ambient_states[0].get_turbine_wind_speed_abs()
+        crosswind_axis  = np.array([-streamwise_axis[1], streamwise_axis[0], 0])
+        vertical_axis   = np.array([0, 0, 1])
 
-        xi = np.moveaxis(dx[0:2,:,:], 0, -1)@streamwise_axis 
-        r  = np.moveaxis(dx[0:2,:,:], 0, -1)@crosswind_axis 
+        xi  = np.moveaxis(dx, 0, -1)@streamwise_axis 
+        r_h = np.moveaxis(dx, 0, -1)@crosswind_axis 
+        r_v = np.moveaxis(dx, 0, -1)@vertical_axis 
         
-        du = self._du_xi_r(xi, r, ct, yaw_ang, ti)
+        du = self._du_xi_r(xi, r_h, r_v, ct, yaw_angle, ti)
 
         return np.sqrt( np.sum( du ** 2 , axis=0) )
 
-    def _du_xi_r(self, xi, r, ct, yaw_ang, ti):
-        r += self._deflection_xi(xi)
-        return np.zeros_like(xi)
+    def _du_xi_r(self, xi, r_h, r_v, ct, yaw_angle, ti):
+        # r_h += self._deflection_xi(xi)
 
-        # kstar = self.param["ka_ti"] + self.param["kb_ti"] * ti
+        # # Initialize the velocity deficit
+        # uR = u_initial * ct / ( 2.0 * (1 - np.sqrt(1 - ct) ) )
+        # u0 = u_initial * np.sqrt(1 - ct_i)
+
+        # # Initial lateral bounds
+        # sigma_z0 = self.wind_farm_layout[:,4] * 0.5 * np.sqrt(uR / (u_initial + u0))
+        # sigma_y0 = sigma_z0 * np.cosd(yaw_angle) * cos(wind_veer)
+
+        # xR = x_i
+
+        # # Start of the far wake
+        # x0 = np.ones_like(u_initial)
+        # x0 *= self.wind_farm_layout[:,4] * np.cos(yaw_angle) * (1 + np.sqrt(1 - ct) )
+        # x0 /= np.sqrt(2) * (
+        #     4 * self.alpha * ti + 2 * self.beta * (1 - np.sqrt(1 - ct) )
+        # )
+        # x0 += x_i
+
+        kstar = self.param['ka_ti'] + self.param['kb_ti'] * ti
         
-        # _tmp = np.sqrt(1-ct)
-        # eps = self.param.epsfac * np.sqrt(0.5*(1+_tmp)/_tmp)
-        # xi0 = (np.sqrt(.125) - eps) * self.param.D/kstar
+        _tmp = np.sqrt(1-ct)
+        eps = self.param['epsfac'] * np.sqrt(0.5*(1+_tmp)/_tmp)
+        xi0 = (np.sqrt(.125) - eps) * self.wind_farm_layout[:,3]/kstar
         
-        # idx_cone = np.where(np.abs(r) < self.param.D/2*(1. - xi/xi0) * (xi < xi0) * (xi>0)) 
-        # idx_us = np.where((xi<0)) 
+        idx_cone = np.where(np.abs(r_h) < self.wind_farm_layout[:,3]/2*(1. - xi/xi0) * (xi < xi0) * (xi>0)) 
+        idx_us = np.where(xi<0) 
             
-        # sig_o_d_sqr = ( kstar * xi/self.param.D + eps ) ** 2
-        # rad = 1 - ct / (8.*sig_o_d_sqr)
+        sig_o_d_sqr = ( kstar * xi/self.wind_farm_layout[:,3] + eps ) ** 2
+        rad = 1 - ct / (8.*sig_o_d_sqr)
 
-        # u = self.ambient_states[0].get_turbine_wind_speed_u()
-        # du   =  u * (1 - np.sqrt(rad * (rad > 0)))* np.exp( -1./(2*sig_o_d_sqr) * (r/self.param.D)**2. )  
-        # du_nw = u * (1 - (np.sqrt(1-ct)))
+        u = self.ambient_states[0].get_turbine_wind_speed_u()
+        du   =  u * (1 - np.sqrt(rad * (rad > 0)))* np.exp( -1./(2*sig_o_d_sqr) * (r_h/self.wind_farm_layout[:,3])**2. )  
+        du_nw = u * (1 - (np.sqrt(1-ct)))
 
-        # du[du>du_nw] = du_nw 
-        # du[idx_cone] = du_nw
-        # du[idx_us] = 0
+        idx_bounded = du>du_nw
+
+        if np.any(idx_bounded): du[idx_bounded] = du_nw
+        if np.any(idx_cone):    du[idx_cone] = du_nw
+        if np.any(idx_us):      du[idx_us] = 0
+
+        return du
+
+
 
     def _deflection_xi(self, xi):
         return np.zeros_like(xi)
