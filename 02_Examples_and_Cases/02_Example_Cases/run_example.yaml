@@ -194,12 +194,9 @@ vis:
     store_data: True
 
   debug:
-<<<<<<< Updated upstream
     effective_wf_layout: True  # Triggers a debug plot during runtime of the wakes passed on to the wake model
     effective_wf_prisim: True  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
-=======
     effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
->>>>>>> Stashed changes
     time: [ 700, 900] # Times at witch a debug plot of the wind farm is generated
     iT: [0,1,2] # Turbines for which the debug plot is created
     turbine_effective_wind_speed: False # Generates the effective wind speed across the farm based on a ghost turbine
