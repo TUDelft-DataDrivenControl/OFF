@@ -351,11 +351,11 @@ class PythonGaussianWake(WakeModel):
         stream = open(self.settings['sim_dir'] + self.settings['gch_yaml_path'], 'r')
         sim_info = yaml.safe_load(stream)
 
+        # TODO: parameters should be loaded from the yaml file
         self.param = {}
-        self.param['ka_ti']  = 1
-        self.param['kb_ti']  = 1
-        self.param['epsfac'] = 1
-        self.param['D']      = 1
+        self.param['ka_ti']  = 0.03
+        self.param['kb_ti']  = 0
+        self.param['epsfac'] = 0.2
 
         # sim_info["wake"]["wake_deflection_parameters"]["gauss"]["ad"]
 
@@ -407,25 +407,86 @@ class PythonGaussianWake(WakeModel):
         yaw_angle = np.array([s.get_current_yaw() for s in self.turbine_states])
         ct      = np.array([s.get_current_ct()  for s in self.turbine_states])
         ti      = 0.06
-        avg_vel = self._u_rotors(ct, yaw_angle, ti)
+        avg_vel = self._u_rotors(ct, yaw_angle, ti, i_t=[i_t])[0]
+        # avg_vel = self._u(self.wind_farm_layout[:2,:], ct, yaw_angle, ti)
 
         measurements = pd.DataFrame(
             [[
                 i_t,
-                avg_vel[i_t],
+                avg_vel,
             ]],
             columns=['t_idx', 'u_abs_eff']
         )
 
-        return avg_vel[i_t], measurements
+        return avg_vel, measurements
 
-    def _u_rotors(self, ct, yaw_angle, ti): # for now, only velocity at the center
-        return self._u(self.wind_farm_layout, ct, yaw_angle, ti)
+    def _u_rotors(self, ct: np.ndarray, yaw_angle: np.ndarray, ti: np.ndarray, i_t: List[int]=None) -> np.ndarray: 
+        """ computes the local velocities at the rotor plane
 
-    def _u(self, pos, ct, yaw_angle, ti): # for now, only velocity at the center
+        Parameters
+        ----------
+        ct : np.ndarray
+            n_wts long array containing the local thrust coefficients of the wind turbines
+        yaw_angle : np.ndarray
+            n_wts long array containing the yaw angles of the wind turbines in deg
+        ti : np.ndarray
+            n_wts long array containing the turbulence intensity at the location of the wind turbines 
+        i_t : List[int], optional
+            indexes of the wind turbine where the wind field should be evaluated, by default None (computed at all the wind turbines)
+
+        Returns
+        -------
+        np.np_array
+            array containing the effective wind speed at turbine [i_t]
+        """
+        # TODO: effective wind speed should be averaged over the rotor
+        if i_t is None:
+            return self._u(self.wind_farm_layout, ct, yaw_angle, ti)
+        else:
+            return self._u(self.wind_farm_layout[i_t,:], ct, yaw_angle, ti)
+
+    def _u(self, pos: np.ndarray, ct: np.ndarray, yaw_angle: np.ndarray, ti: np.ndarray) -> np.ndarray: # for now, only velocity at the center
+        """ Computes the effective wind speed at pos
+
+        Parameters
+        ----------
+        pos : np.ndarray
+            n_pos x 3 array containing the position the wind field is evaluated at
+        ct : np.ndarray
+            n_wts long array containing the local thrust coefficients of the wind turbines
+        yaw_angle : np.ndarray
+            n_wts long array containing the yaw angles of the wind turbines in deg
+        ti : np.ndarray
+            n_wts long array containing the turbulence intensity at the location of the wind turbines 
+
+        Returns
+        -------
+        np.ndarray:
+            n_pos long array containing the effective wind speed at pos
+        """        
+        # TODO: is it actuallly the correct way to superpose those fields
         return self.ambient_states[0].get_turbine_wind_speed_abs() - self._du(pos, ct, yaw_angle, ti)
 
-    def _du(self, pos, ct, yaw_angle, ti) -> np.ndarray:
+    def _du(self, pos: np.ndarray, ct: np.ndarray, yaw_angle: np.ndarray, ti: np.ndarray) -> np.ndarray:
+        """ Computes the velocity deficit at pos 
+
+        Parameters
+        ----------
+        pos : np.ndarray
+            n_pos x 3 array containing the position the wind field is evaluated at
+        ct : np.ndarray
+            n_wts long array containing the local thrust coefficients of the wind turbines
+        yaw_angle : np.ndarray
+            n_wts long array containing the yaw angles of the wind turbines in deg
+        ti : np.ndarray
+            n_wts long array containing the turbulence intensity at the location of the wind turbines 
+
+        Returns
+        -------
+        np.ndarray:
+            n_pos long array containing the wake deficit field at pos
+        """        
+                
         dx = np.array([np.subtract.outer(pos[:,comp], self.wind_farm_layout[:,comp]) for comp in range(3)])
         
         streamwise_axis = np.array([*self.ambient_states[0].get_turbine_wind_speed(), 0]) / self.ambient_states[0].get_turbine_wind_speed_abs()
@@ -438,88 +499,59 @@ class PythonGaussianWake(WakeModel):
         
         du = self._du_xi_r(xi, r_h, r_v, ct, yaw_angle, ti)
 
-        return np.sqrt( np.sum( du ** 2 , axis=0) )
+        return np.sqrt( np.sum( du ** 2 , axis=1) )
 
-    def _du_xi_r(self, xi, r_h, r_v, ct, yaw_angle, ti):
-        # r_h += self._deflection_xi(xi)
+    def _du_xi_r(self, xi: np.ndarray, r_h: np.ndarray, r_v: np.ndarray, ct: np.ndarray, yaw_angle: np.ndarray, ti: np.ndarray) -> np.ndarray:
+        """_summary_
 
-        # # Initialize the velocity deficit
-        # uR = u_initial * ct / ( 2.0 * (1 - np.sqrt(1 - ct) ) )
-        # u0 = u_initial * np.sqrt(1 - ct_i)
+        Parameters
+        ----------
+        xi : np.ndarray
+            n_pos x n_wts array containing the streamwise position of pos_i in the reference frame of wind turbine j
+        r_h : np.ndarray
+            n_pos x n_wts array containing the horizontal position of pos_i in the reference frame of wind turbine j
+        r_v : np.ndarray
+            n_pos x n_wts array containing the vertical position of pos_i in the reference frame of wind turbine j
+        ct : np.ndarray
+            n_wts long array containing the local thrust coefficients of the wind turbines
+        yaw_angle : np.ndarray
+            n_wts long array containing the yaw angles of the wind turbines in deg
+        ti : np.ndarray
+            n_wts long array containing the turbulence intensity at the location of the wind turbines 
 
-        # # Initial lateral bounds
-        # sigma_z0 = self.wind_farm_layout[:,4] * 0.5 * np.sqrt(uR / (u_initial + u0))
-        # sigma_y0 = sigma_z0 * np.cosd(yaw_angle) * cos(wind_veer)
+        Returns
+        -------
+        np.ndarray
+            n_pos x n_wts containing the velocity deficit of wind turbine j at location pos i
+        """
 
-        # xR = x_i
-
-        # # Start of the far wake
-        # x0 = np.ones_like(u_initial)
-        # x0 *= self.wind_farm_layout[:,4] * np.cos(yaw_angle) * (1 + np.sqrt(1 - ct) )
-        # x0 /= np.sqrt(2) * (
-        #     4 * self.alpha * ti + 2 * self.beta * (1 - np.sqrt(1 - ct) )
-        # )
-        # x0 += x_i
+        # TODO: speed deficit should be 2D and account for yaw deflection
 
         kstar = self.param['ka_ti'] + self.param['kb_ti'] * ti
         
         _tmp = np.sqrt(1-ct)
         eps = self.param['epsfac'] * np.sqrt(0.5*(1+_tmp)/_tmp)
         xi0 = (np.sqrt(.125) - eps) * self.wind_farm_layout[:,3]/kstar
-        
-        idx_cone = np.where(np.abs(r_h) < self.wind_farm_layout[:,3]/2*(1. - xi/xi0) * (xi < xi0) * (xi>0)) 
-        idx_us = np.where(xi<0) 
             
         sig_o_d_sqr = ( kstar * xi/self.wind_farm_layout[:,3] + eps ) ** 2
         rad = 1 - ct / (8.*sig_o_d_sqr)
 
-        u = self.ambient_states[0].get_turbine_wind_speed_u()
+        u = self.ambient_states[0].get_turbine_wind_speed_abs()
         du   =  u * (1 - np.sqrt(rad * (rad > 0)))* np.exp( -1./(2*sig_o_d_sqr) * (r_h/self.wind_farm_layout[:,3])**2. )  
         du_nw = u * (1 - (np.sqrt(1-ct)))
 
         idx_bounded = du>du_nw
+        idx_cone    = np.abs(r_h) < self.wind_farm_layout[:,3]/2*(1. - xi/xi0) * (xi < xi0) * (xi>0)
+        idx_us      = xi>0
 
-        if np.any(idx_bounded): du[idx_bounded] = du_nw
-        if np.any(idx_cone):    du[idx_cone] = du_nw
-        if np.any(idx_us):      du[idx_us] = 0
+        du = du_nw * idx_bounded + du * (~idx_bounded)
+        du = du_nw * idx_cone + du * (~idx_cone)
+        du = idx_us * du
 
         return du
 
-
-
     def _deflection_xi(self, xi):
         return np.zeros_like(xi)
-    
-        # self.fi.calculate_wake(yaw_angles=yaw_ang)
-        
-        # avg_vel = self.fi.turbine_average_velocities
-        # Cts = self.fi.get_turbine_Cts()
-        # AIs = self.fi.get_turbine_ais()
-        # TIs = self.fi.get_turbine_TIs()
-
-        # measurements = pd.DataFrame(
-        #     [[
-        #         i_t,
-        #         avg_vel[:, :, i_t].flatten()[0],
-        #         Cts[:, :, i_t].flatten()[0],
-        #         AIs[:, :, i_t].flatten()[0],
-        #         TIs[:, :, i_t].flatten()[0],
-        #     ]],
-        #     columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
-        # )
- 
-        # n_t = len(self.turbine_states)
-        # yaw_ang = np.zeros([1, 1, n_t])
-
-        # for ii_t in np.arange(n_t):
-        #     yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
-
-        # self.fi.calculate_wake(yaw_angles=yaw_ang)
-        
-        # avg_vel = self.fi.turbine_average_velocities
-        # Cts = self.fi.get_turbine_Cts()
-        # AIs = self.fi.get_turbine_ais()
-        # TIs = self.fi.get_turbine_TIs()
 
 
     def vis_flow_field(self):

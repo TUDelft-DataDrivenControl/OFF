@@ -310,10 +310,6 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
         """
         u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
         u_op = self._get_wind_speeds_op(i_t, wind_farm)
-        print('u_rp: ', u_rp)
-        print('shape u_rp: ', np.shape(u_rp))
-        print( 'm: ', m)
-        print('u_op: ', u_op)
         return u_rp, u_op, m
 
     def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
@@ -337,7 +333,6 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
                                    wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
         self.floris_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.floris_wake.get_measurements_i_t(i_t)
-        print('ueff: ', ueff)
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
         return np.array([u_eff, v_eff]), m
 
