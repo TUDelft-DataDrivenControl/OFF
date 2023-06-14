@@ -317,7 +317,6 @@ class FlorisGaussianWake(WakeModel):
         plt.show()
 
 
-
 class PythonGaussianWake(WakeModel):
     """
     Python interface for the Gaussian Curl Hybrid model
@@ -353,6 +352,12 @@ class PythonGaussianWake(WakeModel):
 
         # TODO: parameters should be loaded from the yaml file
         self.param = {}
+        self.param['ka_ti']  = sim_info["wake"]["wake_deflection_parameters"]["gauss"]["ka"]
+        self.param['kb_ti']  = sim_info["wake"]["wake_deflection_parameters"]["gauss"]["kb"]
+        
+        self.param["ky"]     = 1
+        self.param["kz"]     = 1
+
         self.param['ka_ti']  = 0.03
         self.param['kb_ti']  = 0
         self.param['epsfac'] = 0.2
@@ -464,7 +469,7 @@ class PythonGaussianWake(WakeModel):
         np.ndarray:
             n_pos long array containing the effective wind speed at pos
         """        
-        # TODO: is it actuallly the correct way to superpose those fields
+        # TODO: is it actually the correct way to superpose those fields
         return self.ambient_states[0].get_turbine_wind_speed_abs() - self._du(pos, ct, yaw_angle, ti)
 
     def _du(self, pos: np.ndarray, ct: np.ndarray, yaw_angle: np.ndarray, ti: np.ndarray) -> np.ndarray:
@@ -550,9 +555,59 @@ class PythonGaussianWake(WakeModel):
 
         return du
 
-    def _deflection_xi(self, xi):
-        return np.zeros_like(xi)
 
+
+    def _deflection_xi(self, xi, x0, sigy, sigz, ct, yaw_ang, D):
+        """
+        Wake deflection following Bastankhah and Porté-Agel 2016
+
+        Parameters
+        ----------
+        xi : [nT x nT] np.ndarray 
+            Matrix with downstream distance of different points (col) respective to each turbine (row)
+        x0 : [1 x nT] np.ndarray 
+            potential core length
+        sigy : [1 x nT] np.ndarray 
+            y axis gaussian spread
+        sigz : [1 x nT] np.ndarray 
+            z axis gaussian spread
+        ct : [1 x nT] np.ndarray 
+            Thrust coefficient
+        yaw_ang : [1 x nT] np.ndarray 
+            misalignment with the main wind direction
+        D : [1 x nT] np.ndarray 
+            turbine diameter
+        """
+        delta = np.zeros_like(xi)
+
+        # Create matrix from inputs for calculation
+        #   The xi matrix needs a mask and the other inputs can not be masked with the same if they are vectors
+        yaw_ang_r = np.tile(np.deg2rad(yaw_ang), (len(yaw_ang),1))
+        cos_yaw = np.cos(yaw_ang_r)
+        
+        ct      = np.tile(ct,(len(ct),1))
+        sigy    = np.tile(sigy,(len(sigy),1))
+        sigz    = np.tile(sigz,(len(sigz),1))
+        yaw_ang = np.tile(yaw_ang,(len(yaw_ang),1))
+        D       = np.tile(D,(len(D),1))
+
+        # Eq. 6.12
+        theta = 0.3 * yaw_ang_r / cos_yaw * (1 - np.sqrt(1 - ct * cos_yaw))
+
+        # Near wake deflection for all entries (Eq. 7.4)
+        delta = theta * xi
+        delta[xi < 0.0] = 0.0  # No delfection for upstream turbines
+
+        # Correct wake defelction for far wake entries
+        mask_far_wake = xi > x0
+        #   Far wake fraction 1 & 2
+        fwf1 = (1.6 + np.sqrt(ct[mask_far_wake]))*(1.6* np.sqrt((8*sigy[mask_far_wake]*sigz[mask_far_wake])/(D[mask_far_wake]**2 * cos_yaw[mask_far_wake])) - np.sqrt(ct[mask_far_wake]))
+        fwf2 = (1.6 - np.sqrt(ct[mask_far_wake]))*(1.6* np.sqrt((8*sigy[mask_far_wake]*sigz[mask_far_wake])/(D[mask_far_wake]**2 * cos_yaw[mask_far_wake])) + np.sqrt(ct[mask_far_wake]))
+        #   Calculate displacement additional to the near wake deflection (Eq. 7.4)
+        delta[mask_far_wake] += theta[mask_far_wake]/14.7 * np.sqrt(cos_yaw[mask_far_wake]/(self.param["ky"] * self.param["kz"] * ct[mask_far_wake])) * \
+            (2.9 + 1.3*np.sqrt(1 - ct[mask_far_wake]) - ct[mask_far_wake]) * np.log(fwf1 / fwf2) * D[mask_far_wake]
+        
+        return delta
 
     def vis_flow_field(self):
         """
