@@ -361,13 +361,13 @@ class HAWT_ADM(Turbine):
         if "rotor_overhang" in turbine_data:
             self.nacellePos[0] = turbine_data["rotor_overhang"]
 
-        if "Cp_curve" in turbine_data:
-            self.Cp_u_values = turbine_data["Cp_curve"]["Cp_u_values"]
-            self.Cp_u_wind_speeds = turbine_data["Cp_curve"]["Cp_u_wind_speeds"]
+        if "Cp_curve" in turbine_data["performance"]:
+            self.Cp_u_values = turbine_data["performance"]["Cp_curve"]["Cp_u_values"]
+            self.Cp_u_wind_speeds = turbine_data["performance"]["Cp_curve"]["Cp_u_wind_speeds"]
 
         if "Ct_curve" in turbine_data:
-            self.Ct_u_values = turbine_data["Ct_curve"]["Ct_u_values"]
-            self.Ct_u_wind_speeds = turbine_data["Ct_curve"]["Ct_u_values"]
+            self.Ct_u_values = turbine_data["performance"]["Ct_curve"]["Ct_u_values"]
+            self.Ct_u_wind_speeds = turbine_data["performance"]["Ct_curve"]["Ct_u_values"]
 
         if "pP" in turbine_data:
             self.Cp_pP = turbine_data["pP"]
@@ -383,7 +383,7 @@ class HAWT_ADM(Turbine):
         lg.info('Power yaw coefficient: %s' % self.yaw_power_coeff)
         lg.info('Thrust yaw coefficient: %s' % self.yaw_thrust_coeff)
 
-    def calc_power(self, wind_speed, air_den):
+    def calc_power(self, wind_speed, air_den = 1.225):
         """
         Calculate the power based on turbine, ambient and OP states
 
@@ -400,7 +400,7 @@ class HAWT_ADM(Turbine):
             Power generated (W)
         """
         if self.yaw_power_coeff == "pP":
-            yaw = self.turbine_states.get_yaw()
+            yaw = self.turbine_states.get_current_yaw()
             yaw_coef = np.cos(yaw) ** self.Cp_pP
         elif self.yaw_power_coeff == "none":
             yaw_coef = 1.0
@@ -410,13 +410,13 @@ class HAWT_ADM(Turbine):
         if self.power_calc_method == "axial induction":
             axi = self.turbine_states.get_current_ax_ind()
             cp = 4 * axi * (1 - axi) ** 2
-            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
         elif self.power_calc_method == "cp-u lut":
             cp = np.interp(wind_speed, self.Cp_u_wind_speeds, self.Cp_u_values)
-            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
         elif self.power_calc_method == "cp-bpa-tsr":
             cp = 0
-            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
             raise Exception("Cp calculation based on cp-bpa-tsr not implemented yet.")
         else:
             raise Exception("The power calculation method %s is unkown. Try cp-u lut, cp-bpa-tsr, axial induction "
