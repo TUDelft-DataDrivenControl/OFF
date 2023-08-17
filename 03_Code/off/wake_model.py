@@ -171,11 +171,10 @@ class DummyWake(WakeModel):
             dist_dw = np.cos(phi_u) * dist_wc[:, 0] + np.sin(phi_u) * dist_wc[:, 1]
 
             if np.average(dist_dw) > -.1:
-                lg.debug(f'Turbine {idx} has no influence on turbine {i_t}')
-                lg.debug(f'Location Turbine {idx}: {self.wind_farm_layout[idx, 0:3]}')
-                lg.debug(f'Location Turbine {i_t}: {self.wind_farm_layout[i_t, 0:3]}')
-                lg.debug(f'Wind direction: {ot.ot_get_orientation(self.ambient_states[i_t].get_turbine_wind_dir())} '
-                         f'deg')
+                lg.debug('Turbine %s has no influence on turbine %s' % (idx, i_t))
+                lg.debug('Location Turbine %s: %s' % (idx, self.wind_farm_layout[idx, 0:3]))
+                lg.debug('Location Turbine %s: %s' % (i_t, self.wind_farm_layout[i_t, 0:3]))
+                lg.debug('Wind direction: %s deg' % ot.ot_get_orientation(self.ambient_states[i_t].get_turbine_wind_dir()))
                 continue
 
             dist_cw = -np.sin(phi_u) * dist_wc[:, 0] + np.cos(phi_u) * dist_wc[:, 1]
@@ -225,9 +224,9 @@ class FlorisGaussianWake(WakeModel):
             1 x 2 : [u_abs, phi] - absolute background wind speed and direction
         """
         super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
-        lg.info(f'Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
+        lg.info('Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
         self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
-        lg.info(f'FLORIS object created.')
+        lg.info('FLORIS object created.')
 
     def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
         """
@@ -345,7 +344,7 @@ class PythonGaussianWake(WakeModel):
             1 x 2 : [u_abs, phi] - absolute background wind speed and direction
         """
         super(PythonGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
-        lg.info(f'Loading input file for Gaussian Wake model (Build in)')
+        lg.info('Loading input file for Gaussian Wake model (Build in)')
 
         stream = open(self.settings['sim_dir'] + self.settings['gch_yaml_path'], 'r')
         sim_info = yaml.safe_load(stream)
@@ -364,7 +363,7 @@ class PythonGaussianWake(WakeModel):
 
         # sim_info["wake"]["wake_deflection_parameters"]["gauss"]["ad"]
 
-        lg.info(f'Gaussian Wake model created.')
+        lg.info('Gaussian Wake model created.')
 
     def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states: List[TurbineStates], ambient_states:List[AmbientStates]):
         """

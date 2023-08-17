@@ -454,12 +454,11 @@ class TWFSolver(WakeSolver):
             weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
 
             # Logging Interpolation OPs
-            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, '
-                    f'loc: {point_a}),'
-                    f' OP2 (index: {ind_op[1]}, loc: {point_b})')
-            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {weight_d} ')
+            lg.info('2 OP interpolation: T%s influence on T%s, OP1 (index: %s, loc: %s), OP2 (index: %s, loc: %s)' %
+                    (inf_turbines[idx], i_t, ind_op[0], point_a, ind_op[1], point_b))
+            lg.info('TWF - OP interpolation weight (should be between 0 and 1): %s' % weight_d)
             weight_d = np.fmin(np.fmax(weight_d, 0), 1)
-            lg.info(f'TWF - Used OP interpolation weight: {weight_d}')
+            lg.info('TWF - Used OP interpolation weight:  %s' % weight_d)
 
             r0 = 1 - weight_d
             r1 = weight_d
@@ -486,7 +485,7 @@ class TWFSolver(WakeSolver):
             #       3. Set diameter
             twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
-        lg.info(f'TWF layout for turbine {i_t}:')
+        lg.info('TWF layout for turbine %s:' % i_t)
         lg.info(twf_layout)
 
         # Set wind farm in the wake model
@@ -499,7 +498,7 @@ class TWFSolver(WakeSolver):
 
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
-        lg.info(f'Effective wind speed of turbine {i_t} : {ueff} m/s')
+        lg.info('Effective wind speed of turbine %s : %s m/s' % (i_t, ueff))
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, twf_a_states[i_t_tmp].get_turbine_wind_dir())
         return np.array([u_eff, v_eff]), m
 

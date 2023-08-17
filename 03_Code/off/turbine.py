@@ -44,7 +44,8 @@ class TurbineStates(States, ABC):
             name and unit of the states
         """
         super(TurbineStates, self).__init__(number_of_time_steps, number_of_states, state_names)
-        lg.info(f'Turbine states chain created with {number_of_time_steps} time steps and {number_of_states} states')
+        lg.info('Turbine states chain created with %s time steps and %s states' %
+                (number_of_time_steps, number_of_states))
         lg.info(state_names)
 
     @abstractmethod
@@ -307,7 +308,7 @@ class Turbine(ABC):
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         """
         # TODO add tilt to offset calculation
-        lg.info(f'Orientation [0] {self.orientation[0]}')
+        lg.info('Orientation [0] %s ' % self.orientation[0])
 
         yaw = ot.ot_deg2rad(self.orientation[0])
         offset = np.array([np.cos(yaw), np.sin(yaw), 1]) * \
@@ -357,7 +358,7 @@ class HAWT_ADM(Turbine):
 
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         lg.info("HAWT turbine of type " + turbine_data["name"] + "created")
-        lg.info(f'Turbine base location: {base_location}')
+        lg.info('Turbine base location: %s' % base_location)
 
     def calc_power(self, wind_speed, air_den):
         """

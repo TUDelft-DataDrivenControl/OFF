@@ -67,7 +67,7 @@ class OFF:
             Current run id.
         """
         run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
-        lg.info('RunID path: ' + run_id_path)
+        lg.info('RunID path: %s', run_id_path)
 
         try:
             fid = open(run_id_path)
@@ -80,7 +80,7 @@ class OFF:
         with open(run_id_path, 'w') as fid:
             fid.write('{}'.format(run_id+1))
 
-        lg.info(f'RunID: {run_id}')
+        lg.info('RunID: %s' % run_id)
         return run_id
 
     def __dir_init__(self, settings_sim: dict):
@@ -158,7 +158,7 @@ class OFF:
                 log_fid = f'{self.sim_dir}/off.log'
                 _logger_add(lg, logging.FileHandler(log_fid), file_lvl, file_formatter)
         
-        lg.info(f'Saving data to {self.sim_dir}.')
+        lg.info('Saving data to %s.' % self.sim_dir)
 
     def init_sim(self, start_ambient: np.ndarray, start_turbine: np.ndarray):
         """
@@ -201,7 +201,7 @@ class OFF:
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
-            lg.info(f'Starting time step: {t} s.')
+            lg.info('Starting time step: %s s.' % t)
 
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
@@ -246,7 +246,7 @@ class OFF:
                 tur.observation_points.propagate_ops(self.settings_sim['time step'])
                 lg.debug(tur.observation_points.get_world_coord())
 
-            lg.info(f'Ending time step: {t} s.')
+            lg.info('Ending time step: %s s.' % t)
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
