@@ -400,7 +400,7 @@ class HAWT_ADM(Turbine):
             Power generated (W)
         """
         if self.yaw_power_coeff == "pP":
-            yaw = self.turbine_states.get_current_yaw()
+            yaw = np.deg2rad(self.turbine_states.get_current_yaw())
             yaw_coef = np.cos(yaw) ** self.Cp_pP
         elif self.yaw_power_coeff == "none":
             yaw_coef = 1.0
