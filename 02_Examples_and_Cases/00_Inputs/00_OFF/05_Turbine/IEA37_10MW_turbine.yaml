@@ -238,8 +238,8 @@ performance:
       - 50.0
 generator_efficiency: 1.0
 hub_height: 119.0
-pP: 1.88
-pT: 1.88
+pP: 1.88                    # coefficient for power calculation: cos(yaw) ** pP
+pT: 1.88                    # coefficient for thrust calculation: cos(yaw) ** pT
 rotor_diameter: 198.0
 TSR: 8.0
 ref_density_cp_ct: 1.225

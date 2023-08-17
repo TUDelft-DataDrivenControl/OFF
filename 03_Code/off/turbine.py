@@ -353,12 +353,35 @@ class HAWT_ADM(Turbine):
         """
         self.diameter = turbine_data["rotor_diameter"]
         self.nacellePos = np.array([0, 0, turbine_data["hub_height"]])
+        self.power_calc_method = "cp-u lut"  # alternative to "axial induction", "cp-bpa-tsr"  TODO: Set later in input
+        self.thrust_calc_method = "ct-u lut"  # alternative to "axial induction", "ct-bpa-tsr" TODO: Set later in input
+        self.yaw_power_coeff = "pP" # alternative to "none" TODO: Set later in input
+        self.yaw_thrust_coeff ="pT" # alternative to "none" TODO: Set later in input
+
         if "rotor_overhang" in turbine_data:
             self.nacellePos[0] = turbine_data["rotor_overhang"]
+
+        if "Cp_curve" in turbine_data:
+            self.Cp_u_values = turbine_data["Cp_curve"]["Cp_u_values"]
+            self.Cp_u_wind_speeds = turbine_data["Cp_curve"]["Cp_u_wind_speeds"]
+
+        if "Ct_curve" in turbine_data:
+            self.Ct_u_values = turbine_data["Ct_curve"]["Ct_u_values"]
+            self.Ct_u_wind_speeds = turbine_data["Ct_curve"]["Ct_u_values"]
+
+        if "pP" in turbine_data:
+            self.Cp_pP = turbine_data["pP"]
+
+        if "pT" in turbine_data:
+            self.Cp_pT = turbine_data["pT"]
 
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         lg.info("HAWT turbine of type " + turbine_data["name"] + "created")
         lg.info('Turbine base location: %s' % base_location)
+        lg.info('Power calculation method: %s' % self.power_calc_method)
+        lg.info('Thrust calculation method: %s' % self.thrust_calc_method)
+        lg.info('Power yaw coefficient: %s' % self.yaw_power_coeff)
+        lg.info('Thrust yaw coefficient: %s' % self.yaw_thrust_coeff)
 
     def calc_power(self, wind_speed, air_den):
         """
@@ -376,9 +399,30 @@ class HAWT_ADM(Turbine):
         float :
             Power generated (W)
         """
+        if self.yaw_power_coeff == "pP":
+            yaw = self.turbine_states.get_yaw()
+            yaw_coef = np.cos(yaw) ** self.Cp_pP
+        elif self.yaw_power_coeff == "none":
+            yaw_coef = 1.0
+        else:
+            raise Exception("Only cos(yaw) ** pP yaw coefficient supported (or none)")
 
-        # TODO probably needs to be rewritten
-        return 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3  # TODO link with turbine state Cp calculation
+        if self.power_calc_method == "axial induction":
+            axi = self.turbine_states.get_current_ax_ind()
+            cp = 4 * axi * (1 - axi) ** 2
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+        elif self.power_calc_method == "cp-u lut":
+            cp = np.interp(wind_speed, self.Cp_u_wind_speeds, self.Cp_u_values)
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+        elif self.power_calc_method == "cp-bpa-tsr":
+            cp = 0
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef
+            raise Exception("Cp calculation based on cp-bpa-tsr not implemented yet.")
+        else:
+            raise Exception("The power calculation method %s is unkown. Try cp-u lut, cp-bpa-tsr, axial induction "
+                            "instead." % self.power_calc_method)
+
+        return p
 
 
 class TurbineStatesFLORIDyn(TurbineStates):
@@ -395,7 +439,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         super().__init__(number_of_time_steps, 3, ['axial induction (-), yaw (deg), added turbulence intensity (%)'])
 
-    def get_current_cp(self) -> float:
+    def get_current_cp(self) -> float:  # TODO: Remove! This has been moved to the turbine model
         """
         get_current_cp returns the current power coefficient of the turbine
 
@@ -407,7 +451,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         return 4 * self.states[0, 0] * (1 - self.states[0, 0]) ** 2 * \
                np.cos(self.states[0, 1]) ** 2.2  # TODO Double check correct Cp calculation
 
-    def get_current_ct(self) -> float:
+    def get_current_ct(self) -> float:  # TODO: Remove! This has been moved to the turbine model
         """
         get_current_ct returns the current thrust coefficient of the turbine
 
