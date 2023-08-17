@@ -219,7 +219,7 @@ class OFF:
 
                 # Calculate the power generated
                 pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0], uv_r[idx, 1]))
-                m_tmp.pow = pow_t[idx, :]
+                m_tmp['pow'] = pow_t[idx, :]
 
                 # Add turbine index & timestamp to data
                 m_tmp.t_idx = idx
