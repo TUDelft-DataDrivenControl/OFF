@@ -41,3 +41,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# =========== TICKETS ===========
+# [ ] generate initial input file for FLORIS
+#   currently FLORIS is initialized with the 02/00/01_FLORIS .yaml files. These link to the NREL5MW, which needs to be
+#   replaced by a file that links to the correct turbines. Further, all settings not overwritten by the re-init function
+#   of FLORIS also stay the same.
+# [ ] implement the yaw controllers
+#   Four controllers with varying complexity are suggested: ideal greedy baseline, realistic greedy baseline, yaw
+#   steering LUT based, yaw steering prescribed motion. The controller object should take into account that the same
+#   input workflow will be required for axial induction and possibly tilt.

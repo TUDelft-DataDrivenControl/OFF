@@ -245,6 +245,7 @@ class OFF:
 
             # ///////////////////// CONTROL ///////////////////////
 
+
             # ///////////////////// VISUALIZE /////////////////////
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
                     t in self.settings_vis["debug"]["time"]):

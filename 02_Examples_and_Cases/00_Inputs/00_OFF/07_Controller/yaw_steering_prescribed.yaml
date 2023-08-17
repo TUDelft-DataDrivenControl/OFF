@@ -1,0 +1,6 @@
+controller:
+  name: Prescribed motion yaw steering controller
+  description: Applies prescribed yaw trajectories to the turbines
+
+  settings:
+    ctl: "prescribed yaw controller"

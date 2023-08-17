@@ -1,0 +1,8 @@
+controller:
+  name: Realistic greedy baseline
+  description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
+
+  settings:
+    ctl: "RealGreedyBaseline"
+    misalignment_thresh: 2 # in deg
+    average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml

@@ -1,0 +1,6 @@
+controller:
+  name: Ideal greedy baseline
+  description: Follows the main wind direction, disregarding yaw travel costs or other turbines
+
+  settings:
+    ctl: "IdealGreedyBaseline"

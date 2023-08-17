@@ -40,7 +40,7 @@ class OFFInterface():
     measurements : pd.DataFrame
 
     def __init__(self) -> None:
-        ready_to_run = False
+        self.ready_to_run = False
 
         # ===== Check package requirements =====
         pkg_missing = False
@@ -174,7 +174,7 @@ class OFFInterface():
 
     def _run_yaml_to_dict(self, sim_info: dict) -> tuple:
         """
-        Returns settings dicts for simulation, wake and solver (sim, wke, sol)
+        Returns settings dicts for simulation, wake, solver, corrector and controller (sim, wke, sol, cor, ctr)
         Parameters
         ----------
         sim_info:
@@ -203,6 +203,8 @@ class OFFInterface():
         settings_cor = { 'ambient': sim_info["ambient"].get('flow_field', False),
                         'turbine': sim_info["turbine"].get('feed', False),
                         'wake': sim_info["wake"].get('feed', False) }
+
+        settings_ctr = sim_info["controller"]["settings"]
 
         return settings_sim, settings_sol, settings_wke, settings_cor
 

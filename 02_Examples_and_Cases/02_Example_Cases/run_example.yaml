@@ -114,10 +114,18 @@ solver:
 
   settings:
     wake_solver: "TWFSolver"
-    wake_model: "PythonGaussianWake" # "FLORIS GCH"
+    wake_model: "FLORIS GCH" #"PythonGaussianWake" # "FLORIS GCH"
     op_propagation: "frozen turbulence"
     extrapolation: "pair"
     n_op: 120
+
+controller:
+  name: Ideal greedy baseline
+  description: Follows the main wind direction, disregarding yaw travel costs or other turbines
+
+  settings:
+    ctl: "IdealGreedyBaseline"
+
 
 turbine:
   iea_10mw:
@@ -371,6 +379,7 @@ turbine:
     installation: fixed
     rotor_overhang: 7.07        # in m    # TODO Copied from DTU 10MW - Change!
     shaft_tilt: 5               # in deg  # TODO Copied from DTU 10MW - Change!
+    yaw_rate_lim: 0.3           # deg/s   # TODO Find true value
 
 io:                             # Needs to be written by the user
   data folder: ''
