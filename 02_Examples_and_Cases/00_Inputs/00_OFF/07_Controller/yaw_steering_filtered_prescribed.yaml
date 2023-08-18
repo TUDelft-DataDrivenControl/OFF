@@ -1,0 +1,6 @@
+controller:
+  name: Prescribed filtered motion yaw steering controller
+  description: Applies prescribed yaw trajectories to the turbines, the trajectories are taken as setpoints, whcih are only applied if a given threshold is overcome
+
+  settings:
+    ctl: "prescribed filtered yaw controller"
