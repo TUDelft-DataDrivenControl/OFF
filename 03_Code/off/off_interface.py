@@ -299,7 +299,7 @@ class OFFInterface():
         # The code below does not take time into account, but rather initializes with a given wind dir / vel
         flow_field = dict([('air_density', settings_amb['flow_field']['air_density']),
                            ('reference_wind_height', settings_amb['flow_field']['reference_wind_height']),
-                           ('turbulence_intensity', settings_amb['flow_field']['turbulence_intensity']),
+                           ('turbulence_intensity', settings_amb['flow_field']['turbulence_intensity'][0]),
                            ('wind_directions', [settings_amb['flow_field']['wind_directions'][0]]),
                            ('wind_shear', settings_amb['flow_field']['wind_shear']),
                            ('wind_speeds', [settings_amb['flow_field']['wind_speeds'][0]]),

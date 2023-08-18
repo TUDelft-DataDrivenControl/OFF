@@ -79,7 +79,8 @@ ambient:
   flow_field: # This struct is passed on to the AmbientCorrector to feed in the new flow properties
     air_density: 1.225
     reference_wind_height: 119.0 # Needs to be defined as FLORIS expects different turbine types (-1 might still work)
-    turbulence_intensity: 0.06
+    turbulence_intensity:
+      - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 255.0
       - 255.0
