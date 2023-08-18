@@ -1,0 +1,3 @@
+solver:
+  type: turbine_grid
+  turbine_grid_points: 3
