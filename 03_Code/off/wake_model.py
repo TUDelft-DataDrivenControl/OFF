@@ -225,7 +225,7 @@ class FlorisGaussianWake(WakeModel):
         """
         super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
         lg.info('Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
-        self.fi = FlorisInterface(self.settings['sim_dir'] + self.settings['gch_yaml_path'])
+        self.fi = FlorisInterface(self.settings['yaml_path'])
         lg.info('FLORIS object created.')
 
     def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):

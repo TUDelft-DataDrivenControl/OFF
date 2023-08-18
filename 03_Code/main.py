@@ -28,7 +28,7 @@ def main():
     #   The interface object does mot yet know the simulation environment, it only checks requirements
     oi = offi.OFFInterface()
     
-    # Tell the simulatin what to run
+    # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
     oi.initSimulatioByPath(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
     

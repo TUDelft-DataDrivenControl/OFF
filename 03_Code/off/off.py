@@ -30,6 +30,7 @@ import numpy as np
 import pandas as pd
 import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
+import shutil
 
 from off import __file__ as OFF_PATH
 OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
@@ -51,6 +52,11 @@ class OFF:
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
+
+        # Link FLORIS File
+        settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
+        shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
+
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)

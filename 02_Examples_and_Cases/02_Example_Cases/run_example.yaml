@@ -78,9 +78,8 @@ ambient:
 
   flow_field: # This struct is passed on to the AmbientCorrector to feed in the new flow properties
     air_density: 1.225
-    reference_wind_height: -1 # -1 is code for use the hub height of T0
-    turbulence_intensity:
-      - 0.06
+    reference_wind_height: 119.0 # Needs to be defined as FLORIS expects different turbine types (-1 might still work)
+    turbulence_intensity: 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 255.0
       - 255.0
@@ -106,7 +105,10 @@ wake:
   settings:
     nRP: 10               # Not used yet but required
     rotor discretization: Isocell  # Not used yet but required
-    gch_yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
+    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
+    floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
+    floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
+    floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
 
 solver:
   name: TWF FLORIS

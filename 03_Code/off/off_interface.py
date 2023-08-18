@@ -72,12 +72,17 @@ class OFFInterface():
         path_to_yaml: str
             Path to the simulation yaml file
         """
-        stream = open(path_to_yaml,'r')
+        stream = open(path_to_yaml, 'r')
         sim_info = yaml.safe_load(stream)
 
         # Convert run data into settings and wind farm object
         settings_sim, settings_sol, settings_wke, settings_cor = self._run_yaml_to_dict(sim_info)
         wind_farm = self._run_yaml_to_wind_farm(sim_info)
+        tmp_yaml_path = self._gen_FLORIS_yaml(settings_wke,
+                              sim_info["wind_farm"],
+                              sim_info["ambient"],
+                              path_to_yaml.rsplit('/', 1)[0])  # This might not work on Windows
+        settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
 
         # Visualization settings
         vis = sim_info["vis"]
@@ -171,7 +176,6 @@ class OFFInterface():
 
         return pkg_missing
 
-
     def _run_yaml_to_dict(self, sim_info: dict) -> tuple:
         """
         Returns settings dicts for simulation, wake, solver, corrector and controller (sim, wke, sol, cor, ctr)
@@ -207,7 +211,6 @@ class OFFInterface():
         settings_ctr = sim_info["controller"]["settings"]
 
         return settings_sim, settings_sol, settings_wke, settings_cor
-
 
     def _run_yaml_to_wind_farm(self, sim_info: dict) -> wfm.WindFarm:
         """
@@ -253,3 +256,59 @@ class OFFInterface():
 
         wind_farm = wfm.WindFarm(turbines)
         return wind_farm
+
+    def _gen_FLORIS_yaml(self, settings_wke: dict, settings_wf: dict, settings_amb: dict, path_to_tmp: str) -> str:
+        """
+        Combines the OFF simulation settings into the initial FLORIS input file
+
+        Parameters
+        ----------
+        settings_wke
+        settings_wf
+        settings_amb
+
+        Returns
+        -------
+        path to the FLORIS file
+        """
+        floris_file = dict([('name', "OFF FLORIS Init Simulation"),
+                             ('description', "File to initialize the FLORIS simulation with the correct turbine types "
+                                             "and settings"),
+                             ('floris_version', "v3.4.1")])
+
+        # Read yaml data for Logging, Solver and Wake settings
+        stream = open(off.OFF_PATH + '/' + settings_wke["floris_logging"], 'r')
+        f_logging = yaml.safe_load(stream)
+        floris_file.update(f_logging)
+
+        stream = open(off.OFF_PATH + '/' + settings_wke["floris_solver"], 'r')
+        f_solver = yaml.safe_load(stream)
+        floris_file.update(f_solver)
+
+        stream = open(off.OFF_PATH + '/' + settings_wke["floris_wake"], 'r')
+        f_wake = yaml.safe_load(stream)
+        floris_file.update(f_wake)
+
+        # Write yaml data for farm and flow field
+        farm = dict([('layout_x', settings_wf['farm']['layout_x']),  # Will be overwritten by twf solver
+                     ('layout_y', settings_wf['farm']['layout_y']),  # Will be overwritten by twf solver
+                     ('turbine_type', settings_wf['farm']['turbine_type'])])
+
+        floris_file.update(dict([('farm', farm)]))
+
+        # The code below does not take time into account, but rather initializes with a given wind dir / vel
+        flow_field = dict([('air_density', settings_amb['flow_field']['air_density']),
+                           ('reference_wind_height', settings_amb['flow_field']['reference_wind_height']),
+                           ('turbulence_intensity', settings_amb['flow_field']['turbulence_intensity']),
+                           ('wind_directions', [settings_amb['flow_field']['wind_directions'][0]]),
+                           ('wind_shear', settings_amb['flow_field']['wind_shear']),
+                           ('wind_speeds', [settings_amb['flow_field']['wind_speeds'][0]]),
+                           ('wind_veer', settings_amb['flow_field']['wind_veer'])])
+        floris_file.update(dict([('flow_field', flow_field)]))
+
+        path_out = path_to_tmp + '/tmp_floris_input.yaml'
+        with open(path_out, "w") as yaml_file:
+            yaml.dump(floris_file, yaml_file)
+
+        return path_out
+
