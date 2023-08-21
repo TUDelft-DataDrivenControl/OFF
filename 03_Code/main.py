@@ -37,6 +37,7 @@ def main():
     
     # Store output
     oi.storeMeasurements()
+    oi.storeAppliedControl()
 
 
 if __name__ == "__main__":

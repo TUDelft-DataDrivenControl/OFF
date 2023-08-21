@@ -257,7 +257,7 @@ class OFF:
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
                 # Store turbine state applied in controller
-                c_tmp = self.controller.get_applied_settings()
+                c_tmp = self.controller.get_applied_settings(tur, idx, t)
                 control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
 
             lg.info('Rotor wind speed of all turbines:')
