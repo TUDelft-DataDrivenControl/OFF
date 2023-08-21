@@ -115,7 +115,7 @@ class TurbineStates(States, ABC):
     @abstractmethod
     def get_ax_ind(self, index: int) -> float:
         """
-        get_ax_ind(index) returns the axial induction coefficient at a requested index of the turbine state chain
+        get_ax_ind(index) returns the axial induction factor at a requested index of the turbine state chain
 
         Parameters
         ----------
@@ -125,6 +125,17 @@ class TurbineStates(States, ABC):
         -------
         float:
             Axial induction factor
+        """
+        pass
+
+    @abstractmethod
+    def set_ax_ind(self, ax_ind):
+        """
+        Stores the axial induction factor of the turbine in the states.
+
+        Parameters
+        ----------
+        ax_ind: axial induction factor
         """
         pass
 
@@ -141,6 +152,17 @@ class TurbineStates(States, ABC):
         -------
         float:
             yaw misalignment in deg
+        """
+        pass
+
+    @abstractmethod
+    def set_yaw(self, yaw_angle):
+        """
+        Stores the yaw angle of the turbine in the states.
+
+        Parameters
+        ----------
+        yaw_angle: Difference between turbine orientation and wind direction
         """
         pass
 
@@ -264,8 +286,8 @@ class Turbine(ABC):
             Turbine yaw misalignment angle in degrees
 
         """
-        # TODO: this should also set the turbine states
         self.orientation[0] = ot.ot_get_orientation(wind_direction, yaw)
+        self.turbine_states.set_yaw(yaw)
 
     def calc_tilt(self):
         """
@@ -487,6 +509,19 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         return self.get_yaw(0)
 
+    def set_yaw(self, yaw_angle: float):
+        """
+        Sets the yaw misalignment with the wind direction
+
+        Parameters
+        ----------
+        yaw_angle
+        """
+        if self.n_time_steps > 1:
+            self.states[0, 1] = yaw_angle
+        else:
+            self.states[1] = yaw_angle
+
     def get_ct(self, index: int) -> float:
         """
         get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain
@@ -518,6 +553,19 @@ class TurbineStatesFLORIDyn(TurbineStates):
             return self.states[index, 0]
         else:
             return self.states[0]
+
+    def set_ax_ind(self, ax_ind):
+        """
+        Stores the axial induction factor of the turbine in the states.
+
+        Parameters
+        ----------
+        ax_ind: axial induction factor
+        """
+        if self.n_time_steps > 1:
+            self.states[0, 0] = ax_ind
+        else:
+            self.states[0] = ax_ind
 
     def get_yaw(self, index: int) -> float:
         """

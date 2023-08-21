@@ -40,7 +40,7 @@ class Controller(ABC):
         self.settings = settings
 
     @abstractmethod
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -68,7 +68,7 @@ class IdealGreedyBaselineController(Controller):
         super(IdealGreedyBaselineController, self).__init__(settings)
         lg.info('Ideal greedy baseline controller created.')
 
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -85,7 +85,7 @@ class IdealGreedyBaselineController(Controller):
         -------
         Turbine object with updated turbine states
         """
-        pass
+        turbine.set_yaw(turbine.ambient_states.get_wind_dir(), 0.0)
 
 
 class RealisticGreedyBaselineController(Controller):
@@ -98,7 +98,7 @@ class RealisticGreedyBaselineController(Controller):
         super(RealisticGreedyBaselineController, self).__init__(settings)
         lg.info('Realistic greedy baseline controller created.')
 
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -128,7 +128,7 @@ class YawSteeringLUTController(Controller):
         super(YawSteeringLUTController, self).__init__(settings)
         lg.info('Yaw steering LUT controller created.')
 
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -157,7 +157,7 @@ class YawSteeringPrescribedMotionController(Controller):
         super(YawSteeringPrescribedMotionController, self).__init__(settings)
         lg.info('Prescribed yaw motion controller created.')
 
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -186,7 +186,7 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         super(YawSteeringFilteredPrescribedMotionController, self).__init__(settings)
         lg.info('Prescribed yaw motion controller created.')
 
-    def set_turbine_states(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
         """
         Reads the given turbine and sets its turbine states
 
@@ -206,7 +206,7 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         pass
 
 # ============== Tickets ================
-# [ ] implement 1st controller -> ideal greedy baseline
+# [x] implement 1st controller -> ideal greedy baseline
 # [ ] Add switch to run file
 #       [ ] Select input data
 # [ ] Add controller to initialization

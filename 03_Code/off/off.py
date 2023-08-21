@@ -26,6 +26,7 @@ import off.windfarm as wfm
 import off.observation_points as ops
 import off.ambient as amb
 import off.utils as util
+import off.controller as ctr
 import numpy as np
 import pandas as pd
 import off.wake_solver as ws
@@ -45,7 +46,7 @@ class OFF:
     settings_vis = dict()
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict,
-                 settings_cor: dict, vis: dict):
+                 settings_cor: dict, settings_ctr: dict, vis: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.settings_vis = vis
@@ -53,14 +54,30 @@ class OFF:
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
 
-        # Link FLORIS File
+        # =========== FLORIS ===========
         settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
         shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
 
+        # =========== Solver ===========
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
 
+        # =========== Controller ===========
+        if settings_ctr["ctl"] == "IdealGreedyBaseline":
+            self.controller = ctr.IdealGreedyBaselineController(settings_ctr)
+        elif settings_ctr["ctl"] == "RealGreedyBaseline":
+            self.controller = ctr.RealisticGreedyBaselineController(settings_ctr)
+        elif settings_ctr["ctl"] == "prescribed filtered yaw controller":
+            self.controller = ctr.YawSteeringFilteredPrescribedMotionController(settings_ctr)
+        elif settings_ctr["ctl"] == "prescribed yaw controller":
+            self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr)
+        elif settings_ctr["ctl"] == "LUT yaw controller":
+            self.controller = ctr.YawSteeringLUTController(settings_ctr)
+        else:
+            raise Warning("Controller %s is undefined!" % settings_ctr["ctl"])
+
+        # =========== Corrector ===========
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
@@ -249,9 +266,6 @@ class OFF:
                 # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
 
-            # ///////////////////// CONTROL ///////////////////////
-
-
             # ///////////////////// VISUALIZE /////////////////////
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
                     t in self.settings_vis["debug"]["time"]):
@@ -263,6 +277,10 @@ class OFF:
                 tur.turbine_states.iterate_states_and_keep()
                 tur.observation_points.propagate_ops(self.settings_sim['time step'])
                 lg.debug(tur.observation_points.get_world_coord())
+
+            # ///////////////////// CONTROL ///////////////////////
+            for idx, tur in enumerate(self.wind_farm.turbines):
+                self.controller(tur, idx, t)
 
             lg.info('Ending time step: %s s.' % t)
 

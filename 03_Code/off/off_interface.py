@@ -76,8 +76,10 @@ class OFFInterface():
         sim_info = yaml.safe_load(stream)
 
         # Convert run data into settings and wind farm object
-        settings_sim, settings_sol, settings_wke, settings_cor = self._run_yaml_to_dict(sim_info)
+        settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr = self._run_yaml_to_dict(sim_info)
         wind_farm = self._run_yaml_to_wind_farm(sim_info)
+
+        # Generate an input file for FLORIS
         tmp_yaml_path = self._gen_FLORIS_yaml(settings_wke,
                               sim_info["wind_farm"],
                               sim_info["ambient"],
@@ -88,7 +90,7 @@ class OFFInterface():
         vis = sim_info["vis"]
 
         # Create OFF simulation object
-        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, vis)
+        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, settings_ctr, vis)
 
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
@@ -210,7 +212,7 @@ class OFFInterface():
 
         settings_ctr = sim_info["controller"]["settings"]
 
-        return settings_sim, settings_sol, settings_wke, settings_cor
+        return settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr
 
     def _run_yaml_to_wind_farm(self, sim_info: dict) -> wfm.WindFarm:
         """
