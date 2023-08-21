@@ -207,7 +207,7 @@ class OFF:
                                                  t.get_rotor_pos(), self.settings_sim['time step'])
             pass
 
-    def run_sim(self) -> pd.DataFrame:
+    def run_sim(self) -> tuple:
         """
         Central function which executes the simulation and manipulates the ``self.wind_farm object``
 
@@ -221,6 +221,8 @@ class OFF:
 
         # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as the power
         measurements = pd.DataFrame()
+        control_applied = pd.DataFrame()
+
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         pow_t = np.zeros((len(self.wind_farm.turbines), 1))
         for t in np.arange(self.settings_sim['time start'],
@@ -254,6 +256,10 @@ class OFF:
                 # Set propagation speed of the OPs of the turbine 'tur'
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
+                # Store turbine state applied in controller
+                c_tmp = self.controller.get_applied_settings()
+                control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
+
             lg.info('Rotor wind speed of all turbines:')
             lg.info(uv_r)
 
@@ -280,13 +286,17 @@ class OFF:
 
             # ///////////////////// CONTROL ///////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):
+                lg.debug("Turbine %s states before control-> yaw = %s deg, ax ind = %s." %
+                         (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
                 self.controller(tur, idx, t)
+                lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
+                         (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
 
             lg.info('Ending time step: %s s.' % t)
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
-        return measurements
+        return measurements, control_applied
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """

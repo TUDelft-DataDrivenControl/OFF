@@ -18,7 +18,8 @@
 
 import numpy as np
 from abc import ABC, abstractmethod
-import off.Turbine as Turbine
+import pandas as pd
+import off.turbine as tur
 import logging
 
 lg = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class Controller(ABC):
         self.settings = settings
 
     @abstractmethod
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
         """
         Reads the given turbine and sets its turbine states
 
@@ -56,6 +57,23 @@ class Controller(ABC):
         Returns
         -------
         Turbine object with updated turbine states
+        """
+        pass
+
+    @abstractmethod
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
         """
         pass
 
@@ -68,7 +86,7 @@ class IdealGreedyBaselineController(Controller):
         super(IdealGreedyBaselineController, self).__init__(settings)
         lg.info('Ideal greedy baseline controller created.')
 
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
         """
         Reads the given turbine and sets its turbine states
 
@@ -85,7 +103,33 @@ class IdealGreedyBaselineController(Controller):
         -------
         Turbine object with updated turbine states
         """
-        turbine.set_yaw(turbine.ambient_states.get_wind_dir(), 0.0)
+        turbine.set_yaw(turbine.ambient_states.get_wind_dir_ind(0), 0.0)
+
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float) -> pd.DataFrame:
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
+        """
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.orientation[0],
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'time']
+        )
+
+        return control_settings
 
 
 class RealisticGreedyBaselineController(Controller):
@@ -96,9 +140,90 @@ class RealisticGreedyBaselineController(Controller):
 
     def __init__(self, settings: dict):
         super(RealisticGreedyBaselineController, self).__init__(settings)
+        self.moving = np.full((settings['number of turbines'], 1), False)
+        self.moved = np.full((settings['number of turbines'], 1), False)
         lg.info('Realistic greedy baseline controller created.')
 
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
+        """
+        Reads the given turbine and sets its turbine states
+
+        Parameters
+        ----------
+        turbine: Turbine
+            Turbine object with turbine states, ambient states and observation points
+        i_t:
+            Index of the turbine (for look-up tables)
+        time_step:
+            current time step (for look-up tables or counters)
+
+        Returns
+        -------
+        Turbine object with updated turbine states
+        """
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+        yaw = turbine.calc_yaw(wind_dir)
+        self.moved[i_t] = self.moving[i_t]
+
+        # check if difference is larger than threshold or if the turbine is moving already
+        if np.abs(yaw) >= self.settings['misalignment_thresh']:
+            # Turbine can move
+            self.moving[i_t] = True
+
+        if self.moving[i_t]:
+            yaw_delta_t = np.sign(yaw) * self.settings['time step'] * turbine.settings['yaw_rate_lim']
+            i_correction = np.argmin(
+                np.abs([yaw, yaw_delta_t]))
+
+            if i_correction == 0:
+                # yaw angle 0.0 deg can be achieved
+                turbine.set_yaw(wind_dir, 0.0)
+                self.moved[i_t] = True  # in case the yaw misalignment was so small that it could be reached immediately
+                self.moving[i_t] = False
+            elif i_correction == 1:
+                # yaw angle 0.0 deg can not be achieved, turbine keeps correcting
+                turbine.set_yaw(wind_dir, yaw - yaw_delta_t)
+
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
+        """
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.orientation[0],
+                self.moving[i_t],
+                self.moved[i_t],
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'moving', 'moved', 'time']
+        )
+
+        return control_settings
+
+
+class YawSteeringLUTController(Controller):
+    """
+    Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the
+    averaged wind direction is larger then a given offset.
+    """
+
+    def __init__(self, settings: dict):
+        super(YawSteeringLUTController, self).__init__(settings)
+        lg.info('Yaw steering LUT controller created.')
+
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
         """
         Reads the given turbine and sets its turbine states
 
@@ -117,33 +242,19 @@ class RealisticGreedyBaselineController(Controller):
         """
         pass
 
-
-class YawSteeringLUTController(Controller):
-    """
-    Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the
-    averaged wind direction is larger then a given offset.
-    """
-
-    def __init__(self, settings: dict):
-        super(YawSteeringLUTController, self).__init__(settings)
-        lg.info('Yaw steering LUT controller created.')
-
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """
-        Reads the given turbine and sets its turbine states
+        Extracts the settings that this controller is setting. Does NOT write new settings.
 
         Parameters
         ----------
-        turbine: Turbine
-            Turbine object with turbine states, ambient states and observation points
-        i_t:
-            Index of the turbine (for look-up tables)
-        time_step:
-            current time step (for look-up tables or counters)
+        turbine
+        i_t
+        time_step
 
         Returns
         -------
-        Turbine object with updated turbine states
+        pd.Dataframe
         """
         pass
 
@@ -157,7 +268,7 @@ class YawSteeringPrescribedMotionController(Controller):
         super(YawSteeringPrescribedMotionController, self).__init__(settings)
         lg.info('Prescribed yaw motion controller created.')
 
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
         """
         Reads the given turbine and sets its turbine states
 
@@ -176,6 +287,22 @@ class YawSteeringPrescribedMotionController(Controller):
         """
         pass
 
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
+        """
+        pass
+
 
 class YawSteeringFilteredPrescribedMotionController(Controller):
     """
@@ -186,7 +313,7 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         super(YawSteeringFilteredPrescribedMotionController, self).__init__(settings)
         lg.info('Prescribed yaw motion controller created.')
 
-    def __call__(self, turbine: Turbine, i_t: int, time_step: float) -> Turbine:
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
         """
         Reads the given turbine and sets its turbine states
 
@@ -202,6 +329,22 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         Returns
         -------
         Turbine object with updated turbine states
+        """
+        pass
+
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
         """
         pass
 

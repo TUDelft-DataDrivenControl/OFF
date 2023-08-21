@@ -38,6 +38,7 @@ class OFFInterface():
     off_sim : off.OFF
     ready_to_run : bool
     measurements : pd.DataFrame
+    control_applied : pd.DataFrame
 
     def __init__(self) -> None:
         self.ready_to_run = False
@@ -106,7 +107,7 @@ class OFFInterface():
         Runs the initialized simulation.
         """
         if self.ready_to_run:
-            self.measurements = self.off_sim.run_sim()
+            self.measurements, self.control_applied = self.off_sim.run_sim()
         else:
             print('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
 
@@ -118,6 +119,15 @@ class OFFInterface():
             path_to_csv = self.off_sim.sim_dir + "/measurements.csv"
 
         self.measurements.to_csv(path_or_buf=path_to_csv)
+
+    def storeAppliedControl(self, path_to_csv=""):
+        """
+        Stores the measurements as a csv in the run folder or at a given path.
+        """
+        if len(path_to_csv) == 0:
+            path_to_csv = self.off_sim.sim_dir + "/applied_control.csv"
+
+        self.control_applied.to_csv(path_or_buf=path_to_csv)
 
     def getState(self) -> off.OFF:
         """
@@ -211,6 +221,8 @@ class OFFInterface():
                         'wake': sim_info["wake"].get('feed', False) }
 
         settings_ctr = sim_info["controller"]["settings"]
+        settings_ctr['time step'] = sim_info["sim"]["sim"]["time step"]
+        settings_ctr['number of turbines'] = len(sim_info["wind_farm"]["farm"]["layout_x"])
 
         return settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr
 
