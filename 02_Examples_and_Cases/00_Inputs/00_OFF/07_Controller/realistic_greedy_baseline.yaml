@@ -7,3 +7,4 @@ controller:
     misalignment_thresh: 2 # in deg
     average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
     apply_frequency: 6 # in time steps, has to be an integer. Time step length is set in the simulation yaml
+    update_to_current: True # if false, the controller updates to the wind direction orientation that occurred at the time of crossing the threshold

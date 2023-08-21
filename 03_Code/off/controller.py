@@ -209,8 +209,6 @@ class RealisticGreedyBaselineController(Controller):
         else:
             turbine.set_yaw(wind_dir, yaw)
 
-        self.run_controller = False
-
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """
         Extracts the settings that this controller is setting. Does NOT write new settings.
@@ -247,6 +245,11 @@ class RealisticGreedyBaselineController(Controller):
         ----------
         t : Simulation time
         """
+        # Reset
+        if self.run_controller:
+            self.run_controller = False
+
+        # Check if condition is fulfilled
         self.time_steps_since_update = self.time_steps_since_update + 1
         if self.time_steps_since_update >= self.settings["apply_frequency"]:
             self.run_controller = True
