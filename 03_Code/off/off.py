@@ -285,6 +285,7 @@ class OFF:
                 lg.debug(tur.observation_points.get_world_coord())
 
             # ///////////////////// CONTROL ///////////////////////
+            self.controller.update(t)
             for idx, tur in enumerate(self.wind_farm.turbines):
                 lg.debug("Turbine %s states before control-> yaw = %s deg, ax ind = %s." %
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))

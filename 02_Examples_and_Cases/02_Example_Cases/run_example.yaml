@@ -137,6 +137,7 @@ controller:
     ctl: "RealGreedyBaseline"
     misalignment_thresh: 5 # in deg
     average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
+    apply_frequency: 6 # in time steps, has to be an integer. Time step length is set in the simulation yaml
 
 
 turbine:

@@ -77,6 +77,17 @@ class Controller(ABC):
         """
         pass
 
+    @abstractmethod
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        pass
+
 
 class IdealGreedyBaselineController(Controller):
     """
@@ -131,6 +142,16 @@ class IdealGreedyBaselineController(Controller):
 
         return control_settings
 
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        pass
+
 
 class RealisticGreedyBaselineController(Controller):
     """
@@ -142,6 +163,8 @@ class RealisticGreedyBaselineController(Controller):
         super(RealisticGreedyBaselineController, self).__init__(settings)
         self.moving = np.full((settings['number of turbines'], 1), False)
         self.moved = np.full((settings['number of turbines'], 1), False)
+        self.time_steps_since_update = 0
+        self.run_controller = True
         lg.info('Realistic greedy baseline controller created.')
 
     def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
@@ -166,7 +189,7 @@ class RealisticGreedyBaselineController(Controller):
         self.moved[i_t] = self.moving[i_t]
 
         # check if difference is larger than threshold or if the turbine is moving already
-        if np.abs(yaw) >= self.settings['misalignment_thresh']:
+        if np.abs(yaw) >= self.settings['misalignment_thresh'] and self.run_controller:
             # Turbine can move
             self.moving[i_t] = True
 
@@ -185,6 +208,8 @@ class RealisticGreedyBaselineController(Controller):
                 turbine.set_yaw(wind_dir, yaw - yaw_delta_t)
         else:
             turbine.set_yaw(wind_dir, yaw)
+
+        self.run_controller = False
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """
@@ -213,6 +238,19 @@ class RealisticGreedyBaselineController(Controller):
         )
 
         return control_settings
+
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        self.time_steps_since_update = self.time_steps_since_update + 1
+        if self.time_steps_since_update >= self.settings["apply_frequency"]:
+            self.run_controller = True
+            self.time_steps_since_update = 0
 
 
 class YawSteeringLUTController(Controller):
@@ -257,6 +295,16 @@ class YawSteeringLUTController(Controller):
         Returns
         -------
         pd.Dataframe
+        """
+        pass
+
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
         """
         pass
 
@@ -305,6 +353,16 @@ class YawSteeringPrescribedMotionController(Controller):
         """
         pass
 
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        pass
+
 
 class YawSteeringFilteredPrescribedMotionController(Controller):
     """
@@ -347,6 +405,16 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         Returns
         -------
         pd.Dataframe
+        """
+        pass
+
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
         """
         pass
 
