@@ -171,7 +171,7 @@ class RealisticGreedyBaselineController(Controller):
             self.moving[i_t] = True
 
         if self.moving[i_t]:
-            yaw_delta_t = np.sign(yaw) * self.settings['time step'] * turbine.settings['yaw_rate_lim']
+            yaw_delta_t = np.sign(yaw) * self.settings['time step'] * turbine.yaw_rate_lim
             i_correction = np.argmin(
                 np.abs([yaw, yaw_delta_t]))
 
@@ -183,6 +183,8 @@ class RealisticGreedyBaselineController(Controller):
             elif i_correction == 1:
                 # yaw angle 0.0 deg can not be achieved, turbine keeps correcting
                 turbine.set_yaw(wind_dir, yaw - yaw_delta_t)
+        else:
+            turbine.set_yaw(wind_dir, yaw)
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """

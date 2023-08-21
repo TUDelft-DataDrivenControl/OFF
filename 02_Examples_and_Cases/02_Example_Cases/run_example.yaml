@@ -122,12 +122,21 @@ solver:
     extrapolation: "pair"
     n_op: 120
 
+# controller:
+#  name: Ideal greedy baseline
+#  description: Follows the main wind direction, disregarding yaw travel costs or other turbines
+
+#  settings:
+#    ctl: "IdealGreedyBaseline"
+
 controller:
-  name: Ideal greedy baseline
-  description: Follows the main wind direction, disregarding yaw travel costs or other turbines
+  name: Realistic greedy baseline
+  description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
 
   settings:
-    ctl: "IdealGreedyBaseline"
+    ctl: "RealGreedyBaseline"
+    misalignment_thresh: 5 # in deg
+    average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
 
 
 turbine:

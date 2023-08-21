@@ -397,6 +397,9 @@ class HAWT_ADM(Turbine):
         if "pT" in turbine_data:
             self.Cp_pT = turbine_data["pT"]
 
+        if "yaw_rate_lim" in turbine_data:
+            self.yaw_rate_lim = turbine_data["yaw_rate_lim"]
+
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         lg.info("HAWT turbine of type " + turbine_data["name"] + "created")
         lg.info('Turbine base location: %s' % base_location)

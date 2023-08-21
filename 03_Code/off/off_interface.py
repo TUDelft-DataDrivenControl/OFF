@@ -96,8 +96,8 @@ class OFFInterface():
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
             np.array([sim_info["ambient"]["flow_field"]["wind_speeds"][0],
-                    sim_info["ambient"]["flow_field"]["wind_directions"][0],
-                    sim_info["ambient"]["flow_field"]["turbulence_intensity"][0]]),
+                      sim_info["ambient"]["flow_field"]["wind_directions"][0],
+                      sim_info["ambient"]["flow_field"]["turbulence_intensity"][0]]),
             np.array([1 / 3, 0, 0]))
         
         self.ready_to_run = True
@@ -261,7 +261,7 @@ class OFFInterface():
             turbines.append(tur.HAWT_ADM(np.array([sim_info["wind_farm"]["farm"]["layout_x"][idx] * dist_factor,
                                                 sim_info["wind_farm"]["farm"]["layout_y"][idx] * dist_factor,
                                                 sim_info["wind_farm"]["farm"]["layout_z"][idx] * dist_factor]),
-                                        np.array([0,                                                   # yaw
+                                        np.array([sim_info["ambient"]["flow_field"]["wind_directions"][0],  # orientation
                                                 sim_info["turbine"][t]["shaft_tilt"]]),            # tilt
                                         tur.TurbineStatesFLORIDyn(sim_info["solver"]["settings"]["n_op"]),  # Turb. states
                                         ops.FLORIDynOPs4(sim_info["solver"]["settings"]["n_op"]),           # OP model
