@@ -288,6 +288,37 @@ class Turbine(ABC):
         """
         self.orientation[0] = ot.ot_get_orientation(wind_direction, yaw)
         self.turbine_states.set_yaw(yaw)
+        lg.debug("Turbine yaw angle set to %s deg, resulting orientation %s deg" % (yaw, self.orientation[0]))
+
+    def set_orientation_yaw(self, orientation_yaw: float, wind_direction=orientation):
+        """
+        Sets the orientation of the turbine in yaw direction (opposed to tilt), calculates the effective yaw angle and
+        updates the turbine states
+        Parameters
+        ----------
+        orientation_yaw: float
+            Turbine orientation in deg. If the turbine orientation is equal to the wind direction, yaw = 0
+        wind_direction: float
+            Wind direction in deg
+        """
+        self.orientation[0] = orientation_yaw
+        yaw = self.calc_yaw(wind_direction)
+        self.turbine_states.set_yaw(yaw)
+        lg.debug("Turbine yaw orientation set to %s deg, resulting yaw angle %s deg" % (orientation_yaw, yaw))
+
+    def set_tilt(self, tilt: float):
+        """
+        Sets the tilt angle of the turbine
+        Parameters
+        ----------
+        tilt: float
+            Tilt angle in deg
+
+        Returns
+        -------
+
+        """
+        self.orientation[1] = tilt
 
     def calc_tilt(self):
         """
@@ -408,7 +439,7 @@ class HAWT_ADM(Turbine):
         lg.info('Power yaw coefficient: %s' % self.yaw_power_coeff)
         lg.info('Thrust yaw coefficient: %s' % self.yaw_thrust_coeff)
 
-    def calc_power(self, wind_speed, air_den = 1.225):
+    def calc_power(self, wind_speed, air_den=1.225):
         """
         Calculate the power based on turbine, ambient and OP states
 

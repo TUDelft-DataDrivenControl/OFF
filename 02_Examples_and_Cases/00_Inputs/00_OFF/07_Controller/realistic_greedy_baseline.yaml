@@ -4,7 +4,9 @@ controller:
 
   settings:
     ctl: "RealGreedyBaseline"
-    misalignment_thresh: 2 # in deg
+    misalignment_thresh: 2 # in deg, applied as ± threshold (e.g. 2 deg will result in 4 deg wide dead-band)
     average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
     apply_frequency: 6 # in time steps, has to be an integer. Time step length is set in the simulation yaml
     update_to_current: True # if false, the controller updates to the wind direction orientation that occurred at the time of crossing the threshold
+    integration_error_correction: True # If true, the error of the turbine alignment will be integrated and if it is larger than a threshold, it will be corrected.
+    integration_thresh: 10 # in deg*s, if the integrated error to the wind direction is larger than the given threshold the turbine will move to correct it, event if the instantaneous error is smaller than the dead-band
