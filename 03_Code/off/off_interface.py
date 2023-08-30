@@ -29,6 +29,7 @@ import importlib.util
 import sys
 import yaml
 import pandas as pd
+import shutil
 
 class OFFInterface():
     """
@@ -78,6 +79,7 @@ class OFFInterface():
 
         # Convert run data into settings and wind farm object
         settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr = self._run_yaml_to_dict(sim_info)
+        settings_sim['path_to_yaml'] = path_to_yaml
         wind_farm = self._run_yaml_to_wind_farm(sim_info)
 
         # Generate an input file for FLORIS
@@ -119,6 +121,13 @@ class OFFInterface():
             path_to_csv = self.off_sim.sim_dir + "/measurements.csv"
 
         self.measurements.to_csv(path_or_buf=path_to_csv)
+
+    def storeRunFile(self):
+        """
+        Stores the yaml file used to run the simulation
+        """
+        shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
+                        self.off_sim.sim_dir + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
 
     def storeAppliedControl(self, path_to_csv=""):
         """

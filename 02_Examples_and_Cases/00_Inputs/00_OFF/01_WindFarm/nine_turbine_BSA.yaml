@@ -1,0 +1,56 @@
+
+name: turbine array
+description: Nine turbine case with IEA 10 MW turbines around the Bossele Alpha platform
+
+farm:
+  layout_x:
+    - 2864.58
+    - 3923.61
+    - 2690.97
+    - 1458.33
+    - 1753.47
+    - 2534.72
+    - 0.0
+    - 4340.27
+    - 3333.33
+  layout_y:
+    - 2708.33
+    - 2135.41
+    - 1406.25
+    - 1996.52
+    - 3350.69
+    - 0.0
+    - 2569.44
+    - 4548.61
+    - 5052.08
+  layout_z:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  turbine_type:
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+    - iea_10mw
+  unit:
+    - m
+  diameter: # Only needed if unit was set to D
+    - 198.0
+  boundaries_xyz:
+    - -500.0
+    - 4800.0
+    - -500.0
+    - 5500.0
+    - 0.0
+    - 400.0
