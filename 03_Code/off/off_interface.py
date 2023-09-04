@@ -127,7 +127,7 @@ class OFFInterface():
         Stores the yaml file used to run the simulation
         """
         shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
-                        self.off_sim.sim_dir + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
+                        self.off_sim.sim_dir + '/' + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
 
     def storeAppliedControl(self, path_to_csv=""):
         """

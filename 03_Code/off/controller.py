@@ -20,7 +20,9 @@ import numpy as np
 from abc import ABC, abstractmethod
 import pandas as pd
 import off.turbine as tur
+import off.utils as util
 import logging
+import ast
 
 lg = logging.getLogger(__name__)
 
@@ -264,6 +266,15 @@ class YawSteeringLUTController(Controller):
 
     def __init__(self, settings: dict):
         super(YawSteeringLUTController, self).__init__(settings)
+        self.moving = np.full((settings['number of turbines'], 1), False)
+        self.moved = np.full((settings['number of turbines'], 1), False)
+        self.time_steps_since_update = 0
+        self.run_controller = True
+        self.lut = pd.read_csv(settings['path_to_angles_and_directions_csv'])
+        # Mirror 0 deg index to 360 for binning
+        self.lut = pd.concat([self.lut,
+                              self.lut.loc[[0]].assign(**{'wind_direction': 360})], ignore_index=True)
+        self.orientation = settings['orientation']
         lg.info('Yaw steering LUT controller created.')
 
     def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
@@ -283,7 +294,27 @@ class YawSteeringLUTController(Controller):
         -------
         Turbine object with updated turbine states
         """
-        pass
+        # Get wind direction
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+
+        # Determine LUT bin
+        i_bin = abs(self.lut['wind_direction'] - wind_dir).idxmin()
+
+        # Check how long it has been in bin
+        # TODO Time check skipped for now
+
+        # Apply orientation
+        lut_row = self.lut.loc[i_bin]
+        # Convert the array of optimized values, read as string in the dataframe, into numbers TODO read as array
+        if not self.orientation:
+            opt_yaw = np.array([float(value) for value in self.lut.loc[0]['yaw_angles_opt'].strip('[]').split()])
+            turbine.set_orientation_yaw(
+                util.ot_get_orientation(
+                    lut_row['wind_direction'],
+                    opt_yaw[i_t]),
+                wind_dir)
+
+        # TODO apply LUT for orientation
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """
@@ -299,7 +330,21 @@ class YawSteeringLUTController(Controller):
         -------
         pd.Dataframe
         """
-        pass
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+        i_bin = abs(self.lut['wind_direction'] - wind_dir).idxmin()
+
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.orientation[0],
+                wind_dir,
+                i_bin,
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'wind_dir', 'i_bin', 'time']
+        )
+        return control_settings
 
     def update(self, t: float):
         """
