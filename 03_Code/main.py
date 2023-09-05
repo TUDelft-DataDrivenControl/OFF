@@ -31,16 +31,16 @@ def main():
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
     # oi.initSimulatioByPath(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
-    oi.initSimulatioByPath('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/'
+    oi.init_simulation_by_path('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/'
                            'Simulations/Input/Torque_320_C1.yaml')
     
     # Run the simulation
-    oi.runSim()
+    oi.run_sim()
     
     # Store output
-    oi.storeMeasurements()
-    oi.storeAppliedControl()
-    oi.storeRunFile()
+    oi.store_measurements()
+    oi.store_applied_control()
+    oi.store_run_file()
 
 
 if __name__ == "__main__":
