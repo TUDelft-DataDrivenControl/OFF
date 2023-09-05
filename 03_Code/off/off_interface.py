@@ -30,6 +30,7 @@ import sys
 import yaml
 import pandas as pd
 import shutil
+import os
 
 class OFFInterface():
     """
@@ -149,6 +150,26 @@ class OFFInterface():
         Set the entire simulation state as OFF object
         """
         self.off_sim = off_sim
+
+    def move_output_to(self, path: str):
+        """
+        Moves the files in the run folder to a given location.
+        Parameters
+        ----------
+        path: string of the new folder, does not need to end with a delimiter
+
+        Returns
+        -------
+
+        """
+        # gather all files
+        allfiles = os.listdir(self.off_sim.sim_dir)
+
+        # iterate on all files to move them to destination folder
+        for f in allfiles:
+            src_path = os.path.join(self.off_sim.sim_dir, f)
+            dst_path = os.path.join(path, f)
+            os.rename(src_path, dst_path)
 
     def getAmbientConditions(self) -> None:
         pass
