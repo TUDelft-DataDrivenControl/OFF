@@ -21,9 +21,11 @@ logging.basicConfig(level=logging.ERROR)
 
 import off.off as off
 import off.off_interface as offi
-
+import time
 
 def main():
+    start_time = time.time()
+
     # Create an interface object
     #   The interface object does mot yet know the simulation environment, it only checks requirements
     oi = offi.OFFInterface()
@@ -36,7 +38,9 @@ def main():
     
     # Run the simulation
     oi.run_sim()
-    
+
+    print("---OFF Simulation took %s seconds ---" % (time.time() - start_time))
+
     # Store output
     oi.store_measurements()
     oi.store_applied_control()
