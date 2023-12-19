@@ -51,15 +51,15 @@ wind_farm:
       - 0.0
       - 0.0
     turbine_type:
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
-      - iea_10mw
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
+      - iea_10MW
     unit:
       - D
     diameter: # Only needed if unit was set to D
@@ -129,29 +129,29 @@ solver:
 #  settings:
 #    ctl: "IdealGreedyBaseline"
 
-#controller:
-#  name: Realistic greedy baseline
-#  description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
-
-#  settings:
-#    ctl: "RealGreedyBaseline"
-#    misalignment_thresh: 5 # in deg
-#    average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
-#    apply_frequency: 6 # in time steps, has to be an integer. Time step length is set in the simulation yaml
-
 controller:
-  name: Look-up-table based yaw steering controller
-  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
+  name: Realistic greedy baseline
+  description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
 
   settings:
-    ctl: "LUT yaw controller"
-    misalignment_thresh: 2 # in deg
-    average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
-    orientation: False # Checks if the data is given as orientation or, if false, as yaw angles
-    path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
+    ctl: "RealGreedyBaseline"
+    misalignment_thresh: 5  # in deg
+    average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
+    apply_frequency: 6      # in time steps, has to be an integer. Time step length is set in the simulation yaml
+
+# controller:
+#   name: Look-up-table based yaw steering controller
+#   description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
+#
+#   settings:
+#     ctl: "LUT yaw controller"
+#     misalignment_thresh: 2  # in deg
+#     average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
+#     orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
+#     path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
 
 turbine:
-  iea_10mw:
+  iea_10MW:
     name: IEA Wind Task 37 10MW Offshore Reference Turbine # Source: FLORIS v3.4, adapted for OFF
     performance:
       rated_power: 10000000
