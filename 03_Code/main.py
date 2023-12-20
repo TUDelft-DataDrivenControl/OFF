@@ -32,9 +32,9 @@ def main():
     
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
-    # oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
-    oi.init_simulation_by_path('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/'
-                           'Simulations/Input/Torque_320_C1.yaml')
+    oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
+    # oi.init_simulation_by_path('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/'
+    #                        'Simulations/Input/Torque_320_C1.yaml')
     
     # Run the simulation
     oi.run_sim()

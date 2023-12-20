@@ -367,12 +367,12 @@ class YawSteeringPrescribedMotionController(Controller):
 
         # Read table
         if settings['input_method'] == "csv":
-            t_and_ori = pd.read_csv(settings['path_to_orientation_csv'])
+            t_and_ori = np.genfromtxt(settings['path_to_orientation_csv'], delimiter=',')
             self.lut = t_and_ori[:,1:]
-            self.t = t_and_ori[:,0]
+            self.t   = t_and_ori[:,0]
         elif settings['input_method'] == "yaml":
-            self.lut = settings['orientation_deg']
-            self.t = settings['orientation_t']
+            self.lut = np.array(settings['orientation_deg'])
+            self.t   = settings['orientation_t']
         else:
             raise Warning("Orientation-input %s is undefined!" % settings['path_to_angles_and_directions_csv'])
         
