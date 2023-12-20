@@ -364,6 +364,21 @@ class YawSteeringPrescribedMotionController(Controller):
 
     def __init__(self, settings: dict):
         super(YawSteeringPrescribedMotionController, self).__init__(settings)
+
+        # Read table
+        if settings['input_method'] == "csv":
+            t_and_ori = pd.read_csv(settings['path_to_orientation_csv'])
+            self.lut = t_and_ori[:,1:]
+            self.t = t_and_ori[:,0]
+        elif settings['input_method'] == "yaml":
+            self.lut = settings['orientation_deg']
+            self.t = settings['orientation_t']
+        else:
+            raise Warning("Orientation-input %s is undefined!" % settings['path_to_angles_and_directions_csv'])
+        
+        # TODO Check if complete
+        # - check for number of turbines and number of columns in self.lut
+
         lg.info('Prescribed yaw motion controller created.')
 
     def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
@@ -383,6 +398,10 @@ class YawSteeringPrescribedMotionController(Controller):
         -------
         Turbine object with updated turbine states
         """
+        ori = np.interp(time_step, self.t, self.lut[:, i_t])
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+
+        turbine.set_orientation_yaw(ori, wind_dir)
         pass
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
@@ -399,7 +418,20 @@ class YawSteeringPrescribedMotionController(Controller):
         -------
         pd.Dataframe
         """
-        pass
+
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.orientation[0],
+                wind_dir,
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'wind_dir', 'time']
+        )
+        return control_settings
 
     def update(self, t: float):
         """
