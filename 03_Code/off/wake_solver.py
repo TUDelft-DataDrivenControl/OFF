@@ -467,10 +467,10 @@ class TWFSolver(WakeSolver):
             #       1. OP location
             tmp_op = op_locations[ind_op[0], 0:3] * r0 + op_locations[ind_op[1], 0:3] * r1
             #       2. Ambient
-            twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(ind_op[0],
+            twf_a_states.append(wind_farm.turbines[idx].ambient_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #       3. Turbine state
-            twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(ind_op[0],
+            twf_t_states.append(wind_farm.turbines[idx].turbine_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #   Reconstruct turbine location
             tmp_phi = twf_a_states[-1].get_turbine_wind_dir()

@@ -23,43 +23,43 @@ wind_farm:
     layout_x:
       - 0.0
       - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
+      #- 10.0
+      #- 0.0
+      #- 5.0
+      #- 10.0
+      #- 0.0
+      #- 5.0
+      #- 10.0
     layout_y:
       - 0.0
-      - 0.0
-      - 0.0
-      - 5.0
-      - 5.0
-      - 5.0
-      - 10.0
-      - 10.0
-      - 10.0
+      - 0.50
+      #- 0.0
+      #- 5.0
+      #- 5.0
+      #- 5.0
+      #- 10.0
+      #- 10.0
+      #- 10.0
     layout_z:
       - 0.0
       - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
+      #- 0.0
+      #- 0.0
+      #- 0.0
+      #- 0.0
+      #- 0.0
+      #- 0.0
+      #- 0.0
     turbine_type:
       - iea_10MW
       - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
+      #- iea_10MW
+      #- iea_10MW
+      #- iea_10MW
+      #- iea_10MW
+      #- iea_10MW
+      #- iea_10MW
+      #- iea_10MW
     unit:
       - D
     diameter: # Only needed if unit was set to D
@@ -82,10 +82,10 @@ ambient:
     turbulence_intensity:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 255.0
-      - 255.0
-      - 195.0
-      - 195.0
+      - 270.0
+      - 270.0
+      - 270.0
+      - 270.0
     wind_directions_t:
       - 0.0
       - 600.0
@@ -156,16 +156,20 @@ controller:
 
   settings:
     ctl: "prescribed yaw controller"
-    input_method: "csv"    # Can be "csv" or "yaml" - for csv, the path to the turbine orientation needs to be given, for yaml, the orientation needs to be added below
+    input_method: "yaml"    # Can be "csv" or "yaml" - for csv, the path to the turbine orientation needs to be given, for yaml, the orientation needs to be added below
     misalignment_thresh: 2  # in deg
     average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
     orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
     path_to_orientation_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/01_FLORIDyn/02_Matlab/marcusbecker@hpc06.tudelft.net/Simulations/2022_9T_Data_EnKF_Reference/Data/Control_YawInterpolation.csv"
     orientation_deg:        # in deg
-      - [225, 225, 225, 225, 225, 225, 225, 225, 225]
-      - [225, 225, 225, 225, 225, 225, 225, 225, 225]
+      - [250, 270] #, 215, 230, 225, 225, 225, 225, 225]
+      - [250, 270] #, 215, 230, 225, 225, 225, 225, 225]
+      - [270, 270] #, 225, 225, 225, 225, 225, 225, 225]
+      - [270, 270] #, 225, 225, 225, 225, 225, 225, 225]
     orientation_t:          # in s
       - 0.0
+      - 600.0
+      - 800.0
       - 90000.0
 
 
@@ -463,7 +467,7 @@ vis:
     plot_selection: False # One plot where you can choose which turbine to view
     input_yaw: True
     input_Ct: False
-    output_Power: True 
+    output_Power: True
     output_EffU: False
     output_Red: False
     farm_interaction: False
@@ -475,14 +479,10 @@ vis:
     effective_wf_prisim: True  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
     effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
     time: [ 700, 900] # Times at witch a debug plot of the wind farm is generated
-    iT: [0,1,2] # Turbines for which the debug plot is created
+    iT: [0,1] # Turbines for which the debug plot is created
     turbine_effective_wind_speed: False # Generates the effective wind speed across the farm based on a ghost turbine
     turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
     turbine_effective_wind_speed_plot_ops: True # Adds dots for the particles
     turbine_effective_wind_speed_show_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
     turbine_effective_wind_speed_store_plot: True # Stores the contour plot as .png
     turbine_effective_wind_speed_store_data: True # Stores the data as .csv in the run folder
-
-
-
-

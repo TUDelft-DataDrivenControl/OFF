@@ -402,7 +402,6 @@ class YawSteeringPrescribedMotionController(Controller):
         wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
 
         turbine.set_orientation_yaw(ori, wind_dir)
-        pass
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
         """
