@@ -1,0 +1,209 @@
+sim:
+  name: Test sim
+  description: Test simulation with 40s runtime, devided in 4s steps
+
+  sim:
+    time step: 4.0
+    time start: 0.0
+    time end: 1200.0
+
+  logging:
+    console:
+      enable: true
+      level: DEBUG
+    file:
+      enable: true
+      level: INFO
+
+wind_farm:
+  name: turbine array
+  description: Nine turbine case with DTU 10 MW turbines at 5D distance in a row
+
+  farm:
+    layout_x:
+      - 0.0
+      - 5.0
+      - 10.0
+      - 0.0
+      - 5.0
+      - 10.0
+      - 0.0
+      - 5.0
+      - 10.0
+    layout_y:
+      - 10.0
+      - 10.0
+      - 10.0
+      - 5.0
+      - 5.0
+      - 5.0
+      - 0.0
+      - 0.0
+      - 0.0
+    layout_z:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+    turbine_type:
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+      - dtu_10mw
+    unit:
+      - D
+    diameter: # Only needed if unit was set to D
+      - 178.4
+    boundaries_xyz:
+      - -2.0
+      - 12.0
+      - -4.0
+      - 4.0
+      - 0.0
+      - 5.0
+
+ambient:
+  name: ambient_conditions
+  description: Constant wind speed at 8m/s coming from 270 deg (0 deg = north)
+
+  flow_field: # This struct is passed on to the AmbientCorrector to feed in the new flow properties
+    air_density: 1.225
+    reference_wind_height: -1 # -1 is code for use the hub height of T0
+    turbulence_intensity:
+      - 0.06
+    wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
+      - 255.0
+      - 255.0
+      - 195.0
+      - 195.0
+    wind_directions_t:
+      - 0.0
+      - 600.0
+      - 900.0
+      - 1200.0
+    wind_shear: 0.12
+    wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
+      - 8.0
+    wind_speeds_t:
+      - 0.0
+    wind_veer: 0.0
+    corr_overwrite_direction: true # All states are overwritten instead of only the first particle state
+
+wake:
+  name: GCH
+  description: Gaussian Curl Hybrid wake model
+
+  settings:
+    nRP: 10               # Not used yet but required
+    rotor discretization: Isocell  # Not used yet but required
+    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
+
+solver:
+  name: TWF FLORIS
+  description:
+
+  settings:
+    wake_solver: "TWFSolver"
+    wake_model: "Floris GCH"
+    op_propagation: "frozen turbulence"
+    extrapolation: "pair"
+    n_op: 120
+
+turbine:
+  dtu_10mw:
+    name: DTU 10 MW reference turbine
+    performance:
+      rated_power: 10000000     # in W
+      rated_wind_speed: 11.4    # in m/s
+      cutin_wind_speed: 4.0     # in m/s
+      cutout_wind_speed: 25.0   # in m/s
+      cutin_rot_speed: 6.0      # in RPM
+      rated_rot_speed: 9.6      # in RPM
+      Cp_curve:
+        Cp_tb_values: [ ]
+        Cp_tb_tsr: [ ]          # in (m/s)/(m/s)
+        Cp_tb_bpa: [ ]          # in deg
+      Ct_curve: # Ct(u) curve copied from IEA37_10MW, needs to be replaced
+        Ct_tb_values: [ ]
+        Ct_tb_tsr: [ ]          # in (m/s)/(m/s)
+        Ct_tb_bpa: [ ]          # in deg
+        Ct_u_values: [ 0.770113776, 0.776301765, 0.782430404, 0.781982993, 0.780246928, 0.777153006, 0.771853687, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.776845963, 0.767521911, 0.765104347, 0.758675026, 0.505649564, 0.431035612, 0.370827539, 0.320855929, 0.278805531, 0.243151019, 0.212773558, 0.186803785, 0.164542221, 0.145414565, 0.128943645, 0.114730283, 0.102438991, 0.091786964, 0.082535328, 0.074482009, 0.067455867, 0.061311766, 0.05592648,  0.051195261, 0.047029125 ]
+        Ct_u_wind_speeds: [ 4.0, 4.514652562, 5.000795688, 5.457350016, 5.883301884, 6.277705571, 6.639685402, 6.968437691, 7.263232527, 7.523415391, 7.748408611, 7.937712648, 8.090907197, 8.20765213, 8.287688244, 8.330837837, 8.337005108, 8.367833853, 8.435590166, 8.540123611, 8.681202099, 8.858512398, 9.071660837, 9.320174171, 9.603500641, 9.921011189, 10.27200086, 10.65569038, 10.75773635, 11.51769068, 11.9940876, 12.49936091, 13.03238875, 13.59198769, 14.17691527, 14.7858728, 15.41750825, 16.07041923, 16.74315611, 17.43422525, 18.1420923, 18.86518562, 19.60189976, 20.35059904, 21.10962115, 21.87728087, 22.65187381, 23.43168018, 24.21496861, 25.0 ]
+    hub_height: 119.0
+    rotor_overhang: 7.07        # in m
+    shaft_tilt: 5               # in deg
+    rotor_diameter: 178.3       # in m
+    turbine_type: HAWT
+    installation: fixed
+
+io:                             # Needs to be written by the user
+  data folder: ''
+  simulation folder:
+
+vis:
+  grid:
+    generate: True  # Master-switch to generate & store flow field data
+    boundaries:
+      - [ -2, 12]                 # x in D or m
+      - [ -2, 12]                 # y in D or m
+      - [ 0, 3]                 # z in D or m
+    unit:
+      - D
+    diameter: # Only needed if unit was set to D
+      - 178.4
+    resolution: [ 101, 101, 10 ] # x, y, z in points
+    volume_3d: False
+    slice_2d: True
+    slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
+    slice_2d_xz: [ ]                # y-coordinates for xz slices
+    slice_2d_yz: [ ]                # x-coordinates for yz slices
+    slice_2d_p:                     # x,y,z coordinate of a point on a plane
+      - [ ]
+    slice_2d_n:                     # x,y,z coordinate of a normal vector on a plane
+      - [ ]
+    data_vel_background: True
+    data_vel_effective: True
+    data_dir_background: True
+    data_ti_background: False
+    data_ti_effective: True
+    data_op_markers: True
+
+
+  turbine:
+    generate: True  # Master-switch to generate & store turbine data
+    plot_together: False  # One plot of one QoI with all turbines above one another
+    plot_seperated: True  # One plot with a subplot for every turbine
+    plot_selection: False # One plot where you can choose which turbine to view
+    input_yaw: True
+    input_Ct: False
+    output_Power: True 
+    output_EffU: False
+    output_Red: False
+    farm_interaction: False
+    farm_layout: False
+    store_data: True
+
+  debug:
+    effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
+    time: [ 700 ] # Times at witch a debug plot of the wind farm is generated
+    iT: [0,1,2] # Turbines for which the debug plot is created
+    turbine_effective_wind_speed: True # Generates the effective wind speed across the farm based on a ghost turbine
+    turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_plot_ops: True # Adds dots for the particles
+    turbine_effective_wind_speed_show_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_store_plot: True # Stores the contour plot as .png
+    turbine_effective_wind_speed_store_data: True # Stores the data as .csv in the run folder
+
+
+
+
