@@ -1,0 +1,8 @@
+controller:
+  name: Prescribed motion yaw steering controller
+  description: Applies prescribed yaw trajectories to the turbines
+
+  settings:
+    ctl: "prescribed yaw controller"
+    orientation: True # Checks if the data is given as orientation or, if false, as yaw angles
+    path_to_angles_and_times_csv: "/test.csv"

@@ -42,7 +42,8 @@ class AmbientStates(States, ABC):
             name and unit of the states
         """
         super(AmbientStates, self).__init__(number_of_time_steps, number_of_states, state_names)
-        lg.info(f'Ambient states chain created with {number_of_time_steps} time steps and {number_of_states} states')
+        lg.info('Ambient states chain created with %s time steps and %s states' %
+                (number_of_time_steps, number_of_states))
         lg.info(state_names)
 
     @abstractmethod
@@ -296,7 +297,10 @@ class FLORIDynAmbient(AmbientStates):
         float
             u wind speed
         """
-        return self.states[0, 0] * np.cos(ot_deg2rad(self.states[0, 1]))
+        if self.n_time_steps > 1:
+            return self.states[0, 0] * np.cos(ot_deg2rad(self.states[0, 1]))
+        else:
+            return self.states[0] * np.cos(ot_deg2rad(self.states[1]))
 
     def get_turbine_wind_speed_v(self) -> float:
         """
@@ -307,7 +311,10 @@ class FLORIDynAmbient(AmbientStates):
         float
             v wind speed
         """
-        return self.states[0, 0] * np.sin(ot_deg2rad(self.states[0, 1]))
+        if self.n_time_steps > 1:
+            return self.states[0, 0] * np.sin(ot_deg2rad(self.states[0, 1]))
+        else:
+            return self.states[0] * np.sin(ot_deg2rad(self.states[1]))
 
     def get_wind_speed_abs(self) -> np.ndarray:
         """

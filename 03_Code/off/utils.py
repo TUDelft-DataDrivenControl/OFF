@@ -179,7 +179,7 @@ def ot_get_orientation(wind_dir: float, yaw: float) -> float:
     float
         Orientation in LES degree
     """
-    return wind_dir + yaw
+    return np.mod(wind_dir - yaw, 360)
 
 
 def ot_get_yaw(wind_dir: float, orientation: float) -> float:
@@ -198,7 +198,8 @@ def ot_get_yaw(wind_dir: float, orientation: float) -> float:
     float
         yaw angle in LES degree (clockwise)
     """
-    return orientation - wind_dir
+    yaw = [wind_dir - orientation, 360 - (wind_dir - orientation)]
+    return yaw[np.argmin(np.abs(yaw))]
 
 
 def ot_get_closest_point_3d_sorted(ref_loc: np.ndarray, points: np.ndarray) -> int:

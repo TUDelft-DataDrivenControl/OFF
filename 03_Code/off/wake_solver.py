@@ -183,6 +183,7 @@ class WakeSolver(ABC):
 
 
 class FLORIDynTWFWakeSolver(WakeSolver):
+    # TODO: Delete as it is not used anymore!!
     """ Wake solver connecting to the dummy wake """
     dummy_wake: wm.DummyWake
 
@@ -270,6 +271,7 @@ class FLORIDynTWFWakeSolver(WakeSolver):
 
 
 class FLORIDynFlorisWakeSolver(WakeSolver):
+    # TODO: Delete as it is not used anymore!!
     """ First version of the coupling with the FLORIS model """
     floris_wake: wm.FlorisGaussianWake
 
@@ -308,10 +310,6 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
         """
         u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
         u_op = self._get_wind_speeds_op(i_t, wind_farm)
-        print('u_rp: ', u_rp)
-        print('shape u_rp: ', np.shape(u_rp))
-        print( 'm: ', m)
-        print('u_op: ', u_op)
         return u_rp, u_op, m
 
     def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
@@ -335,7 +333,6 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
                                    wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
         self.floris_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
         ueff, m = self.floris_wake.get_measurements_i_t(i_t)
-        print('ueff: ', ueff)
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
         return np.array([u_eff, v_eff]), m
 
@@ -359,7 +356,7 @@ class FLORIDynFlorisWakeSolver(WakeSolver):
 
 
 class TWFSolver(WakeSolver):
-    floris_wake: wm.FlorisGaussianWake
+    floris_wake: wm.WakeModel
 
     def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
         """
@@ -375,9 +372,14 @@ class TWFSolver(WakeSolver):
             Visualization settings
         """
         super(TWFSolver, self).__init__(settings_sol, settings_vis)
-        lg.info('FLORIDyn wake solver created.')
+        lg.info('FLORIDyn TWF solver created.')
 
-        self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        if settings_sol["wake_model"].startswith("FLORIS"):
+            self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        elif settings_sol["wake_model"] == "PythonGaussianWake":
+            self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        else:
+            raise ImportError('Wake model unknown!')
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
@@ -452,12 +454,11 @@ class TWFSolver(WakeSolver):
             weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
 
             # Logging Interpolation OPs
-            lg.info(f'2 OP interpolation: T{inf_turbines[idx]} influence on T{i_t}, OP1 (index: {ind_op[0]}, '
-                    f'loc: {point_a}),'
-                    f' OP2 (index: {ind_op[1]}, loc: {point_b})')
-            lg.info(f'TWF - OP interpolation weight (should be between 0 and 1): {weight_d} ')
+            lg.info('2 OP interpolation: T%s influence on T%s, OP1 (index: %s, loc: %s), OP2 (index: %s, loc: %s)' %
+                    (inf_turbines[idx], i_t, ind_op[0], point_a, ind_op[1], point_b))
+            lg.info('TWF - OP interpolation weight (should be between 0 and 1): %s' % weight_d)
             weight_d = np.fmin(np.fmax(weight_d, 0), 1)
-            lg.info(f'TWF - Used OP interpolation weight: {weight_d}')
+            lg.info('TWF - Used OP interpolation weight:  %s' % weight_d)
 
             r0 = 1 - weight_d
             r1 = weight_d
@@ -466,10 +467,10 @@ class TWFSolver(WakeSolver):
             #       1. OP location
             tmp_op = op_locations[ind_op[0], 0:3] * r0 + op_locations[ind_op[1], 0:3] * r1
             #       2. Ambient
-            twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(ind_op[0],
+            twf_a_states.append(wind_farm.turbines[idx].ambient_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #       3. Turbine state
-            twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(ind_op[0],
+            twf_t_states.append(wind_farm.turbines[idx].turbine_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #   Reconstruct turbine location
             tmp_phi = twf_a_states[-1].get_turbine_wind_dir()
@@ -484,7 +485,7 @@ class TWFSolver(WakeSolver):
             #       3. Set diameter
             twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
 
-        lg.info(f'TWF layout for turbine {i_t}:')
+        lg.info('TWF layout for turbine %s:' % i_t)
         lg.info(twf_layout)
 
         # Set wind farm in the wake model
@@ -497,7 +498,7 @@ class TWFSolver(WakeSolver):
 
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
-        lg.info(f'Effective wind speed of turbine {i_t} : {ueff} m/s')
+        lg.info('Effective wind speed of turbine %s : %s m/s' % (i_t, ueff))
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, twf_a_states[i_t_tmp].get_turbine_wind_dir())
         return np.array([u_eff, v_eff]), m
 

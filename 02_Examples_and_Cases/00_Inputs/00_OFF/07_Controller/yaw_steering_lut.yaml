@@ -1,0 +1,10 @@
+controller:
+  name: Look-up-table based yaw steering controller
+  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
+
+  settings:
+    ctl: "LUT yaw controller"
+    misalignment_thresh: 2 # in deg
+    average_window: 1 # in time steps, has to be an integer. Time step length is set in the simulation yaml
+    orientation: False # Checks if the data is given as orientation or, if false, as yaw angles
+    path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"

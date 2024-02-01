@@ -47,7 +47,7 @@ class WindFarm:
         turbines : Turbine object list
             List of turbines in the wind farm
         """
-        lg.info(f'Wind farm created with {len(turbines)} turbines.')
+        lg.info('Wind farm created with %s turbines.' % len(turbines))
         self.nT = len(turbines)
         self.turbines = turbines
         self.dependencies = np.full((self.nT, self.nT), True)
@@ -89,7 +89,7 @@ class WindFarm:
         for idx, trb in enumerate(self.turbines):
             layout[idx, :] = np.append(trb.get_rotor_pos(), trb.diameter)
 
-        lg.info(f'Wind farm layout:')
+        lg.info('Wind farm layout:')
         lg.info(layout)
 
         return layout
@@ -108,7 +108,7 @@ class WindFarm:
         for idx, trb in enumerate(self.turbines):
             t_states[idx, :] = trb.turbine_states.get_ind_state(0)
 
-        lg.info(f'Current wind farm states:')
+        lg.info('Current wind farm states:')
         lg.info(t_states)
 
         return t_states
@@ -129,7 +129,7 @@ class WindFarm:
         """
         # Add turbine to the list
         self.turbines.append(turb)
-        lg.info(f'New turbine added to the wind farm, base located at:')
+        lg.info('New turbine added to the wind farm, base located at:')
         lg.info(self.turbines[-1].base_location)
 
         # Update the dependencies array
@@ -161,7 +161,7 @@ class WindFarm:
         Turbine
             removed turbine object
         """
-        lg.info(f'Turbine {ind} is being removed, base located at:')
+        lg.info('Turbine %s is being removed, base located at:' % ind)
         lg.info(self.turbines[ind].base_location)
 
         # Remove dependencies
@@ -170,7 +170,7 @@ class WindFarm:
 
         # Reduce turbine count
         self.nT = self.nT - 1
-        lg.info(f'Number of turbines now: {self.nT}')
+        lg.info('Number of turbines now: %s' % self.nT)
 
         # Remove and return turbine
         return self.turbines.pop(ind)

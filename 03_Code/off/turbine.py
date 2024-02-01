@@ -44,7 +44,8 @@ class TurbineStates(States, ABC):
             name and unit of the states
         """
         super(TurbineStates, self).__init__(number_of_time_steps, number_of_states, state_names)
-        lg.info(f'Turbine states chain created with {number_of_time_steps} time steps and {number_of_states} states')
+        lg.info('Turbine states chain created with %s time steps and %s states' %
+                (number_of_time_steps, number_of_states))
         lg.info(state_names)
 
     @abstractmethod
@@ -114,7 +115,7 @@ class TurbineStates(States, ABC):
     @abstractmethod
     def get_ax_ind(self, index: int) -> float:
         """
-        get_ax_ind(index) returns the axial induction coefficient at a requested index of the turbine state chain
+        get_ax_ind(index) returns the axial induction factor at a requested index of the turbine state chain
 
         Parameters
         ----------
@@ -124,6 +125,17 @@ class TurbineStates(States, ABC):
         -------
         float:
             Axial induction factor
+        """
+        pass
+
+    @abstractmethod
+    def set_ax_ind(self, ax_ind):
+        """
+        Stores the axial induction factor of the turbine in the states.
+
+        Parameters
+        ----------
+        ax_ind: axial induction factor
         """
         pass
 
@@ -140,6 +152,17 @@ class TurbineStates(States, ABC):
         -------
         float:
             yaw misalignment in deg
+        """
+        pass
+
+    @abstractmethod
+    def set_yaw(self, yaw_angle):
+        """
+        Stores the yaw angle of the turbine in the states.
+
+        Parameters
+        ----------
+        yaw_angle: Difference between turbine orientation and wind direction
         """
         pass
 
@@ -263,8 +286,39 @@ class Turbine(ABC):
             Turbine yaw misalignment angle in degrees
 
         """
-        # TODO: this should also set the turbine states
         self.orientation[0] = ot.ot_get_orientation(wind_direction, yaw)
+        self.turbine_states.set_yaw(yaw)
+        lg.debug("Turbine yaw angle set to %s deg, resulting orientation %s deg" % (yaw, self.orientation[0]))
+
+    def set_orientation_yaw(self, orientation_yaw: float, wind_direction=orientation):
+        """
+        Sets the orientation of the turbine in yaw direction (opposed to tilt), calculates the effective yaw angle and
+        updates the turbine states
+        Parameters
+        ----------
+        orientation_yaw: float
+            Turbine orientation in deg. If the turbine orientation is equal to the wind direction, yaw = 0
+        wind_direction: float
+            Wind direction in deg
+        """
+        self.orientation[0] = orientation_yaw
+        yaw = self.calc_yaw(wind_direction)
+        self.turbine_states.set_yaw(yaw)
+        lg.debug("Turbine yaw orientation set to %s deg, resulting yaw angle %s deg" % (orientation_yaw, yaw))
+
+    def set_tilt(self, tilt: float):
+        """
+        Sets the tilt angle of the turbine
+        Parameters
+        ----------
+        tilt: float
+            Tilt angle in deg
+
+        Returns
+        -------
+
+        """
+        self.orientation[1] = tilt
 
     def calc_tilt(self):
         """
@@ -307,7 +361,7 @@ class Turbine(ABC):
             1 x 3 vector with x,y,z location of the rotor in the world coordinate system
         """
         # TODO add tilt to offset calculation
-        lg.info(f'Orientation [0] {self.orientation[0]}')
+        lg.info('Orientation [0] %s ' % self.orientation[0])
 
         yaw = ot.ot_deg2rad(self.orientation[0])
         offset = np.array([np.cos(yaw), np.sin(yaw), 1]) * \
@@ -352,14 +406,40 @@ class HAWT_ADM(Turbine):
         """
         self.diameter = turbine_data["rotor_diameter"]
         self.nacellePos = np.array([0, 0, turbine_data["hub_height"]])
+        self.power_calc_method = "cp-u lut"  # alternative to "axial induction", "cp-bpa-tsr"  TODO: Set later in input
+        self.thrust_calc_method = "ct-u lut"  # alternative to "axial induction", "ct-bpa-tsr" TODO: Set later in input
+        self.yaw_power_coeff = "pP" # alternative to "none" TODO: Set later in input
+        self.yaw_thrust_coeff ="pT" # alternative to "none" TODO: Set later in input
+
         if "rotor_overhang" in turbine_data:
             self.nacellePos[0] = turbine_data["rotor_overhang"]
 
+        if "Cp_curve" in turbine_data["performance"]:
+            self.Cp_u_values = turbine_data["performance"]["Cp_curve"]["Cp_u_values"]
+            self.Cp_u_wind_speeds = turbine_data["performance"]["Cp_curve"]["Cp_u_wind_speeds"]
+
+        if "Ct_curve" in turbine_data:
+            self.Ct_u_values = turbine_data["performance"]["Ct_curve"]["Ct_u_values"]
+            self.Ct_u_wind_speeds = turbine_data["performance"]["Ct_curve"]["Ct_u_values"]
+
+        if "pP" in turbine_data:
+            self.Cp_pP = turbine_data["pP"]
+
+        if "pT" in turbine_data:
+            self.Cp_pT = turbine_data["pT"]
+
+        if "yaw_rate_lim" in turbine_data:
+            self.yaw_rate_lim = turbine_data["yaw_rate_lim"]
+
         super().__init__(base_location, orientation, turbine_states, observation_points, ambient_states)
         lg.info("HAWT turbine of type " + turbine_data["name"] + "created")
-        lg.info(f'Turbine base location: {base_location}')
+        lg.info('Turbine base location: %s' % base_location)
+        lg.info('Power calculation method: %s' % self.power_calc_method)
+        lg.info('Thrust calculation method: %s' % self.thrust_calc_method)
+        lg.info('Power yaw coefficient: %s' % self.yaw_power_coeff)
+        lg.info('Thrust yaw coefficient: %s' % self.yaw_thrust_coeff)
 
-    def calc_power(self, wind_speed, air_den):
+    def calc_power(self, wind_speed, air_den=1.225):
         """
         Calculate the power based on turbine, ambient and OP states
 
@@ -375,9 +455,30 @@ class HAWT_ADM(Turbine):
         float :
             Power generated (W)
         """
+        if self.yaw_power_coeff == "pP":
+            yaw = np.deg2rad(self.turbine_states.get_current_yaw())
+            yaw_coef = np.cos(yaw) ** self.Cp_pP
+        elif self.yaw_power_coeff == "none":
+            yaw_coef = 1.0
+        else:
+            raise Exception("Only cos(yaw) ** pP yaw coefficient supported (or none)")
 
-        # TODO probably needs to be rewritten
-        return 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3  # TODO link with turbine state Cp calculation
+        if self.power_calc_method == "axial induction":
+            axi = self.turbine_states.get_current_ax_ind()
+            cp = 4 * axi * (1 - axi) ** 2
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
+        elif self.power_calc_method == "cp-u lut":
+            cp = np.interp(wind_speed, self.Cp_u_wind_speeds, self.Cp_u_values)
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
+        elif self.power_calc_method == "cp-bpa-tsr":
+            cp = 0
+            p = 0.5 * np.pi * (self.diameter / 2) ** 2 * wind_speed ** 3 * cp * yaw_coef * air_den
+            raise Exception("Cp calculation based on cp-bpa-tsr not implemented yet.")
+        else:
+            raise Exception("The power calculation method %s is unkown. Try cp-u lut, cp-bpa-tsr, axial induction "
+                            "instead." % self.power_calc_method)
+
+        return p
 
 
 class TurbineStatesFLORIDyn(TurbineStates):
@@ -394,7 +495,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         super().__init__(number_of_time_steps, 3, ['axial induction (-), yaw (deg), added turbulence intensity (%)'])
 
-    def get_current_cp(self) -> float:
+    def get_current_cp(self) -> float:  # TODO: Remove! This has been moved to the turbine model
         """
         get_current_cp returns the current power coefficient of the turbine
 
@@ -406,7 +507,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         return 4 * self.states[0, 0] * (1 - self.states[0, 0]) ** 2 * \
                np.cos(self.states[0, 1]) ** 2.2  # TODO Double check correct Cp calculation
 
-    def get_current_ct(self) -> float:
+    def get_current_ct(self) -> float:  # TODO: Remove! This has been moved to the turbine model
         """
         get_current_ct returns the current thrust coefficient of the turbine
 
@@ -442,6 +543,19 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         return self.get_yaw(0)
 
+    def set_yaw(self, yaw_angle: float):
+        """
+        Sets the yaw misalignment with the wind direction
+
+        Parameters
+        ----------
+        yaw_angle
+        """
+        if self.n_time_steps > 1:
+            self.states[0, 1] = yaw_angle
+        else:
+            self.states[1] = yaw_angle
+
     def get_ct(self, index: int) -> float:
         """
         get_ct(index) returns the Ct coefficient at a requested index of the turbine state chain
@@ -473,6 +587,19 @@ class TurbineStatesFLORIDyn(TurbineStates):
             return self.states[index, 0]
         else:
             return self.states[0]
+
+    def set_ax_ind(self, ax_ind):
+        """
+        Stores the axial induction factor of the turbine in the states.
+
+        Parameters
+        ----------
+        ax_ind: axial induction factor
+        """
+        if self.n_time_steps > 1:
+            self.states[0, 0] = ax_ind
+        else:
+            self.states[0] = ax_ind
 
     def get_yaw(self, index: int) -> float:
         """

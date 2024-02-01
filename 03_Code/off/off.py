@@ -25,10 +25,13 @@ import off.turbine as tur
 import off.windfarm as wfm
 import off.observation_points as ops
 import off.ambient as amb
+import off.utils as util
+import off.controller as ctr
 import numpy as np
 import pandas as pd
 import off.wake_solver as ws
 from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
+import shutil
 
 from off import __file__ as OFF_PATH
 OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
@@ -43,17 +46,38 @@ class OFF:
     settings_vis = dict()
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict,
-                 settings_cor: dict, vis: dict):
+                 settings_cor: dict, settings_ctr: dict, vis: dict):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.settings_vis = vis
         self.__dir_init__( settings_sim )
         self.__logger_init__( settings_sim )
         settings_wke['sim_dir'] = self.root_dir
+
+        # =========== FLORIS ===========
+        settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
+        shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
+
+        # =========== Solver ===========
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
         # self.wake_solver = ws.FLORIDynFlorisWakeSolver(settings_wke, settings_sol)
         self.wake_solver = ws.TWFSolver(settings_wke, settings_sol, vis)
 
+        # =========== Controller ===========
+        if settings_ctr["ctl"] == "IdealGreedyBaseline":
+            self.controller = ctr.IdealGreedyBaselineController(settings_ctr)
+        elif settings_ctr["ctl"] == "RealGreedyBaseline":
+            self.controller = ctr.RealisticGreedyBaselineController(settings_ctr)
+        elif settings_ctr["ctl"] == "prescribed filtered yaw controller":
+            self.controller = ctr.YawSteeringFilteredPrescribedMotionController(settings_ctr)
+        elif settings_ctr["ctl"] == "prescribed yaw controller":
+            self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr)
+        elif settings_ctr["ctl"] == "LUT yaw controller":
+            self.controller = ctr.YawSteeringLUTController(settings_ctr)
+        else:
+            raise Warning("Controller %s is undefined!" % settings_ctr["ctl"])
+
+        # =========== Corrector ===========
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
@@ -67,7 +91,7 @@ class OFF:
             Current run id.
         """
         run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
-        lg.info('RunID path: ' + run_id_path)
+        lg.info('RunID path: %s', run_id_path)
 
         try:
             fid = open(run_id_path)
@@ -80,7 +104,7 @@ class OFF:
         with open(run_id_path, 'w') as fid:
             fid.write('{}'.format(run_id+1))
 
-        lg.info(f'RunID: {run_id}')
+        lg.info('RunID: %s' % run_id)
         return run_id
 
     def __dir_init__(self, settings_sim: dict):
@@ -158,7 +182,7 @@ class OFF:
                 log_fid = f'{self.sim_dir}/off.log'
                 _logger_add(lg, logging.FileHandler(log_fid), file_lvl, file_formatter)
         
-        lg.info(f'Saving data to {self.sim_dir}.')
+        lg.info('Saving data to %s.' % self.sim_dir)
 
     def init_sim(self, start_ambient: np.ndarray, start_turbine: np.ndarray):
         """
@@ -181,8 +205,9 @@ class OFF:
             t.observation_points.init_all_states(t.ambient_states.get_turbine_wind_speed_u(),
                                                  t.ambient_states.get_turbine_wind_speed_v(),
                                                  t.get_rotor_pos(), self.settings_sim['time step'])
+            pass
 
-    def run_sim(self) -> pd.DataFrame:
+    def run_sim(self) -> tuple:
         """
         Central function which executes the simulation and manipulates the ``self.wind_farm object``
 
@@ -194,13 +219,16 @@ class OFF:
         lg.info(f'Running simulation from {self.settings_sim["time start"]} s to {self.settings_sim["time end"]} s.')
         lg.info(f'Time step: {self.settings_sim["time step"]} s.')
 
-        # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as OP speed
+        # Allocate data structures for measurement (output), effective rotor wind speed (u,v) as well as the power
         measurements = pd.DataFrame()
+        control_applied = pd.DataFrame()
+
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
+        pow_t = np.zeros((len(self.wind_farm.turbines), 1))
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
-            lg.info(f'Starting time step: {t} s.')
+            lg.info('Starting time step: %s s.' % t)
 
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
@@ -213,16 +241,29 @@ class OFF:
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+
+                # Calculate the power generated
+                pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0], uv_r[idx, 1]))
+                m_tmp['pow'] = pow_t[idx, :]
+
                 # Add turbine index & timestamp to data
                 m_tmp.t_idx = idx
                 m_tmp['time'] = t
+
                 # Append turbine measurements to general measurement data
                 measurements = pd.concat([measurements, m_tmp], ignore_index=True)
+
                 # Set propagation speed of the OPs of the turbine 'tur'
                 tur.observation_points.set_op_propagation_speed(uv_op)
 
-            lg.info(f'Rotor wind speed of all turbines:')
+                # Store turbine state applied in controller
+                c_tmp = self.controller.get_applied_settings(tur, idx, t)
+                control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
+
+            lg.info('Rotor wind speed of all turbines:')
             lg.info(uv_r)
+
+            lg.info('Power generated by all turbines: %s' % pow_t)
 
             # ///////////////////// CORRECT ///////////////////////
             # Load new values for the flow field
@@ -230,8 +271,6 @@ class OFF:
             for idx, tur in enumerate(self.wind_farm.turbines):
                 # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
-
-            # ///////////////////// CONTROL ///////////////////////
 
             # ///////////////////// VISUALIZE /////////////////////
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
@@ -245,11 +284,20 @@ class OFF:
                 tur.observation_points.propagate_ops(self.settings_sim['time step'])
                 lg.debug(tur.observation_points.get_world_coord())
 
-            lg.info(f'Ending time step: {t} s.')
+            # ///////////////////// CONTROL ///////////////////////
+            self.controller.update(t)
+            for idx, tur in enumerate(self.wind_farm.turbines):
+                lg.debug("Turbine %s states before control-> yaw = %s deg, ax ind = %s." %
+                         (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
+                self.controller(tur, idx, t)
+                lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
+                         (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
+
+            lg.info('Ending time step: %s s.' % t)
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
-        return measurements
+        return measurements, control_applied
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """
