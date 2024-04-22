@@ -658,7 +658,7 @@ class Floris4Wake(WakeModel):
         ambient_states : np.ndarray
             1 x 2 : [u_abs, phi] - absolute background wind speed and direction
         """
-        super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+        super(Floris4Wake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
         lg.info('Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
         self.fmodel = FlorisModel(self.settings['yaml_path'])
         lg.info('FLORIS 4 object created.')

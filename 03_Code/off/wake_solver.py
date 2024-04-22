@@ -375,7 +375,7 @@ class TWFSolver(WakeSolver):
         lg.info('FLORIDyn TWF solver created.')
 
         if settings_sol["wake_model"].startswith("FLORIS"):
-            self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+            self.floris_wake = wm.Floris4Wake(settings_wke, np.array([]), np.array([]), np.array([]))
         elif settings_sol["wake_model"] == "PythonGaussianWake":
             self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
         else:

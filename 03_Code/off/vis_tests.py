@@ -17,8 +17,26 @@
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
+from scipy.spatial import cKDTree
 import matplotlib.pyplot as plt
-from scipy.spatial import Voronoi, voronoi_plot_2d
+
+def assign_points_to_nearest(scattered_points, grid_points):
+    # Erstellen Sie einen k-dimensionalen Baum aus den verstreuten Punkten
+    tree = cKDTree(scattered_points)
+
+    # Finden Sie die Indizes der nächsten verstreuten Punkte für jeden Grid-Punkt
+    _, indices = tree.query(grid_points)
+
+    # Erstellen Sie ein Dictionary, das jeden verstreuten Punkt auf eine Liste von Grid-Punkten abbildet, die ihm am nächsten sind
+    point_mapping = {}
+    for point_index, grid_point in zip(indices, grid_points):
+        nearest_scattered_point = tuple(scattered_points[point_index])
+        if nearest_scattered_point not in point_mapping:
+            point_mapping[nearest_scattered_point] = []
+        point_mapping[nearest_scattered_point].append(tuple(grid_point))
+
+    return point_mapping
+
 
 # Define grid points
 x_range = np.arange(0, 5, 1)
@@ -26,35 +44,21 @@ y_range = np.arange(0, 3, 1)
 x_grid, y_grid = np.meshgrid(x_range, y_range)
 grid_points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
 
-print(grid_points)
-
 # Define scattered points
 scattered_points = np.array([[1, 1], [2, 2], [3, 1], [3, 3]])
 
-# Combine scattered and grid points
-all_points = np.vstack((scattered_points, grid_points))
-
-# Compute Voronoi diagram
-vor = Voronoi(all_points)
-
-# Determine Voronoi regions for grid points
-region_indices = vor.point_region
-grid_regions = region_indices[len(scattered_points):]
+mapping = assign_points_to_nearest(scattered_points, grid_points)
 
 # Plot Voronoi diagram
 fig, ax = plt.subplots()
-voronoi_plot_2d(vor, ax=ax, show_vertices=True, line_colors='gray')
 
-# Plot grid points within their respective Voronoi regions
-for i, region_index in enumerate(grid_regions):
-    region_vertices = vor.vertices[vor.regions[region_index]]
-    ax.fill(*zip(*region_vertices), alpha=0.4)
-
-# Customize plot properties
-ax.plot(scattered_points[:, 0], scattered_points[:, 1], 'ko')  # Plot scattered points
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_title('Voronoi Diagram with Grid Points')
+# Plot grid points that belong to the same scattered point in a uniform color
+for scattered_point, grid_points in mapping.items():
+    x_values = [point[0] for point in grid_points]
+    y_values = [point[1] for point in grid_points]
+    ax.plot(x_values, y_values, 'o', label=f'Scattered Point {scattered_point}')
+# Add legend
+ax.legend()
 
 # Show the plot
 plt.show()
