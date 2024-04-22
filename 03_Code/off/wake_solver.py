@@ -32,9 +32,9 @@ lg = logging.getLogger(__name__)
 
 class WakeSolver(ABC):
     
-    settings_sol: dict()
-    settings_vis: dict()
-    _flag_plot_wakes: bool()
+    settings_sol: dict
+    settings_vis: dict
+    _flag_plot_wakes: bool
 
     def __init__(self, settings_sol: dict, settings_vis: dict):
         """

@@ -21,8 +21,9 @@ import pandas as pd
 from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
-from floris.tools import FlorisInterface
-from floris.tools.visualization import visualize_cut_plane
+# from floris.tools import FlorisInterface
+# from floris.tools.visualization import visualize_cut_plane
+from floris import FlorisModel, TimeSeries
 import matplotlib.pyplot as plt
 import yaml
 
@@ -630,3 +631,155 @@ class PythonGaussianWake(WakeModel):
         plt.show()
 
 
+
+class Floris4Wake(WakeModel):
+    """
+    Interface to the FLORIS 4 wake models
+    """
+
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
+        """
+
+        Parameters
+        ----------
+        settings : dict
+            .["yaml_path"] path to settings, e.g. gch.yaml
+                example files can be found at https://github.com/NREL/floris/tree/main/examples/inputs
+        wind_farm_layout : np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states : array of TurbineStates objects
+            array with n_t TurbineStates objects with each one state
+            Obejcts have access to methods such as get_current_Ct()
+        ambient_states : array of AmbientStates objects
+            array with n_t AmbientStates objects with each one state
+            Obejcts have access to methods such as get_turbine_wind_dir()
+        turbine_states : np.ndarray
+            n_t x 2 array with [axial ind., yaw]
+        ambient_states : np.ndarray
+            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
+        """
+        super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+        lg.info('Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
+        self.fmodel = FlorisModel(self.settings['yaml_path'])
+        lg.info('FLORIS 4 object created.')
+
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
+        """
+        Changes the states of the stored wind farm
+
+        Parameters
+        ----------
+        wind_farm_layout: np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states: TurbineStates object with n_t entries for yaw
+        ambient_states: AmbientStates object with 1 entry for wind speed and direction
+        """
+        self.wind_farm_layout = wind_farm_layout
+        self.turbine_states = turbine_states
+        self.ambient_states = ambient_states
+
+        # retrieve yaw angles
+        n_t = len(self.turbine_states)
+        yaw_ang = np.zeros([1,n_t])
+
+        for ii_t in np.arange(n_t):
+            yaw_ang[0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
+
+        # Set ambient conditions 
+        # TODO: Replace turbulence intensity with actual value + index of turbine
+        time_series = TimeSeries(
+            wind_directions=ambient_states[0].get_turbine_wind_dir(),
+            wind_speeds=ambient_states[0].get_turbine_wind_speed_abs(),
+            turbulence_intensities=0.06,
+        )
+        
+        # Set the wind farm conditions
+        self.fmodel.set(
+            layout_x=wind_farm_layout[:, 0],
+            layout_y=wind_farm_layout[:, 1],
+            wind_data=time_series,
+            yaw_angles=yaw_ang,
+        )
+        
+
+    def get_measurements_i_t(self, i_t: int) -> tuple:
+        """
+        Returns the measurements of the wake model including the effective wind speed at the turbine i_t
+
+        Parameters
+        ----------
+        i_t : int
+            Index of the turbine of interest
+
+        Returns
+        -------
+        tuple:
+            float: u_eff
+                effective wind speed at turbine i_t
+            pandas.dataframe: measurements
+                all measurements (Power gen, added turbulence, etc.)
+        """
+        
+        # Solve the wind farm
+        self.fmodel.run()
+
+        # Retrieve the measurements
+        avg_vel = self.fmodel.turbine_average_velocities
+        Cts = self.fmodel.get_turbine_Cts()
+        AIs = self.fmodel.get_turbine_ais() 
+        TIs = self.fmodel.get_turbine_TIs()
+        Pows = self.fmodel.get_turbine_powers()
+
+        # Store measurements in a pandas dataframe
+        measurements = pd.DataFrame(
+            [[
+                i_t,
+                avg_vel[:, :, i_t].flatten()[0],
+                Cts[:, :, i_t].flatten()[0],
+                AIs[:, :, i_t].flatten()[0],
+                TIs[:, :, i_t].flatten()[0],
+                Pows[:, :, i_t].flatten()[0]
+            ]],
+            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
+        )
+
+        # Return the effective wind speed and the measurements
+        return avg_vel[:, :, i_t].flatten()[0], measurements
+
+    def vis_flow_field(self):
+        """
+        Creates a plot of the wind farm applied to the given turbine using the FLORIS interface
+        """
+
+        n_t = len(self.turbine_states)
+        yaw_ang = np.zeros([1, 1, n_t])
+
+        for ii_t in np.arange(n_t):
+            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
+
+        # Don't know if the calculate_wake is needed, but probably for yaw angles
+        self.fi.calculate_wake(yaw_angles=yaw_ang)
+        horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
+
+        fig, ax_horo_plane = plt.subplots()
+        self.fi.visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        plt.show()
+
+    def get_twf_vis(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """
+        Get datapoints to visualize the turbine wake field
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinates of the points to visualize
+        """
+
+        self.fmodel.run()
+        return self.fmodel.sample_flow_at_points(x, y, z)
+                
+        
