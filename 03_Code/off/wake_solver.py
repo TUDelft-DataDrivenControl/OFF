@@ -35,6 +35,11 @@ class WakeSolver(ABC):
     settings_sol: dict
     settings_vis: dict
     _flag_plot_wakes: bool
+    _flag_plot_tile: bool
+    _flow_field_x: np.ndarray
+    _flow_field_y: np.ndarray
+    _flow_field_z: np.ndarray
+    _flow_field_u: np.ndarray
 
     def __init__(self, settings_sol: dict, settings_vis: dict):
         """
@@ -49,6 +54,8 @@ class WakeSolver(ABC):
         self.settings_sol = settings_sol
         self.settings_vis = settings_vis
         self._flag_plot_wakes = False
+        self._flag_plot_tile  = False
+        
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
 
@@ -83,6 +90,36 @@ class WakeSolver(ABC):
         """
         self._flag_plot_wakes = False
 
+    def raise_flag_plot_tile(self, x:np.ndarray, y:np.ndarray, z:np.ndarray):
+        """
+        Raises a flag to plot the TWF tile during the next call of the wake model
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinates of the points to visualize
+        """
+        self._flag_plot_tile = True
+        self._flow_field_x = x
+        self._flow_field_y = y
+        self._flow_field_z = z
+
+    def _lower_flag_plot_tile(self):
+        """
+        Lowers the flag to plot the tile after it has been plotted
+        """
+        self._flag_plot_tile = False
+
+    def get_tile_u(self):
+        """
+        Returns the |u| component of the flow field
+        """
+        return self._flow_field_u
+    
     def vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm, sim_dir, t):
         """
         Moves a dummy turbine around to extract the effective wind speed at a given grid
@@ -495,6 +532,13 @@ class TWFSolver(WakeSolver):
         if self._flag_plot_wakes:
             self.floris_wake.vis_flow_field()
             self._lower_flag_plot_wakes()
+
+        # Get effective wind speed from TWF "tile"
+        if self._flag_plot_tile:
+            self._flow_field_u = self.floris_wake.vis_tile(
+                self._flow_field_x, self._flow_field_y, self._flow_field_z)
+            
+            self._lower_flag_plot_tile()
 
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)

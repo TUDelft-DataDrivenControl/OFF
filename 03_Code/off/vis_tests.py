@@ -39,13 +39,14 @@ def assign_points_to_nearest(scattered_points, grid_points):
 
 
 # Define grid points
-x_range = np.arange(0, 5, 1)
-y_range = np.arange(0, 3, 1)
+x_range = np.arange(0, 50, 1)
+y_range = np.arange(0, 30, 1)
 x_grid, y_grid = np.meshgrid(x_range, y_range)
 grid_points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
 
 # Define scattered points
-scattered_points = np.array([[1, 1], [2, 2], [3, 1], [3, 3]])
+#scattered_points = np.array([[1, 1], [2, 2], [3, 1], [3, 3]])
+scattered_points = np.random.rand(10, 2) * 50
 
 mapping = assign_points_to_nearest(scattered_points, grid_points)
 

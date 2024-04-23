@@ -239,6 +239,11 @@ class OFF:
                         idx in self.settings_vis["debug"]["iT"]):
                     self.wake_solver.raise_flag_plot_wakes()
 
+                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                        t in self.settings_vis["debug"]["time"]):
+                    
+                    self.wake_solver.raise_flag_plot_effective_wind_speed()
+
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
 

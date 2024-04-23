@@ -765,7 +765,7 @@ class Floris4Wake(WakeModel):
         self.fi.visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
         plt.show()
 
-    def get_twf_vis(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+    def vis_tile(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
         """
         Get datapoints to visualize the turbine wake field
 
@@ -777,9 +777,14 @@ class Floris4Wake(WakeModel):
             y coordinates of the points to visualize
         z : np.ndarray
             z coordinates of the points to visualize
+
+        Returns
+        -------
+        np.ndarray
+            effective velocity at the points
         """
 
-        self.fmodel.run()
+        self.fmodel.run() # TODO check if this is necessary
         return self.fmodel.sample_flow_at_points(x, y, z)
                 
         
