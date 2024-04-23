@@ -25,7 +25,7 @@ import logging
 class Visualizer_FlowField:
     settings: dict
 
-    def __init__(self, settings: dict):
+    def __init__(self, settings: dict, turbine_locations: np.ndarray):
         """
         Class to visualize the flow field
 
@@ -35,6 +35,8 @@ class Visualizer_FlowField:
             Dictionary containing the settings for the visualizer
         """
         self.settings = settings
+        self._vis_generate_grid_points()
+        self._vis_assign_points_to_nearest(turbine_locations)
 
 
     def _vis_assign_points_to_nearest(self, turbine_locations: np.ndarray):
@@ -76,12 +78,7 @@ class Visualizer_FlowField:
         np.ndarray
             Grid points that belong to the given turbine
         """
-
-        # Generate the grid points if necessary
-        if not hasattr(self, 'grid_points'):
-            self._vis_generate_grid_points()
-            self._vis_assign_points_to_nearest(turbine_locations)
-
+        
         # Get the grid points for the given turbine
         return self.point_mapping[tuple(turbine_locations[iT])]
 

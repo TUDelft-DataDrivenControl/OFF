@@ -27,6 +27,7 @@ import off.observation_points as ops
 import off.ambient as amb
 import off.utils as util
 import off.controller as ctr
+import off.vis_flow_field as vff
 import numpy as np
 import pandas as pd
 import off.wake_solver as ws
@@ -81,6 +82,9 @@ class OFF:
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+
+        # =========== Visualization ===========
+        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_turbine_locations())
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -241,8 +245,8 @@ class OFF:
 
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"]):
-                    
-                    self.wake_solver.raise_flag_plot_effective_wind_speed()
+                    grid_points = self.visualizer_ff.vis_get_grid_points_iT(idx, self.wind_farm.get_turbine_locations())
+                    self.wake_solver.raise_flag_plot_effective_wind_speed(grid_points)
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)

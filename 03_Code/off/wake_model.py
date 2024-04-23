@@ -315,7 +315,7 @@ class FlorisGaussianWake(WakeModel):
         horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
 
         fig, ax_horo_plane = plt.subplots()
-        visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        # visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal") # Belongs to FLORIS 3.4, update needed for FLORIS 4
         plt.show()
 
 
@@ -627,7 +627,7 @@ class PythonGaussianWake(WakeModel):
         horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
 
         fig, ax_horo_plane = plt.subplots()
-        visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        # visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal") # Belongs to FLORIS 3.4, update needed for FLORIS 4
         plt.show()
 
 
@@ -762,7 +762,7 @@ class Floris4Wake(WakeModel):
         horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
 
         fig, ax_horo_plane = plt.subplots()
-        self.fi.visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal")
+        # visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal") # Belongs to FLORIS 3.4, update needed for FLORIS 4
         plt.show()
 
     def vis_tile(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
