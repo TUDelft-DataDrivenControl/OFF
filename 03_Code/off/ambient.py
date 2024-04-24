@@ -425,7 +425,7 @@ class FLORIDynAmbient(AmbientStates):
 
 FIELD_MAP = {'Abs. wind speed (m/s)':            'wind_speeds',
              'Wind direction (deg)':             'wind_directions',
-             'Ambient turbulence intensity (%)': 'turbulence_intensity',
+             'Ambient turbulence intensity (%)': 'turbulence_intensities',
              'Wind shear (-)':                   'wind_shear',
              'Wind veer (-)':                    'wind_veer'}
 
