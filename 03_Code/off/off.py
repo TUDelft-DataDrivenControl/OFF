@@ -84,7 +84,7 @@ class OFF:
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
 
         # =========== Visualization ===========
-        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout())
+        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -245,8 +245,8 @@ class OFF:
 
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"]):
-                    grid_points = self.visualizer_ff.vis_get_grid_points_iT(idx, self.wind_farm.get_turbine_locations())
-                    self.wake_solver.raise_flag_plot_effective_wind_speed(grid_points)
+                    grid_points = np.stack(self.visualizer_ff.vis_get_grid_points_iT(idx, self.wind_farm.get_layout()[:,:2]))
+                    self.wake_solver.raise_flag_plot_effective_wind_speed(grid_points[:,0], grid_points[:,1], self.settings_vis["grid"]["slice_2d_xy"][0])
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)

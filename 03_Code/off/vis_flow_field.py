@@ -60,7 +60,7 @@ class Visualizer_FlowField:
             nearest_scattered_point = tuple(turbine_locations[point_index])
             if nearest_scattered_point not in self.point_mapping:
                 self.point_mapping[nearest_scattered_point] = []
-            self.point_mapping[nearest_scattered_point].append(tuple(grid_point))
+            self.point_mapping[nearest_scattered_point].append(grid_point)
 
     def vis_get_grid_points_iT(self, iT:int, turbine_locations: np.ndarray) -> np.ndarray:
         """
