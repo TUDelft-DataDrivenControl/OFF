@@ -101,7 +101,7 @@ class OFFInterface:
         self.off_sim.init_sim(
             np.array([sim_info["ambient"]["flow_field"]["wind_speeds"][0],
                       sim_info["ambient"]["flow_field"]["wind_directions"][0],
-                      sim_info["ambient"]["flow_field"]["turbulence_intensity"][0]]),
+                      sim_info["ambient"]["flow_field"]["turbulence_intensities"][0]]),
             np.array([1 / 3, 0, 0]))
 
         self.ready_to_run = True
@@ -346,7 +346,7 @@ class OFFInterface:
         # The code below does not take time into account, but rather initializes with a given wind dir / vel
         flow_field = dict([('air_density', settings_amb['flow_field']['air_density']),
                            ('reference_wind_height', settings_amb['flow_field']['reference_wind_height']),
-                           ('turbulence_intensity', settings_amb['flow_field']['turbulence_intensity'][0]),
+                           ('turbulence_intensities', settings_amb['flow_field']['turbulence_intensities'][0]),
                            ('wind_directions', [settings_amb['flow_field']['wind_directions'][0]]),
                            ('wind_shear', settings_amb['flow_field']['wind_shear']),
                            ('wind_speeds', [settings_amb['flow_field']['wind_speeds'][0]]),
