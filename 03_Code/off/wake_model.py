@@ -688,9 +688,9 @@ class Floris4Wake(WakeModel):
         # Set ambient conditions 
         # TODO: Replace turbulence intensity with actual value + index of turbine
         time_series = TimeSeries(
-            wind_directions=ambient_states[0].get_turbine_wind_dir(),
-            wind_speeds=ambient_states[0].get_turbine_wind_speed_abs(),
-            turbulence_intensities=0.06,
+            wind_directions=np.ones(1)*ambient_states[0].get_turbine_wind_dir(),
+            wind_speeds=np.ones(1)*ambient_states[0].get_turbine_wind_speed_abs(),
+            turbulence_intensities=np.ones(1)*0.06,
         )
         
         # Set the wind farm conditions
@@ -725,7 +725,7 @@ class Floris4Wake(WakeModel):
 
         # Retrieve the measurements
         avg_vel = self.fmodel.turbine_average_velocities
-        Cts = self.fmodel.get_turbine_Cts()
+        Cts = self.fmodel.get_turbine_thrust_coefficients()
         AIs = self.fmodel.get_turbine_ais() 
         TIs = self.fmodel.get_turbine_TIs()
         Pows = self.fmodel.get_turbine_powers()
@@ -734,17 +734,17 @@ class Floris4Wake(WakeModel):
         measurements = pd.DataFrame(
             [[
                 i_t,
-                avg_vel[:, :, i_t].flatten()[0],
-                Cts[:, :, i_t].flatten()[0],
-                AIs[:, :, i_t].flatten()[0],
-                TIs[:, :, i_t].flatten()[0],
-                Pows[:, :, i_t].flatten()[0]
+                avg_vel.flatten()[i_t],
+                Cts.flatten()[i_t],
+                AIs.flatten()[i_t],
+                TIs.flatten()[i_t],
+                Pows.flatten()[i_t]
             ]],
-            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']
+            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI','Power']
         )
 
         # Return the effective wind speed and the measurements
-        return avg_vel[:, :, i_t].flatten()[0], measurements
+        return avg_vel.flatten()[i_t], measurements
 
     def vis_flow_field(self):
         """

@@ -46,10 +46,10 @@ class Visualizer_FlowField:
         Parameters
         ----------
         turbine_locations : np.ndarray
-            Array containing the locations of the turbines
+            Array containing the [x,y,z,D] locations of the turbine nacelle
         """
-        # Create a k-dimensional tree from the scattered points
-        tree = cKDTree(turbine_locations)
+        # Create a k-dimensional tree from turbine locations (x,y)
+        tree = cKDTree(turbine_locations[:,:2])
 
         # Find the indices of the nearest scattered points for each grid point
         _, indices = tree.query(self.grid_points)
@@ -87,20 +87,20 @@ class Visualizer_FlowField:
         Function to generate the grid points based on settings
         """
 
-        if self.settings['grid']['unit'] == 'D':
-            x_step = ((self.settings['grid']['boundaries'][0][1]*self.settings['grid']['diameter'] -
-                        self.settings['grid']['boundaries'][0][0]*self.settings['grid']['diameter']) / 
+        if self.settings['grid']['unit'][0] == 'D':
+            x_step = ((self.settings['grid']['boundaries'][0][1]*self.settings['grid']['diameter'][0] -
+                        self.settings['grid']['boundaries'][0][0]*self.settings['grid']['diameter'][0]) / 
                             self.settings['grid']['resolution'][0])
-            y_step = ((self.settings['grid']['boundaries'][1][1]*self.settings['grid']['diameter'] -
-                        self.settings['grid']['boundaries'][1][0]*self.settings['grid']['diameter']) / 
+            y_step = ((self.settings['grid']['boundaries'][1][1]*self.settings['grid']['diameter'][0] -
+                        self.settings['grid']['boundaries'][1][0]*self.settings['grid']['diameter'][0]) / 
                             self.settings['grid']['resolution'][1])
             
             x_range = np.arange(
-                self.settings['grid']['boundaries'][0][0]*self.settings['grid']['diameter'],
-                self.settings['grid']['boundaries'][0][1]*self.settings['grid']['diameter'], x_step)
+                self.settings['grid']['boundaries'][0][0]*self.settings['grid']['diameter'][0],
+                self.settings['grid']['boundaries'][0][1]*self.settings['grid']['diameter'][0], x_step)
             y_range = np.arange(
-                self.settings['grid']['boundaries'][1][0]*self.settings['grid']['diameter'],
-                self.settings['grid']['boundaries'][1][1]*self.settings['grid']['diameter'], y_step)
+                self.settings['grid']['boundaries'][1][0]*self.settings['grid']['diameter'][0],
+                self.settings['grid']['boundaries'][1][1]*self.settings['grid']['diameter'][0], y_step)
         else:
             x_step = ((self.settings['grid']['boundaries'][0][1] - self.settings['grid']['boundaries'][0][0]) / 
                             self.settings['grid']['resolution'][0])

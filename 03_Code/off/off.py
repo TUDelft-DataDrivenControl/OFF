@@ -84,7 +84,7 @@ class OFF:
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
 
         # =========== Visualization ===========
-        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_turbine_locations())
+        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout())
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
