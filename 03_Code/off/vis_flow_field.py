@@ -19,6 +19,8 @@
 import numpy as np
 from scipy.spatial import cKDTree
 import matplotlib.pyplot as plt
+import networkx as nx
+from sklearn.neighbors import NearestNeighbors
 import logging
 
 
@@ -44,7 +46,7 @@ class Visualizer_FlowField:
 
     def _vis_create_id_matrix(self, turbine_locations: np.ndarray):
         """
-        Function to create the id matrix
+        Function to create the id matrix & generate a color map
 
         Parameters
         ----------
@@ -56,6 +58,25 @@ class Visualizer_FlowField:
             (self.y_grid - point[1])**2) for point in turbine_locations])
         
         self.id_matrix = np.argmin(distances, axis=0)
+
+        # Create a graph object where each point is a node
+        G = nx.Graph()
+
+        for i in range(len(turbine_locations)):
+            G.add_node(i)
+
+        n_neig = np.min([5, len(turbine_locations)])
+        # Connect each node with its nearest neighbors to create edges
+        nbrs = NearestNeighbors(n_neighbors=n_neig, algorithm='ball_tree').fit(turbine_locations)
+        distances, indices = nbrs.kneighbors(turbine_locations)
+
+        for i in range(len(indices)):
+            for j in range(len(indices[i])):
+                if i != indices[i][j]:
+                    G.add_edge(i, indices[i][j])
+
+        # Assign colors to the nodes using a greedy coloring algorithm
+        self.color_map = nx.greedy_color(G, strategy="largest_first")
     
     def vis_get_grid_points_iT(self, iT:int) -> np.ndarray:
         """
@@ -140,13 +161,50 @@ class Visualizer_FlowField:
             Path to the file
         """
         if self.settings["debug"]["turbine_effective_wind_speed_store_data"]:
-            np.savetxt(path, np.column_stack(
+            np.savetxt(path + '.csv', np.column_stack(
                 (self.x_grid.flatten(), self.y_grid.flatten(), self.u_grid.flatten())),
                   delimiter=',')
         
         if self.settings["debug"]["turbine_effective_wind_speed_plot"]:
-            fig1, ax2 = plt.subplots(layout='constrained')
-            CS = ax2.contourf(self.x_grid, self.y_grid, self.u_grid, 10, cmap=plt.cm.bone)
+            fig1, ax1 = plt.subplots(layout='constrained')
+            for iT, color in self.color_map.items():
+                u_values = np.zeros(self.u_grid.shape)
+                u_values[self.id_matrix == iT] = self.u_grid[self.id_matrix == iT]
+                u_values[self.id_matrix != iT] = np.nan
+                CS = ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.bone)
+            
+            cbar = fig1.colorbar(CS)
+            cbar.ax.set_ylabel('Velocity (m/s)')
+            ax1.axis('equal')
+            #store the plot
+            fig1.savefig(path + '.png')
+
+        if (self.settings["debug"]["turbine_effective_wind_speed_plot"] and 
+            self.settings["debug"]["effective_wf_tile_5color"]):
+            fig1, ax1 = plt.subplots(layout='constrained')
+            
+            for iT, color in self.color_map.items():
+                u_values = np.zeros(self.u_grid.shape)
+                u_values[self.id_matrix == iT] = self.u_grid[self.id_matrix == iT]
+                u_values[self.id_matrix != iT] = np.nan
+
+                if color == 0:
+                    ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Greys_r)
+                elif color == 1:
+                    ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Blues_r)
+                elif color == 2:
+                    ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Greens_r)
+                elif color == 3:
+                    ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Oranges_r)
+                else:
+                    ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Purples_r)
+
+            ax1.axis('equal')
+            #store the plot
+            fig1.savefig(path + '_landscape.png')
+    
+
+
 
     def _vis_assign_points_to_nearest(self, turbine_locations: np.ndarray):
         """

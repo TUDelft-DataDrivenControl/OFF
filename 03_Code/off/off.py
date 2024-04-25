@@ -244,7 +244,7 @@ class OFF:
                     # Plots the wind farm as simulated in the steady state model
                     self.wake_solver.raise_flag_plot_wakes()
 
-                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
                     # Set flag to calculate wind speed in wake model at grid points belonging to turbine iT
                     grid_points_iT = self.visualizer_ff.vis_get_grid_points_iT(idx)
@@ -274,7 +274,7 @@ class OFF:
                 control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
 
                 # Store flow field points
-                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
                     self.visualizer_ff.vis_store_u_values(
                         self.wake_solver.get_tile_u().flatten(), idx)
@@ -314,9 +314,10 @@ class OFF:
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
 
             # ///////////////////// STORE ///////////////////////
-            if (self.settings_vis["debug"]["effective_wf_layout"] and
+            if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
-                self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t) + '.csv')
+                self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
+
             lg.info('Ending time step: %s s.' % t)
 
         lg.info('Simulation finished. Resulting measurements:')

@@ -16,50 +16,46 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
+import networkx as nx
 import numpy as np
-from scipy.spatial import cKDTree
+from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 
-def assign_points_to_nearest(scattered_points, grid_points):
-    # Erstellen Sie einen k-dimensionalen Baum aus den verstreuten Punkten
-    tree = cKDTree(scattered_points)
+# Generiere eine Menge von zufälligen Punkten mit x, y-Koordinaten
+points = np.random.rand(50, 2)
 
-    # Finden Sie die Indizes der nächsten verstreuten Punkte für jeden Grid-Punkt
-    _, indices = tree.query(grid_points)
+# Erstelle ein Graphenobjekt, wobei jeder Punkt ein Knoten ist
+G = nx.Graph()
 
-    # Erstellen Sie ein Dictionary, das jeden verstreuten Punkt auf eine Liste von Grid-Punkten abbildet, die ihm am nächsten sind
-    point_mapping = {}
-    for point_index, grid_point in zip(indices, grid_points):
-        nearest_scattered_point = tuple(scattered_points[point_index])
-        if nearest_scattered_point not in point_mapping:
-            point_mapping[nearest_scattered_point] = []
-        point_mapping[nearest_scattered_point].append(tuple(grid_point))
+for i in range(len(points)):
+    G.add_node(i)
 
-    return point_mapping
+# Verbinde jeden Knoten mit seinen nächsten Nachbarn, um Kanten zu erstellen
+nbrs = NearestNeighbors(n_neighbors=5, algorithm='ball_tree').fit(points)
+distances, indices = nbrs.kneighbors(points)
+
+for i in range(len(indices)):
+    for j in range(len(indices[i])):
+        if i != indices[i][j]:
+            G.add_edge(i, indices[i][j])
+
+# Verwende einen Graphenfärbungsalgorithmus, um jedem Knoten eine von vier Farben zuzuweisen
+color_map = nx.greedy_color(G, strategy="largest_first")
+
+# Drucke die Farbzuordnung für jeden Punkt
+for node, color in color_map.items():
+    print(f'Point {node} is assigned color {color}')
 
 
-# Define grid points
-x_range = np.arange(0, 50, 1)
-y_range = np.arange(0, 30, 1)
-x_grid, y_grid = np.meshgrid(x_range, y_range)
-grid_points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
+# Verwende einen Graphenfärbungsalgorithmus, um jedem Knoten eine von vier Farben zuzuweisen
+color_map = nx.greedy_color(G, strategy="largest_first")
 
-# Define scattered points
-#scattered_points = np.array([[1, 1], [2, 2], [3, 1], [3, 3]])
-scattered_points = np.random.rand(10, 2) * 50
+# Erstelle eine Liste von Farben für jeden Knoten
+colors = ['red', 'green', 'blue', 'yellow']
+node_colors = [colors[color_map[node]] for node in G.nodes()]
 
-mapping = assign_points_to_nearest(scattered_points, grid_points)
+# Zeichne den Graphen
+nx.draw(G, pos=points, node_color=node_colors, with_labels=True)
 
-# Plot Voronoi diagram
-fig, ax = plt.subplots()
-
-# Plot grid points that belong to the same scattered point in a uniform color
-for scattered_point, grid_points in mapping.items():
-    x_values = [point[0] for point in grid_points]
-    y_values = [point[1] for point in grid_points]
-    ax.plot(x_values, y_values, 'o', label=f'Scattered Point {scattered_point}')
-# Add legend
-ax.legend()
-
-# Show the plot
+# Zeige das Diagramm
 plt.show()

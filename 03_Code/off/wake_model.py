@@ -791,7 +791,4 @@ class Floris4Wake(WakeModel):
         else:
             return self.fmodel.sample_flow_at_points(x, y, z)
         
-        np.random.wald(10,1,[3,4])
-        
-                
         
