@@ -24,6 +24,10 @@ import logging
 
 class Visualizer_FlowField:
     settings: dict
+    id_matrix: np.ndarray
+    x_grid: np.ndarray
+    y_grid: np.ndarray
+    u_grid: np.ndarray
 
     def __init__(self, settings: dict, turbine_locations: np.ndarray):
         """
@@ -36,33 +40,24 @@ class Visualizer_FlowField:
         """
         self.settings = settings
         self._vis_generate_grid_points()
-        self._vis_assign_points_to_nearest(turbine_locations)
+        self._vis_create_id_matrix(turbine_locations)
 
-
-    def _vis_assign_points_to_nearest(self, turbine_locations: np.ndarray):
+    def _vis_create_id_matrix(self, turbine_locations: np.ndarray):
         """
-        Function to assign grid points to the nearest turbine locations
+        Function to create the id matrix
 
         Parameters
         ----------
         turbine_locations : np.ndarray
-            Array containing the [x,y,z,D] locations of the turbine nacelle
+            Array containing the locations of the turbines
         """
-        # Create a k-dimensional tree from turbine locations (x,y)
-        tree = cKDTree(turbine_locations[:,:2])
-
-        # Find the indices of the nearest scattered points for each grid point
-        _, indices = tree.query(self.grid_points)
-
-        # Create a dictionary that maps each scattered point to a list of grid points that are nearest to it
-        self.point_mapping = {}
-        for point_index, grid_point in zip(indices, self.grid_points):
-            nearest_scattered_point = tuple(turbine_locations[point_index])
-            if nearest_scattered_point not in self.point_mapping:
-                self.point_mapping[nearest_scattered_point] = []
-            self.point_mapping[nearest_scattered_point].append(grid_point)
-
-    def vis_get_grid_points_iT(self, iT:int, turbine_locations: np.ndarray) -> np.ndarray:
+        distances = np.array([np.sqrt(
+            (self.x_grid - point[0])**2 +
+            (self.y_grid - point[1])**2) for point in turbine_locations])
+        
+        self.id_matrix = np.argmin(distances, axis=0)
+    
+    def vis_get_grid_points_iT(self, iT:int) -> np.ndarray:
         """
         Function to get the grid points for a given turbine location
         
@@ -70,17 +65,14 @@ class Visualizer_FlowField:
         ----------
         iT : int
             Index of the turbine
-        turbine_locations : np.ndarray
-            Array containing the locations of the turbines
 
         Returns
         -------
         np.ndarray
             Grid points that belong to the given turbine
         """
-        
-        # Get the grid points for the given turbine
-        return self.point_mapping[tuple(turbine_locations[iT])]
+        return np.vstack(
+            (self.x_grid[self.id_matrix == iT],self.y_grid[self.id_matrix == iT])).T
 
     def _vis_generate_grid_points(self):
         """
@@ -110,8 +102,9 @@ class Visualizer_FlowField:
             x_range = np.arange(self.settings['grid']['boundaries'][0][0], self.settings['grid']['boundaries'][0][1], x_step)
             y_range = np.arange(self.settings['grid']['boundaries'][1][0], self.settings['grid']['boundaries'][1][1], y_step)
         
-        x_grid, y_grid = np.meshgrid(x_range, y_range)
-        self.grid_points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
+        self.x_grid, self.y_grid = np.meshgrid(x_range, y_range)
+        self.u_grid = np.zeros_like(self.x_grid)
+        #self.grid_points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
 
     def vis_update_grid_point_relations(self, turbine_locations: np.ndarray):
         """
@@ -122,4 +115,58 @@ class Visualizer_FlowField:
         turbine_locations : np.ndarray
             Array containing the locations of the turbines
         """
-        self._vis_assign_points_to_nearest(turbine_locations)
+        self._vis_create_id_matrix(turbine_locations)
+
+    def vis_store_u_values(self, u_values: np.ndarray, iT:int):
+        """
+        Function to store the u values for a given turbine
+
+        Parameters
+        ----------
+        u_values : np.ndarray
+            Array containing the u values
+        iT : int
+            Index of the turbine
+        """
+        self.u_grid[self.id_matrix == iT] = u_values
+
+    def vis_save_flow_field(self, path: str):
+        """
+        Function to save the flow field to a file
+
+        Parameters
+        ----------
+        path : str
+            Path to the file
+        """
+        if self.settings["debug"]["turbine_effective_wind_speed_store_data"]:
+            np.savetxt(path, np.column_stack(
+                (self.x_grid.flatten(), self.y_grid.flatten(), self.u_grid.flatten())),
+                  delimiter=',')
+        
+        if self.settings["debug"]["turbine_effective_wind_speed_plot"]:
+            fig1, ax2 = plt.subplots(layout='constrained')
+            CS = ax2.contourf(self.x_grid, self.y_grid, self.u_grid, 10, cmap=plt.cm.bone)
+
+    def _vis_assign_points_to_nearest(self, turbine_locations: np.ndarray):
+        """
+        Function to assign grid points to the nearest turbine locations
+
+        Parameters
+        ----------
+        turbine_locations : np.ndarray
+            Array containing the [x,y,z,D] locations of the turbine nacelle
+        """
+        # Create a k-dimensional tree from turbine locations (x,y)
+        tree = cKDTree(turbine_locations[:,:2])
+
+        # Find the indices of the nearest scattered points for each grid point
+        _, indices = tree.query(self.grid_points)
+
+        # Create a dictionary that maps each scattered point to a list of grid points that are nearest to it
+        self.point_mapping = {}
+        for point_index, grid_point in zip(indices, self.grid_points):
+            nearest_scattered_point = tuple(turbine_locations[point_index])
+            if nearest_scattered_point not in self.point_mapping:
+                self.point_mapping[nearest_scattered_point] = []
+            self.point_mapping[nearest_scattered_point].append(grid_point)

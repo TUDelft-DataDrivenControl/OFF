@@ -783,9 +783,15 @@ class Floris4Wake(WakeModel):
         np.ndarray
             effective velocity at the points
         """
-        # TODO z might be a single value, extend to array of length x
+        # Check if z is of the same size as x
+        if z.shape != x.shape:
+            # Add z points for every height stored in z
+            Z = np.ones(x.shape) * z[0]
+            return self.fmodel.sample_flow_at_points(x, y, Z)
+        else:
+            return self.fmodel.sample_flow_at_points(x, y, z)
         
-        self.fmodel.run() # TODO check if this is necessary
-        return self.fmodel.sample_flow_at_points(x, y, z)
+        np.random.wald(10,1,[3,4])
+        
                 
         

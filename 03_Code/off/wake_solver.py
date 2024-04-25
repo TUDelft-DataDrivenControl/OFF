@@ -563,9 +563,7 @@ class TWFSolver(WakeSolver):
         """
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
-
-
-
+    
 
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022

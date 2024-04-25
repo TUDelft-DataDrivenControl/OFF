@@ -241,12 +241,16 @@ class OFF:
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"] and
                         idx in self.settings_vis["debug"]["iT"]):
+                    # Plots the wind farm as simulated in the steady state model
                     self.wake_solver.raise_flag_plot_wakes()
 
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"]):
-                    grid_points = np.stack(self.visualizer_ff.vis_get_grid_points_iT(idx, self.wind_farm.get_layout()[:,:2]))
-                    self.wake_solver.raise_flag_plot_effective_wind_speed(grid_points[:,0], grid_points[:,1], self.settings_vis["grid"]["slice_2d_xy"][0])
+                    # Set flag to calculate wind speed in wake model at grid points belonging to turbine iT
+                    grid_points_iT = self.visualizer_ff.vis_get_grid_points_iT(idx)
+                    self.wake_solver.raise_flag_plot_tile(
+                        grid_points_iT[:,0], grid_points_iT[:,1],
+                        np.array(self.settings_vis["grid"]["slice_2d_xy"]))
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
@@ -268,6 +272,13 @@ class OFF:
                 # Store turbine state applied in controller
                 c_tmp = self.controller.get_applied_settings(tur, idx, t)
                 control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
+
+                # Store flow field points
+                if (self.settings_vis["debug"]["effective_wf_layout"] and
+                        t in self.settings_vis["debug"]["time"]):
+                    self.visualizer_ff.vis_store_u_values(
+                        self.wake_solver.get_tile_u().flatten(), idx)
+                    
 
             lg.info('Rotor wind speed of all turbines:')
             lg.info(uv_r)
@@ -302,6 +313,10 @@ class OFF:
                 lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
 
+            # ///////////////////// STORE ///////////////////////
+            if (self.settings_vis["debug"]["effective_wf_layout"] and
+                        t in self.settings_vis["debug"]["time"]):
+                self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t) + '.csv')
             lg.info('Ending time step: %s s.' % t)
 
         lg.info('Simulation finished. Resulting measurements:')
