@@ -17,7 +17,6 @@
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from scipy.spatial import cKDTree
 import matplotlib.pyplot as plt
 import networkx as nx
 from sklearn.neighbors import NearestNeighbors
@@ -175,9 +174,13 @@ class Visualizer_FlowField:
             
             cbar = fig1.colorbar(CS)
             cbar.ax.set_ylabel('Velocity (m/s)')
-            ax1.axis('equal')
+            ax1.set_aspect('equal', 'box')
+            ax1.set_title('Tiled view of the simulation', fontsize=10)
+            ax1.set_xlabel('Easting (m)')
+            ax1.set_ylabel('Northing (m)')
             #store the plot
             fig1.savefig(path + '.png')
+            fig1.clf()
 
         if (self.settings["debug"]["turbine_effective_wind_speed_plot"] and 
             self.settings["debug"]["effective_wf_tile_5color"]):
@@ -199,32 +202,11 @@ class Visualizer_FlowField:
                 else:
                     ax1.contourf(self.x_grid, self.y_grid, u_values, 10, cmap=plt.cm.Purples_r)
 
-            ax1.axis('equal')
+            ax1.set_aspect('equal', 'box')
+            ax1.set_title('Colored tiled view of the simulation', fontsize=10)
+            ax1.set_xlabel('Easting (m)')
+            ax1.set_ylabel('Northing (m)')
             #store the plot
             fig1.savefig(path + '_landscape.png')
+            fig1.clf()
     
-
-
-
-    def _vis_assign_points_to_nearest(self, turbine_locations: np.ndarray):
-        """
-        Function to assign grid points to the nearest turbine locations
-
-        Parameters
-        ----------
-        turbine_locations : np.ndarray
-            Array containing the [x,y,z,D] locations of the turbine nacelle
-        """
-        # Create a k-dimensional tree from turbine locations (x,y)
-        tree = cKDTree(turbine_locations[:,:2])
-
-        # Find the indices of the nearest scattered points for each grid point
-        _, indices = tree.query(self.grid_points)
-
-        # Create a dictionary that maps each scattered point to a list of grid points that are nearest to it
-        self.point_mapping = {}
-        for point_index, grid_point in zip(indices, self.grid_points):
-            nearest_scattered_point = tuple(turbine_locations[point_index])
-            if nearest_scattered_point not in self.point_mapping:
-                self.point_mapping[nearest_scattered_point] = []
-            self.point_mapping[nearest_scattered_point].append(grid_point)

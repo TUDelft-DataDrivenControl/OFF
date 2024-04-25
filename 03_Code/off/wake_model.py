@@ -21,8 +21,7 @@ import pandas as pd
 from abc import ABC, abstractmethod
 import off.utils as ot
 import logging
-# from floris.tools import FlorisInterface
-# from floris.tools.visualization import visualize_cut_plane
+from floris.flow_visualization import visualize_cut_plane
 from floris import FlorisModel, TimeSeries
 import matplotlib.pyplot as plt
 import yaml
@@ -195,128 +194,6 @@ class DummyWake(WakeModel):
         m = pd.DataFrame([[i_t, self.ambient_states[i_t].get_turbine_wind_speed_abs() * np.prod(red), np.prod(red)]],
                          columns=['t_idx', 'u_abs_eff', 'red'])
         return self.ambient_states[i_t].get_turbine_wind_speed_abs() * np.prod(red), m
-
-
-class FlorisGaussianWake(WakeModel):
-    """
-    Interface to the FLORIS wake models
-    """
-
-    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
-        """
-        Interface to the FLORIS wake models
-
-        Parameters
-        ----------
-        settings : dict
-            .["yaml_path"] path to settings, e.g. gch.yaml
-                example files can be found at https://github.com/NREL/floris/tree/main/examples/inputs
-        wind_farm_layout : np.ndarray
-            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
-        turbine_states : array of TurbineStates objects
-            array with n_t TurbineStates objects with each one state
-            Obejcts have access to methods such as get_current_Ct()
-        ambient_states : array of AmbientStates objects
-            array with n_t AmbientStates objects with each one state
-            Obejcts have access to methods such as get_turbine_wind_dir()
-        turbine_states : np.ndarray
-            n_t x 2 array with [axial ind., yaw]
-        ambient_states : np.ndarray
-            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
-        """
-        super(FlorisGaussianWake, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
-        lg.info('Interface for the ' + ' model initialized')  # TODO: Add which model has been initialized
-        self.fi = FlorisInterface(self.settings['yaml_path'])
-        lg.info('FLORIS object created.')
-
-    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
-        """
-        Changes the states of the stored wind farm
-
-        Parameters
-        ----------
-        wind_farm_layout: np.ndarray
-            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
-        turbine_states: np.ndarray
-            n_t x 2 array with [axial ind., yaw]
-        ambient_states: np.ndarray
-            1 x 2 : [u_abs, phi] - absolute background wind speed and direction
-        """
-        self.wind_farm_layout = wind_farm_layout
-        self.turbine_states = turbine_states
-        self.ambient_states = ambient_states
-
-        self.fi.reinitialize(
-            layout_x=wind_farm_layout[:, 0],
-            layout_y=wind_farm_layout[:, 1],
-            wind_directions=[ambient_states[0].get_turbine_wind_dir()],  # TODO Assign wind vel from main turbine
-            wind_speeds=[ambient_states[0].get_turbine_wind_speed_abs()],    # TODO Assign wind dir from main turbine
-        )
-
-    def get_measurements_i_t(self, i_t: int) -> tuple:
-        """
-        Returns the measurements of the wake model including the effective wind speed at the turbine i_t
-
-        Parameters
-        ----------
-        i_t : int
-            Index of the turbine of interest
-
-        Returns
-        -------
-        tuple:
-            float: u_eff
-                effective wind speed at turbine i_t
-            pandas.dataframe: measurements
-                all measurements (Power gen, added turbulence, etc.)
-        """
-        n_t = len(self.turbine_states)
-        yaw_ang = np.zeros([1, 1, n_t])
-
-        for ii_t in np.arange(n_t):
-            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
-
-        self.fi.calculate_wake(yaw_angles=yaw_ang)
-        
-        avg_vel = self.fi.turbine_average_velocities
-        Cts = self.fi.get_turbine_Cts()
-        # AIs = self.fi.get_turbine_ais()               # TODO: Fix since FLORIS v3.4 has a bug causing this line to crash
-        TIs = self.fi.get_turbine_TIs()
-        Pows = self.fi.get_turbine_powers()
-
-        measurements = pd.DataFrame(
-            [[
-                i_t,
-                avg_vel[:, :, i_t].flatten()[0],
-                Cts[:, :, i_t].flatten()[0],
-                # AIs[:, :, i_t].flatten()[0],          # TODO: FLORIS v3.4 fix
-                TIs[:, :, i_t].flatten()[0],
-                Pows[:, :, i_t].flatten()[0]
-            ]],
-            # columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI']  # TODO: FLORIS v3.4 fix
-            columns=['t_idx', 'u_abs_eff', 'Ct', 'TI', 'PowFLORIS']
-        )
-
-        return avg_vel[:, :, i_t].flatten()[0], measurements
-
-    def vis_flow_field(self):
-        """
-        Creates a plot of the wind farm applied to the given turbine using the FLORIS interface
-        """
-
-        n_t = len(self.turbine_states)
-        yaw_ang = np.zeros([1, 1, n_t])
-
-        for ii_t in np.arange(n_t):
-            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
-
-        # Don't know if the calculate_wake is needed, but probably for yaw angles
-        self.fi.calculate_wake(yaw_angles=yaw_ang)
-        horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
-
-        fig, ax_horo_plane = plt.subplots()
-        # visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal") # Belongs to FLORIS 3.4, update needed for FLORIS 4
-        plt.show()
 
 
 class PythonGaussianWake(WakeModel):
@@ -631,7 +508,6 @@ class PythonGaussianWake(WakeModel):
         plt.show()
 
 
-
 class Floris4Wake(WakeModel):
     """
     Interface to the FLORIS 4 wake models
@@ -750,19 +626,9 @@ class Floris4Wake(WakeModel):
         """
         Creates a plot of the wind farm applied to the given turbine using the FLORIS interface
         """
-
-        n_t = len(self.turbine_states)
-        yaw_ang = np.zeros([1, 1, n_t])
-
-        for ii_t in np.arange(n_t):
-            yaw_ang[0, 0, ii_t] = self.turbine_states[ii_t].get_current_yaw()
-
-        # Don't know if the calculate_wake is needed, but probably for yaw angles
-        self.fi.calculate_wake(yaw_angles=yaw_ang)
-        horizontal_plane = self.fi.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
-
         fig, ax_horo_plane = plt.subplots()
-        # visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal") # Belongs to FLORIS 3.4, update needed for FLORIS 4
+        horizontal_plane = self.fmodel.calculate_horizontal_plane(height=self.wind_farm_layout[0, 2])
+        visualize_cut_plane(horizontal_plane, ax=ax_horo_plane, title="Horizontal", minSpeed=0, maxSpeed=10)
         plt.show()
 
     def vis_tile(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
@@ -790,5 +656,4 @@ class Floris4Wake(WakeModel):
             return self.fmodel.sample_flow_at_points(x, y, Z)
         else:
             return self.fmodel.sample_flow_at_points(x, y, z)
-        
         

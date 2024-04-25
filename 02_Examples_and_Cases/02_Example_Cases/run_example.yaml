@@ -435,14 +435,14 @@ vis:
   grid:
     generate: True  # Master-switch to generate & store flow field data
     boundaries:
-      - [ -2, 12]                 # x in D or m
-      - [ -2, 12]                 # y in D or m
+      - [ -2, 17]                 # x in D or m
+      - [ -2, 17]                 # y in D or m
       - [ 0, 3]                 # z in D or m
     unit:
       - D
     diameter: # Only needed if unit was set to D
       - 178.4
-    resolution: [ 101, 101, 10 ] # x, y, z in points
+    resolution: [ 301, 301, 10 ] # x, y, z in points
     volume_3d: False
     slice_2d: True
     slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
@@ -476,9 +476,9 @@ vis:
 
   debug:
     effective_wf_tile: True  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
-    effective_wf_tile_5color: False  # Generates the tiled landscape in a 5 color scheme
+    effective_wf_tile_5color: True  # Generates the tiled landscape in a 5 color scheme
     effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
-    time: [ 400, 700, 900] # Times at witch a debug plot of the wind farm is generated
+    time: [400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900] # Times at witch a debug plot of the wind farm is generated
     iT: [0,1] # Turbines for which the debug plot is created
     turbine_effective_wind_speed: False # Generates the effective wind speed across the farm based on a ghost turbine
     turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
