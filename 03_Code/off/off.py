@@ -27,6 +27,7 @@ import off.observation_points as ops
 import off.ambient as amb
 import off.utils as util
 import off.controller as ctr
+import off.vis_flow_field as vff
 import numpy as np
 import pandas as pd
 import off.wake_solver as ws
@@ -81,6 +82,9 @@ class OFF:
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
             self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+
+        # =========== Visualization ===========
+        self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
 
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
@@ -237,7 +241,16 @@ class OFF:
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"] and
                         idx in self.settings_vis["debug"]["iT"]):
+                    # Plots the wind farm as simulated in the steady state model
                     self.wake_solver.raise_flag_plot_wakes()
+
+                if (self.settings_vis["debug"]["effective_wf_tile"] and
+                        t in self.settings_vis["debug"]["time"]):
+                    # Set flag to calculate wind speed in wake model at grid points belonging to turbine iT
+                    grid_points_iT = self.visualizer_ff.vis_get_grid_points_iT(idx)
+                    self.wake_solver.raise_flag_plot_tile(
+                        grid_points_iT[:,0], grid_points_iT[:,1],
+                        np.array(self.settings_vis["grid"]["slice_2d_xy"]))
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
@@ -259,6 +272,13 @@ class OFF:
                 # Store turbine state applied in controller
                 c_tmp = self.controller.get_applied_settings(tur, idx, t)
                 control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
+
+                # Store flow field points
+                if (self.settings_vis["debug"]["effective_wf_tile"] and
+                        t in self.settings_vis["debug"]["time"]):
+                    self.visualizer_ff.vis_store_u_values(
+                        self.wake_solver.get_tile_u().flatten(), idx)
+                    
 
             lg.info('Rotor wind speed of all turbines:')
             lg.info(uv_r)
@@ -292,6 +312,11 @@ class OFF:
                 self.controller(tur, idx, t)
                 lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
+
+            # ///////////////////// STORE ///////////////////////
+            if (self.settings_vis["debug"]["effective_wf_tile"] and
+                        t in self.settings_vis["debug"]["time"]):
+                self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
 
             lg.info('Ending time step: %s s.' % t)
 

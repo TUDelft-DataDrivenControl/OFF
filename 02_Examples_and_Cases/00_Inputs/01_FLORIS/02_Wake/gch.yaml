@@ -1,14 +1,51 @@
+###
+# Configure the wake model.
 wake:
+
+  ###
+  # Select the models to use for the simulation.
+  # See :py:mod:`~.wake` for a list
+  # of available models and their descriptions.
   model_strings:
+
+    ###
+    # Select the wake combination model.
     combination_model: sosfs
+
+    ###
+    # Select the wake deflection model.
     deflection_model: gauss
+
+    ###
+    # Select the wake turbulence model.
     turbulence_model: crespo_hernandez
+
+    ###
+    # Select the wake velocity deficit model.
     velocity_model: gauss
 
+  ###
+  # Can be "true" or "false".
   enable_secondary_steering: true
+
+  ###
+  # Can be "true" or "false".
   enable_yaw_added_recovery: true
+
+  ###
+  # Can be "true" or "false".
+  enable_active_wake_mixing: false
+
+  ###
+  # Can be "true" or "false".
   enable_transverse_velocities: true
 
+  ###
+  # Configure the parameters for the wake deflection model
+  # selected above.
+  # Additional blocks can be provided for
+  # models that are not enabled, but the enabled model
+  # must have a corresponding parameter block.
   wake_deflection_parameters:
     gauss:
       ad: 0.0
@@ -23,6 +60,12 @@ wake:
       bd: 0.0
       kd: 0.05
 
+  ###
+  # Configure the parameters for the wake velocity deficit model
+  # selected above.
+  # Additional blocks can be provided for
+  # models that are not enabled, but the enabled model
+  # must have a corresponding parameter block.
   wake_velocity_parameters:
     cc:
       a_s: 0.179367259
@@ -41,6 +84,12 @@ wake:
     jensen:
       we: 0.05
 
+  ###
+  # Configure the parameters for the wake turbulence model
+  # selected above.
+  # Additional blocks can be provided for
+  # models that are not enabled, but the enabled model
+  # must have a corresponding parameter block.
   wake_turbulence_parameters:
     crespo_hernandez:
       initial: 0.1

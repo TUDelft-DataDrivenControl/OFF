@@ -32,9 +32,14 @@ lg = logging.getLogger(__name__)
 
 class WakeSolver(ABC):
     
-    settings_sol: dict()
-    settings_vis: dict()
-    _flag_plot_wakes: bool()
+    settings_sol: dict
+    settings_vis: dict
+    _flag_plot_wakes: bool
+    _flag_plot_tile: bool
+    _flow_field_x: np.ndarray
+    _flow_field_y: np.ndarray
+    _flow_field_z: np.ndarray
+    _flow_field_u: np.ndarray
 
     def __init__(self, settings_sol: dict, settings_vis: dict):
         """
@@ -49,6 +54,8 @@ class WakeSolver(ABC):
         self.settings_sol = settings_sol
         self.settings_vis = settings_vis
         self._flag_plot_wakes = False
+        self._flag_plot_tile  = False
+        
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
 
@@ -83,6 +90,36 @@ class WakeSolver(ABC):
         """
         self._flag_plot_wakes = False
 
+    def raise_flag_plot_tile(self, x:np.ndarray, y:np.ndarray, z:np.ndarray):
+        """
+        Raises a flag to plot the TWF tile during the next call of the wake model
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinates of the points to visualize
+        """
+        self._flag_plot_tile = True
+        self._flow_field_x = x
+        self._flow_field_y = y
+        self._flow_field_z = z
+
+    def _lower_flag_plot_tile(self):
+        """
+        Lowers the flag to plot the tile after it has been plotted
+        """
+        self._flag_plot_tile = False
+
+    def get_tile_u(self):
+        """
+        Returns the |u| component of the flow field
+        """
+        return self._flow_field_u
+    
     def vis_turbine_eff_wind_speed_field(self, wind_farm: wfm.WindFarm, sim_dir, t):
         """
         Moves a dummy turbine around to extract the effective wind speed at a given grid
@@ -182,179 +219,6 @@ class WakeSolver(ABC):
                            grid_y, delimiter=',')
 
 
-class FLORIDynTWFWakeSolver(WakeSolver):
-    # TODO: Delete as it is not used anymore!!
-    """ Wake solver connecting to the dummy wake """
-    dummy_wake: wm.DummyWake
-
-    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
-        """
-        FLORIDyn temporary wind farm wake
-
-        Parameters
-        ----------
-        settings_wke: dict
-            Wake settings, including all parameters the wake needs to run
-        settings_sol: dict
-            Wake solver settings
-        """
-        super(FLORIDynTWFWakeSolver, self).__init__(settings_sol, settings_vis)
-        lg.info('FLORIDyn wake solver created.')
-
-        self.dummy_wake = wm.DummyWake(settings_wke, np.array([]), np.array([]), np.array([]))
-
-    def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
-        """
-        Get the wind speed at the location of all OPs and the rotor plane of turbine with index i_t
-
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        tuple(np.ndarray, np.ndarray)
-            [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
-        """
-        u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
-        u_op = self._get_wind_speeds_op(i_t, wind_farm)
-        return u_rp, u_op, m
-
-    def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
-        """
-        Calculates the effective wind speed at the rotor plane of turbine i_t
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        nd.array
-            [u,v] wind speeds at the rotor plane
-        """
-        wind_farm_layout = wind_farm.get_layout()
-
-        turbine_states = wind_farm.get_current_turbine_states()
-
-        ambient_states = np.array([
-            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-            wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
-        
-        self.dummy_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
-        ueff, m = self.dummy_wake.get_measurements_i_t(i_t)
-        [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
-        return np.array([u_eff, v_eff]), m
-
-    def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:
-        """
-        Calculates the free wind speeds for the OPs of turbine i_t
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        nd.array
-            [u,v] wind speeds at the OP locations
-        """
-        # TODO combine the influence of different wakes
-        return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
-
-
-class FLORIDynFlorisWakeSolver(WakeSolver):
-    # TODO: Delete as it is not used anymore!!
-    """ First version of the coupling with the FLORIS model """
-    floris_wake: wm.FlorisGaussianWake
-
-    def __init__(self, settings_wke: dict, settings_sol: dict, settings_vis: dict):
-        """
-        FLORIDyn temporary wind farm wake
-
-        Parameters
-        ----------
-        settings_wke: dict
-            Wake settings, including all parameters the wake needs to run
-        settings_sol: dict
-            Wake solver settings
-        """
-        super(FLORIDynFlorisWakeSolver, self).__init__(settings_sol, settings_vis)
-        lg.info('FLORIDyn FLORIS wake solver created.')
-        lg.warning('FLORIDyn FLORIS wake solver is deprecated.')
-
-        self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
-
-    def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
-        """
-        Get the wind speed at the location of all OPs and the rotor plane of turbine with index i_t
-
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        tuple(np.ndarray, np.ndarray)
-            [u,v] wind speeds at the rotor plane (entry 1) and OPs (entry 2)
-        """
-        u_rp, m = self._get_wind_speeds_rp(i_t, wind_farm)
-        u_op = self._get_wind_speeds_op(i_t, wind_farm)
-        return u_rp, u_op, m
-
-    def _get_wind_speeds_rp(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
-        """
-        Calculates the effective wind speed at the rotor plane of turbine i_t
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        nd.array
-            [u,v] wind speeds at the rotor plane
-        """
-        wind_farm_layout = wind_farm.get_layout()
-        turbine_states = wind_farm.get_current_turbine_states()
-        ambient_states = np.array([wind_farm.turbines[i_t].ambient_states.get_turbine_wind_speed_abs(),
-                                   wind_farm.turbines[i_t].ambient_states.get_turbine_wind_dir()])
-        self.floris_wake.set_wind_farm(wind_farm_layout, turbine_states, ambient_states)
-        ueff, m = self.floris_wake.get_measurements_i_t(i_t)
-        [u_eff, v_eff] = ot.ot_abs2uv(ueff, ambient_states[1])
-        return np.array([u_eff, v_eff]), m
-
-    def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:
-        """
-        Calculates the free wind speeds for the OPs of turbine i_t
-        Parameters
-        ----------
-        i_t : int
-            index of the turbine to find the wind speeds for
-        wind_farm
-            influencing wind farm
-
-        Returns
-        -------
-        nd.array
-            [u,v] wind speeds at the OP locations
-        """
-        # TODO combine the influence of different wakes
-        return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
-
-
 class TWFSolver(WakeSolver):
     floris_wake: wm.WakeModel
 
@@ -375,7 +239,7 @@ class TWFSolver(WakeSolver):
         lg.info('FLORIDyn TWF solver created.')
 
         if settings_sol["wake_model"].startswith("FLORIS"):
-            self.floris_wake = wm.FlorisGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+            self.floris_wake = wm.Floris4Wake(settings_wke, np.array([]), np.array([]), np.array([]))
         elif settings_sol["wake_model"] == "PythonGaussianWake":
             self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
         else:
@@ -496,6 +360,13 @@ class TWFSolver(WakeSolver):
             self.floris_wake.vis_flow_field()
             self._lower_flag_plot_wakes()
 
+        # Get effective wind speed from TWF "tile"
+        if self._flag_plot_tile:
+            self._flow_field_u = self.floris_wake.vis_tile(
+                self._flow_field_x, self._flow_field_y, self._flow_field_z)
+            
+            self._lower_flag_plot_tile()
+
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
         lg.info('Effective wind speed of turbine %s : %s m/s' % (i_t, ueff))
@@ -519,9 +390,7 @@ class TWFSolver(WakeSolver):
         """
         # TODO combine the influence of different wakes
         return wind_farm.turbines[i_t].ambient_states.get_wind_speed()
-
-
-
+    
 
 # [1] FLORIDyn - A dynamic and flexible framework for real - time wind farm control,
 # Becker et al., 2022
