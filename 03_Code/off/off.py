@@ -75,6 +75,8 @@ class OFF:
             self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr)
         elif settings_ctr["ctl"] == "LUT yaw controller":
             self.controller = ctr.YawSteeringLUTController(settings_ctr)
+        elif settings_ctr["ctl"] == "Dead-band LUT yaw controller":
+            self.controller = ctr.DeadbandYawSteeringLuTController(settings_ctr, self.settings_sim['time step'], self.wind_farm.nT)
         else:
             raise Warning("Controller %s is undefined!" % settings_ctr["ctl"])
 

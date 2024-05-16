@@ -497,6 +497,114 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         """
         pass
 
+
+class DeadbandYawSteeringLuTController(Controller):
+    """
+    Chooses yaw angles based on the current main wind direction and a lut for it. 
+    Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough.
+    """
+
+    def __init__(self, settings: dict, dt: float, nT: int):
+        super(DeadbandYawSteeringLuTController, self).__init__(settings)
+
+        # Get LuT
+        if not settings['path_to_angles_and_directions_pkl'].is_empty():
+            # Read pckl file
+            self.lut = pd.read_pickle(settings['path_to_angles_and_directions_pkl'])
+        else:
+            # Read table
+            phi_and_ori = np.genfromtxt(settings['path_to_angles_and_directions_csv'], delimiter=',')
+            self.lut    = phi_and_ori[:,1:]
+            self.phi    = phi_and_ori[:,0]
+
+        self.wind_dir_thresh    = settings['wind_dir_thresh']
+        self.k_i                = settings['k_i'] * dt
+        self.integrated_error   = np.zeros(nT)
+        self.set_wind_dir       = np.zeros(nT)
+        self.run_controller     = True
+        self.first_run          = np.full((nT, 1), False)
+        self.dt                 = dt
+
+        lg.info('Dead-band yaw steering LUT controller created.')
+
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
+        """
+        Reads the given turbine and sets its turbine states
+
+        Parameters
+        ----------
+        turbine: Turbine
+            Turbine object with turbine states, ambient states and observation points
+        i_t:
+            Index of the turbine (for look-up tables & integrated error)
+        time_step:
+            current time step (for look-up tables or counters)
+
+        Returns
+        -------
+        Turbine object with updated turbine states
+        """
+        # Get wind direction and orientation
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+        orientation = turbine.get_yaw_orientation()
+
+        # Init wind direction setting
+        if self.first_run[i_t]:
+            self.set_wind_dir[i_t] = wind_dir
+            self.first_run[i_t] = False
+
+        # Update integrated error
+        self.integrated_error[i_t] += (wind_dir - self.set_wind_dir[i_t]) * self.k_i
+
+        # check if difference is larger than threshold or if the turbine is moving already
+        if (np.abs(self.set_wind_dir[i_t] - wind_dir) > self.wind_dir_thresh or 
+            self.integrated_error[i_t] > self.wind_dir_thresh) and self.run_controller:
+            # Update set wind direction
+            self.set_wind_dir[i_t] = wind_dir
+            # Reset integrated error
+            self.integrated_error[i_t] = 0
+
+            # TODO: store which flag triggered the movement
+
+        # Determine yaw angle based on LUT
+        orientation_lut = np.interp(self.set_wind_dir[i_t], self.phi, self.lut[:, i_t])
+
+        # Move towards yaw angle and complete if possible
+        delta_ori = orientation_lut - orientation
+        if abs(delta_ori) <= turbine.yaw_rate_lim * self.dt:
+            # Achievable in one step
+            turbine.set_orientation_yaw(orientation_lut, wind_dir)
+        else:
+            # Not achievable in one step
+            turbine.set_orientation_yaw(orientation + np.sign(delta_ori) * turbine.yaw_rate_lim * self.dt, wind_dir)
+
+
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
+        """
+        pass
+
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        pass
+
 # ============== Tickets ================
 # [x] implement 1st controller -> ideal greedy baseline
 # [ ] Add switch to run file

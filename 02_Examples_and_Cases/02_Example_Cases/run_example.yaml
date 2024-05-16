@@ -17,7 +17,7 @@ sim:
 
 wind_farm:
   name: turbine array
-  description: Nine turbine case with DTU 10 MW turbines at 5D distance in a row
+  description: Nine turbine case with DTU 10 MW turbines at 5D distance
 
   farm:
     layout_x:
@@ -151,26 +151,39 @@ solver:
 #     path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
 
 controller:
-  name: prescribed yaw controller
-  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
-
+  name: Dead-band LUT yaw controller
+  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough
   settings:
-    ctl: "prescribed yaw controller"
-    input_method: "yaml"    # Can be "csv" or "yaml" - for csv, the path to the turbine orientation needs to be given, for yaml, the orientation needs to be added below
-    misalignment_thresh: 2  # in deg
+    ctl: "Dead-band LUT yaw controller"
+    wind_dir_thresh: 4      # Dead-band width in deg - if you set 2, the ± width is 4 deg
     average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
     orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
-    path_to_orientation_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/01_FLORIDyn/02_Matlab/marcusbecker@hpc06.tudelft.net/Simulations/2022_9T_Data_EnKF_Reference/Data/Control_YawInterpolation.csv"
-    orientation_deg:        # in deg
-      - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-      - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-      - [195, 195, 195, 195, 195, 195, 195, 195, 195]
-      - [195, 195, 195, 195, 195, 195, 195, 195, 195]
-    orientation_t:          # in s
-      - 0.0
-      - 600.0
-      - 900.0
-      - 90000.0
+    path_to_angles_and_directions_pckl: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/03_Papers/08_OFF_Paper/02_Shared Files/off_paper/data/lut/yaw_offsets.pckl" # Leave empty if using csv instead
+    path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
+    k_i : 0.01              # Integral gain (per second)
+
+
+#controller:
+#  name: prescribed yaw controller
+#  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
+#
+#  settings:
+#    ctl: "prescribed yaw controller"
+#    input_method: "yaml"    # Can be "csv" or "yaml" - for csv, the path to the turbine orientation needs to be given, for yaml, the orientation needs to be added below
+#    misalignment_thresh: 2  # in deg
+#    average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
+#    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
+#    path_to_orientation_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/01_FLORIDyn/02_Matlab/marcusbecker@hpc06.tudelft.net/Simulations/2022_9T_Data_EnKF_Reference/Data/Control_YawInterpolation.csv"
+#    orientation_deg:        # in deg
+#      - [255, 255, 255, 255, 255, 255, 255, 255, 255]
+#      - [255, 255, 255, 255, 255, 255, 255, 255, 255]
+#      - [195, 195, 195, 195, 195, 195, 195, 195, 195]
+#      - [195, 195, 195, 195, 195, 195, 195, 195, 195]
+#    orientation_t:          # in s
+#      - 0.0
+#      - 600.0
+#      - 900.0
+#      - 90000.0
 
 
 turbine:
