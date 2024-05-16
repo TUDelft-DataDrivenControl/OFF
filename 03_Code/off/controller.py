@@ -22,7 +22,7 @@ import pandas as pd
 import off.turbine as tur
 import off.utils as util
 import logging
-import ast
+from scipy.interpolate import interpn
 
 lg = logging.getLogger(__name__)
 
@@ -508,9 +508,22 @@ class DeadbandYawSteeringLuTController(Controller):
         super(DeadbandYawSteeringLuTController, self).__init__(settings)
 
         # Get LuT
-        if not settings['path_to_angles_and_directions_pkl'].is_empty():
+        if settings['path_to_angles_and_directions_pckl']:
             # Read pckl file
-            self.lut = pd.read_pickle(settings['path_to_angles_and_directions_pkl'])
+            df_opt = pd.read_pickle(settings['path_to_angles_and_directions_pckl'])
+
+            # available values
+            self.wind_vel = np.sort(df_opt['wind_speed'].value_counts().index)
+            self.wind_dir = np.sort(df_opt['wind_direction'].value_counts().index)
+            self.wind_ti  = np.sort(df_opt['turbulence_intensity'].value_counts().index)
+            
+            n_wind_dir = len(self.wind_dir)
+            n_wind_vel = len(self.wind_vel)
+            n_wind_ti  = len(self.wind_ti)
+            n_wt       = len(df_opt['yaw_angles_opt'][0]) 
+
+            self.lut = np.concatenate(df_opt['yaw_angles_opt'].to_numpy()).reshape((n_wind_dir, n_wind_vel, n_wind_ti, n_wt ))
+
         else:
             # Read table
             phi_and_ori = np.genfromtxt(settings['path_to_angles_and_directions_csv'], delimiter=',')
@@ -546,6 +559,8 @@ class DeadbandYawSteeringLuTController(Controller):
         """
         # Get wind direction and orientation
         wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+        wind_vel = turbine.ambient_states.get_wind_speed(0)
+        wind_ti = turbine.ambient_states.get_turbulence_intensity(0)
         orientation = turbine.get_yaw_orientation()
 
         # Init wind direction setting
@@ -567,7 +582,11 @@ class DeadbandYawSteeringLuTController(Controller):
             # TODO: store which flag triggered the movement
 
         # Determine yaw angle based on LUT
-        orientation_lut = np.interp(self.set_wind_dir[i_t], self.phi, self.lut[:, i_t])
+        yaw_lut = interpn((self.wind_dir, self.wind_vel, self.wind_ti), 
+                        self.lut, 
+                        np.array([self.set_wind_dir[i_t], wind_vel, wind_ti]).T, bounds_error=False, method='linear',fill_value=None).flatten()[i_t]
+        
+        orientation_lut = util.ot_get_orientation(self.set_wind_dir[i_t], yaw_lut)
 
         # Move towards yaw angle and complete if possible
         delta_ori = orientation_lut - orientation
