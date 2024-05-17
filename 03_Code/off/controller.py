@@ -537,6 +537,9 @@ class DeadbandYawSteeringLuTController(Controller):
         self.run_controller     = True
         self.first_run          = np.full((nT, 1), False)
         self.dt                 = dt
+        self.trigger_dir        = np.full((nT, 1), False)
+        self.trigger_int        = np.full((nT, 1), False)
+        self.orientation_lut    = np.zeros(nT)
 
         lg.info('Dead-band yaw steering LUT controller created.')
 
@@ -571,9 +574,12 @@ class DeadbandYawSteeringLuTController(Controller):
         # Update integrated error
         self.integrated_error[i_t] += (wind_dir - self.set_wind_dir[i_t]) * self.k_i
 
+
         # check if difference is larger than threshold or if the turbine is moving already
-        if (np.abs(self.set_wind_dir[i_t] - wind_dir) > self.wind_dir_thresh or 
-            self.integrated_error[i_t] > self.wind_dir_thresh) and self.run_controller:
+        self.trigger_dir[i_t] = np.abs(self.set_wind_dir[i_t] - wind_dir) > self.wind_dir_thresh
+        self.trigger_int[i_t] = self.integrated_error[i_t] > self.wind_dir_thresh
+
+        if (self.trigger_dir[i_t] or self.trigger_int[i_t]) and self.run_controller:
             # Update set wind direction
             self.set_wind_dir[i_t] = wind_dir
             # Reset integrated error
@@ -581,18 +587,20 @@ class DeadbandYawSteeringLuTController(Controller):
 
             # TODO: store which flag triggered the movement
 
+        # TODO add other thresholds 
+
         # Determine yaw angle based on LUT
         yaw_lut = interpn((self.wind_dir, self.wind_vel, self.wind_ti), 
                         self.lut, 
                         np.array([self.set_wind_dir[i_t], wind_vel, wind_ti]).T, bounds_error=False, method='linear',fill_value=None).flatten()[i_t]
         
-        orientation_lut = util.ot_get_orientation(self.set_wind_dir[i_t], yaw_lut)
+        self.orientation_lut[i_t] = util.ot_get_orientation(self.set_wind_dir[i_t], yaw_lut)
 
         # Move towards yaw angle and complete if possible
-        delta_ori = orientation_lut - orientation
+        delta_ori = self.orientation_lut[i_t] - orientation
         if abs(delta_ori) <= turbine.yaw_rate_lim * self.dt:
             # Achievable in one step
-            turbine.set_orientation_yaw(orientation_lut, wind_dir)
+            turbine.set_orientation_yaw(self.orientation_lut[i_t], wind_dir)
         else:
             # Not achievable in one step
             turbine.set_orientation_yaw(orientation + np.sign(delta_ori) * turbine.yaw_rate_lim * self.dt, wind_dir)
@@ -612,7 +620,22 @@ class DeadbandYawSteeringLuTController(Controller):
         -------
         pd.Dataframe
         """
-        pass
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.get_yaw_orientation(),
+                self.orientation_lut[i_t],
+                self.integrated_error[i_t],
+                self.trigger_dir[i_t],
+                self.trigger_int[i_t],
+                self.set_wind_dir[i_t],
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'reference orientation','integrated error', 'direction trigger', 'integration trigger', 'set wind dir', 'time']
+        )
+
+        return control_settings
 
     def update(self, t: float):
         """
