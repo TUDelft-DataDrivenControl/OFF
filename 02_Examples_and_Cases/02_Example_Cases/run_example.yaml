@@ -10,7 +10,7 @@ sim:
   logging:
     console:
       enable: true
-      level: WARNING
+      level: WARNING # INFO
     file:
       enable: true
       level: WARNING
@@ -82,10 +82,10 @@ ambient:
     turbulence_intensities:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 255.0
-      - 255.0
-      - 195.0
-      - 195.0
+      - 225.0
+      - 225.0
+      - 227.0
+      - 227.0
     wind_directions_t:
       - 0.0
       - 600.0
@@ -488,8 +488,8 @@ vis:
     store_data: True
 
   debug:
-    effective_wf_tile: True  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
-    effective_wf_tile_5color: True  # Generates the tiled landscape in a 5 color scheme
+    effective_wf_tile: False  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
+    effective_wf_tile_5color: False  # Generates the tiled landscape in a 5 color scheme
     effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
     time: [400, 452, 500, 552, 600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] # Times at witch a debug plot of the wind farm is generated
     iT: [0,1] # Turbines for which the debug plot is created

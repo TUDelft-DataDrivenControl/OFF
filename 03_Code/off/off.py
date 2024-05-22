@@ -88,6 +88,9 @@ class OFF:
         # =========== Visualization ===========
         self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
 
+        # =========== Progess Bar ===========
+        self.iterations_total = int((self.settings_sim['time end'] - self.settings_sim['time start']) / self.settings_sim['time step'])
+
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
 
@@ -231,6 +234,9 @@ class OFF:
 
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         pow_t = np.zeros((len(self.wind_farm.turbines), 1))
+
+        iteration = 0
+
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
@@ -321,6 +327,8 @@ class OFF:
                 self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
 
             lg.info('Ending time step: %s s.' % t)
+            iteration += 1
+            self._print_progress_bar(iteration, self.iterations_total, prefix = 'Simulation progress:', suffix = 'Complete', length = 50)
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
@@ -349,3 +357,24 @@ class OFF:
         """
         return self.wind_farm
 
+    # Print iterations progress
+    def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+        """
+        Call in a loop to create terminal progress bar
+        @params:
+            iteration   - Required  : current iteration (Int)
+            total       - Required  : total iterations (Int)
+            prefix      - Optional  : prefix string (Str)
+            suffix      - Optional  : suffix string (Str)
+            decimals    - Optional  : positive number of decimals in percent complete (Int)
+            length      - Optional  : character length of bar (Int)
+            fill        - Optional  : bar fill character (Str)
+            printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        """
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+        # Print New Line on Complete
+        if iteration == total: 
+            print()

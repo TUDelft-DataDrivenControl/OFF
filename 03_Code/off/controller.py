@@ -562,8 +562,8 @@ class DeadbandYawSteeringLuTController(Controller):
         """
         # Get wind direction and orientation
         wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
-        wind_vel = turbine.ambient_states.get_wind_speed(0)
-        wind_ti = turbine.ambient_states.get_turbulence_intensity(0)
+        wind_vel = turbine.ambient_states.get_turbine_wind_speed_abs()
+        wind_ti = 0.06 #turbine.ambient_states.get_turbulence_intensity(0)
         orientation = turbine.get_yaw_orientation()
 
         # Init wind direction setting
@@ -580,12 +580,11 @@ class DeadbandYawSteeringLuTController(Controller):
         self.trigger_int[i_t] = self.integrated_error[i_t] > self.wind_dir_thresh
 
         if (self.trigger_dir[i_t] or self.trigger_int[i_t]) and self.run_controller:
+            lg.info('Controller update triggered!')
             # Update set wind direction
             self.set_wind_dir[i_t] = wind_dir
             # Reset integrated error
             self.integrated_error[i_t] = 0
-
-            # TODO: store which flag triggered the movement
 
         # TODO add other thresholds 
 
@@ -627,8 +626,8 @@ class DeadbandYawSteeringLuTController(Controller):
                 turbine.get_yaw_orientation(),
                 self.orientation_lut[i_t],
                 self.integrated_error[i_t],
-                self.trigger_dir[i_t],
-                self.trigger_int[i_t],
+                self.trigger_dir[i_t][0],
+                self.trigger_int[i_t][0],
                 self.set_wind_dir[i_t],
                 time_step
             ]],
@@ -647,24 +646,4 @@ class DeadbandYawSteeringLuTController(Controller):
         """
         pass
 
-# ============== Tickets ================
-# [x] implement 1st controller -> ideal greedy baseline
-# [ ] Add switch to run file
-#       [ ] Select input data
-# [ ] Add controller to initialization
-#       [ ] Switch between which controller is activated
-# [ ] implement controller into simulation loop
-#       [ ] include ideal greedy baseline and see what issues arise
-#       [ ] check if yaw motions have the desired effect
-#       [ ] output the applied motion / cost (maybe not needed)
-#       [ ] reserve output for controller info (controller states, counters, errors, etc.)
-# [ ] implement realistic yaw controller
-#       [ ] Hysteresis
-#       [ ] Integration behaviour
-# [ ] implement LUT yaw controller
-#       [ ] Hysteresis
-#       [ ] Integration behaviour
-# [ ] implement filtered prescribed motion yaw controller
-# [ ] implement prescribed motion yaw controller
-#       -> extends the prescribed motion yaw controller with 0° tolerance to the set point
 
