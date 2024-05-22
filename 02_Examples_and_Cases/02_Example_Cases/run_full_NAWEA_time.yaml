@@ -113,8 +113,9 @@ controller:
     k_i : 0.01              # Integral gain (per second)
 
 
-# Turbine models largely remain unused in the current version of OFF.
-#  Necesary data: shaft_tilt
+# Turbine models largely remain unused in the current version of OFF if FLORIS is used.
+#  The turbine model needs to carry the same name as defined with the wind farm layout.
+#  Necesary data: shaft_tilt (unused)
 #  Optinal data: rotor_overhang, yaw_rate_lim, pP, pT, Ct_curve (Ct_u_values & Ct_u_wind_speeds), Cp_curve (Cp_u_values & Cp_u_wind_speeds)
 turbine:
   dtu_10MW:
