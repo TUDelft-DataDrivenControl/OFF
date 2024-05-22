@@ -113,7 +113,147 @@ controller:
     k_i : 0.01              # Integral gain (per second)
 
 
+# Turbine models largely remain unused in the current version of OFF.
+#  Necesary data: shaft_tilt
+#  Optinal data: rotor_overhang, yaw_rate_lim, pP, pT, Ct_curve (Ct_u_values & Ct_u_wind_speeds), Cp_curve (Cp_u_values & Cp_u_wind_speeds)
 turbine:
+  dtu_10MW:
+    name: 'dtu_10MW' # https://nrel.github.io/turbine-models/DTU_10MW_178_RWT_v1.html
+    performance:
+      rated_power: 10000000
+      rated_wind_speed: 11.4
+      cutin_wind_speed: 4.0
+      cutout_wind_speed: 25.0
+      Cp_curve:
+        Cp_tb_values: [ ]
+        Cp_tb_tsr: [ ]          # in (m/s)/(m/s)
+        Cp_tb_bpa: [ ]          # in deg
+        Cp_u_values:
+          - 0.000
+          - 0.000 # 3.9
+          - 0.286 # 4.0
+          - 0.418 # 5.0
+          - 0.464
+          - 0.478
+          - 0.476
+          - 0.476
+          - 0.476 # 10.0
+          - 0.476
+          - 0.402
+          - 0.317
+          - 0.253
+          - 0.207 # 15.0
+          - 0.17
+          - 0.142
+          - 0.119
+          - 0.102
+          - 0.087 # 20.0
+          - 0.075
+          - 0.065
+          - 0.057
+          - 0.05
+          - 0.044 # 25.0
+          - 0.000 # 25.1
+          - 0.000 # 50.0
+        Cp_u_wind_speeds:
+          - 0.0
+          - 3.9
+          - 4.0
+          - 5.0
+          - 6.0
+          - 7.0
+          - 8.0
+          - 9.0
+          - 10.0
+          - 11.0
+          - 12.0
+          - 13.0
+          - 14.0
+          - 15.0
+          - 16.0
+          - 17.0
+          - 18.0
+          - 19.0
+          - 20.0
+          - 21.0
+          - 22.0
+          - 23.0
+          - 24.0
+          - 25.0
+          - 25.1
+          - 50.0
+      Ct_curve:
+        Ct_tb_values: [ ]
+        Ct_tb_tsr: [ ]
+        Ct_tb_bpa: [ ]
+        Ct_u_values:
+          - 0.000 # 0.0
+          - 0.000 # 3.9
+          - 0.923 # 4.0
+          - 0.919 # 5.0
+          - 0.904
+          - 0.858
+          - 0.814
+          - 0.814
+          - 0.814 # 10.0
+          - 0.814
+          - 0.577
+          - 0.419
+          - 0.323
+          - 0.259 # 15.0
+          - 0.211
+          - 0.175
+          - 0.148
+          - 0.126
+          - 0.109 # 20.0
+          - 0.095
+          - 0.084
+          - 0.074
+          - 0.066
+          - 0.059 # 25.0
+          - 0.000 # 25.1
+          - 0.000 # 50.0
+        Ct_u_wind_speeds:
+          - 0.0
+          - 3.9
+          - 4.0
+          - 5.0
+          - 6.0
+          - 7.0
+          - 8.0
+          - 9.0
+          - 10.0
+          - 11.0
+          - 12.0
+          - 13.0
+          - 14.0
+          - 15.0
+          - 16.0
+          - 17.0
+          - 18.0
+          - 19.0
+          - 20.0
+          - 21.0
+          - 22.0
+          - 23.0
+          - 24.0
+          - 25.0
+          - 25.1
+          - 50.0
+    generator_efficiency: 1.0
+    hub_height: 119.0
+    pP: 1.88
+    pT: 1.88
+    rotor_diameter: 178.3
+    TSR: 8.0
+    ref_density_cp_ct: 1.225
+    ref_tilt_cp_ct: 6.0
+    installation: fixed
+    rotor_overhang: 7.07        # in m    
+    shaft_tilt: 5               # in deg  
+    yaw_rate_lim: 0.3           # deg/s   # TODO Find true value
+
+
   iea_10MW:
     name: IEA Wind Task 37 10MW Offshore Reference Turbine # Source: FLORIS v3.4, adapted for OFF
     performance:
