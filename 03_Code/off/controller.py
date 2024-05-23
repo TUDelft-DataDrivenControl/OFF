@@ -540,6 +540,7 @@ class DeadbandYawSteeringLuTController(Controller):
         self.trigger_dir        = np.full((nT, 1), False)
         self.trigger_int        = np.full((nT, 1), False)
         self.orientation_lut    = np.zeros(nT)
+        self.baseline           = settings['baseline']
 
         lg.info('Dead-band yaw steering LUT controller created.')
 
@@ -586,13 +587,16 @@ class DeadbandYawSteeringLuTController(Controller):
             # Reset integrated error
             self.integrated_error[i_t] = 0
 
-        # TODO add other thresholds 
-
-        # Determine yaw angle based on LUT
-        yaw_lut = interpn((self.wind_dir, self.wind_vel, self.wind_ti), 
+        # TODO add other thresholds for velocity and turbulence intensity
+        
+        if self.baseline:
+            yaw_lut = 0.0
+        else:
+             # Determine yaw angle based on LUT
+            yaw_lut = interpn((self.wind_dir, self.wind_vel, self.wind_ti), 
                         self.lut, 
                         np.array([self.set_wind_dir[i_t], wind_vel, wind_ti]).T, bounds_error=False, method='linear',fill_value=None).flatten()[i_t]
-        
+
         self.orientation_lut[i_t] = util.ot_get_orientation(self.set_wind_dir[i_t], yaw_lut)
 
         # Move towards yaw angle and complete if possible
