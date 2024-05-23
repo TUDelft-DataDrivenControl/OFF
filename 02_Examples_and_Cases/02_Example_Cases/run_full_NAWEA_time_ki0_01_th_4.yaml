@@ -111,6 +111,7 @@ controller:
     path_to_angles_and_directions_pckl: "/home/marcusbecker/01_Data/05_LUTs/01_HKN/01_Torque2024/yaw_offsets.pckl" # Leave empty if using csv instead
     path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
     k_i : 0.01              # Integral gain (per second)
+    baseline: False         # Activate Baseline mode, yaw = 0
 
 
 # Turbine models largely remain unused in the current version of OFF if FLORIS is used.

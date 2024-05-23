@@ -161,6 +161,7 @@ controller:
     path_to_angles_and_directions_pckl: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/03_Papers/08_OFF_Paper/02_Shared Files/off_paper/data/lut/yaw_offsets.pckl" # Leave empty if using csv instead
     path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
     k_i : 0.01              # Integral gain (per second)
+    baseline: False         # Activate Baseline mode, yaw = 0
 
 
 #controller:
