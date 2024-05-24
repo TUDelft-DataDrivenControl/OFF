@@ -10,27 +10,27 @@ The OFF toolbox is meant to provide one interface to dynamic parametric wake mod
 ## Development
 ### Current state
 So what can you expect today?
-The toolbox allows you to run dynamic wind farm simulations using a prescribed (uniform) flow field. The code uses an implementation of the FLORIDyn-framework \[1\], which then interfaces to the FLORIS model \[2\].
+The toolbox allows you to run dynamic wind farm simulations using a prescribed (uniform) flow field. The code uses an implementation of the FLORIDyn-framework \[1\], which then interfaces to the FLORISv4 model \[2\].
 
 *Current degrees of design-freedom include:*
 - The flow field can change uniformly in direction and speed, 
-- the FLORIS wake can be changed, 
-- the number and location of turbines can be altered.
+- the FLORISv4 wake can be changed, 
+- the number and location of turbines can be altered,
+- Dead-band LuT Wake steerig control is available on a controller test branch
 
 *Current limitations include:*
 - Heterogeneous flow field behaviour is not included, 
-- Wake steerig and induction control is not included yet (soon to be added), 
+- Wake steerig control is not officially included yet (controller on test branch), 
 - The dynamic solver is a preliminary implementation, and cannot be changed
   -  OnWaRDS \[3\] approach not yet impemented
   -  Particle model and behaviour not yet changable
--  There is no API yet
 
 *Features include:*
 - Logging is impemented
 - There is an [auto-documentation framework](https://tudelft-datadrivencontrol.github.io/OFF/)
 - UML diagram of the code
 - Measurements are stored in run-folders
-- Effective wind speed flow field plots are possible (calculates the wind speed at a virtual turbine at a given grid point, facing the wind direction)
+- Preliminary effective wind speed flow field plots are possible
 
 ### Current development focus
 1. Completion of the toolbox
@@ -43,7 +43,6 @@ The toolbox allows you to run dynamic wind farm simulations using a prescribed (
   - Computational performance
 3. User friendliness
   - Complete the "Interactive Simulation Assembly"
-  - Create an OFF interface object to automate simulations
   - Communicate back what model has been used and under which conditions (Report)
 
 ### Longterm vision
@@ -69,6 +68,6 @@ A thorough description of the code is available [here](https://tudelft-datadrive
 ### Sources
 \[1\] FLORIDyn - A dynamic and flexible framework for real-time wind farm control, M. Becker, D. Allaerts, J.W. van Wingerden, 2022 J. Phys.: Conf. Ser. 2265(2022) 032103
 
-\[2\] FLORIS Wake Modeling and Wind Farm Controls Software, National Renewable Energy Laboratory, 2023, GitHub
+\[2\] FLORIS Wake Modeling and Wind Farm Controls Software, National Renewable Energy Laboratory, 2024, GitHub
 
 \[3\] A Meandering-Capturing Wake Model Coupled to Rotor-Based Flow-Sensing for Operational Wind Farm Flow Prediction, M. Lejeune, M. Moens, P. Chatelain, 2022 Front. Energy Res., Sec. Wind Energy
