@@ -81,7 +81,7 @@ class OFF:
         # =========== Corrector ===========
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
-            self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm.nT, states_name)
+            self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm, states_name)
 
         # =========== Visualization ===========
         self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
