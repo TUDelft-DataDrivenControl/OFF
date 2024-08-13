@@ -35,6 +35,8 @@ from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 import shutil
 
 from off import __file__ as OFF_PATH
+import datetime
+
 OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
 
 
@@ -99,22 +101,10 @@ class OFF:
         int
             Current run id.
         """
-        run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
-        lg.info('RunID path: %s', run_id_path)
+        current_time = datetime.datetime.now()
+        integer = int(current_time.strftime("%Y%m%d%H%M%S%f"))
 
-        try:
-            fid = open(run_id_path)
-        except FileNotFoundError:
-            run_id = 0
-        else: 
-            with fid:
-                run_id = int(fid.readline())
-
-        with open(run_id_path, 'w') as fid:
-            fid.write('{}'.format(run_id+1))
-
-        lg.info('RunID: %s' % run_id)
-        return run_id
+        return integer
 
     def __dir_init__(self, settings_sim: dict):
         """ Initialize the simulation folder and set the data path.
