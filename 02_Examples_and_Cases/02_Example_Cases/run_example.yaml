@@ -161,9 +161,6 @@ wake:
 
 # Controller settings
 # Multiple controllers are available, each with their own settings. Below you can find examples of the controllers, along with one that is selected.
- 
-
-
 controller:
   name: Dead-band LUT yaw controller
   description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough
@@ -490,18 +487,24 @@ turbine:
     shaft_tilt: 5               # in deg  # TODO Copied from DTU 10MW - Change!
     yaw_rate_lim: 0.3           # deg/s   # TODO Find true value
 
+
+# Visualization settings
+#  As of now, the visualization is mainly used for debugging purposes and many settings are placeholders.
 vis:
   grid:
     generate: True  # Master-switch to generate & store flow field data
+    # As OFF isn't grid based, the flow field plots need a grid to be generated.
     boundaries:
       - [ -2, 12]                 # x in D or m
       - [ -2, 12]                 # y in D or m
-      - [ 0, 3]                 # z in D or m
+      - [ 0, 3]                   # z in D or m
     unit:
       - D
-    diameter: # Only needed if unit was set to D
+    # Only needed if unit was set to D
+    diameter:
       - 178.4
-    resolution: [ 301, 301, 10 ] # x, y, z in points
+    # x, y, z in points
+    resolution: [ 301, 301, 10 ] 
     volume_3d: False
     slice_2d: True
     slice_2d_xy: [ 119.0 ]          # z-coordinates for xy slices
@@ -534,14 +537,25 @@ vis:
     store_data: True
 
   debug:
-    effective_wf_tile: False  # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
-    effective_wf_tile_5color: False  # Generates the tiled landscape in a 5 color scheme
-    effective_wf_layout: False  # Triggers a debug plot during runtime of the wakes passed on to the wake model
-    time: [400, 452, 500, 552, 600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] # Times at witch a debug plot of the wind farm is generated
-    iT: [0,1] # Turbines for which the debug plot is created
-    turbine_effective_wind_speed: False # Generates the effective wind speed across the farm based on a ghost turbine
-    turbine_effective_wind_speed_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
-    turbine_effective_wind_speed_plot_ops: True # Adds dots for the particles
-    turbine_effective_wind_speed_show_plot: True # Plots the data, requires the turbine_effective_wind_speed to be true
-    turbine_effective_wind_speed_store_plot: True # Stores the contour plot as .png
-    turbine_effective_wind_speed_store_data: False # Stores the data as .csv in the run folder
+    # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
+    effective_wf_tile: False  
+    # Generates the tiled landscape in a 5 color scheme
+    effective_wf_tile_5color: False  
+    # Triggers a debug plot during runtime of the wakes passed on to the wake model
+    effective_wf_layout: False  
+    # Times at witch a debug plot of the wind farm is generated
+    time: [400, 452, 500, 552, 600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] 
+    # Turbines for which the debug plot is created
+    iT: [0,1] 
+    # Generates the effective wind speed across the farm based on a ghost turbine
+    turbine_effective_wind_speed: False 
+    # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_plot: True 
+    # Adds dots for the particles
+    turbine_effective_wind_speed_plot_ops: True 
+    # Plots the data, requires the turbine_effective_wind_speed to be true
+    turbine_effective_wind_speed_show_plot: True 
+    # Stores the contour plot as .png
+    turbine_effective_wind_speed_store_plot: True 
+    # Stores the data as .csv in the run folder
+    turbine_effective_wind_speed_store_data: False 

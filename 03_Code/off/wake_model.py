@@ -522,7 +522,7 @@ class Floris4Wake(WakeModel):
                 TIs.flatten()[i_t],
                 Pows.flatten()[i_t]
             ]],
-            columns=['t_idx', 'u_abs_eff', 'Ct', 'AI', 'TI','Power']
+            columns=['t_idx', 'u_abs_eff_FLORIS', 'Ct_FLORIS', 'AI_FLORIS', 'TI_FLORIS','Power_FLORIS']
         )
 
         # Return the effective wind speed and the measurements
