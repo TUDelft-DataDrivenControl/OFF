@@ -184,6 +184,7 @@ wake:
     # The FLORIS input file is generated based on the settings linked below as well as the info in this yaml (e.g. turbine type, layout)
     floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
     floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
+    # This is where the floris model and settings are changed!
     floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
     # Settings not used yet
     nRP: 10
