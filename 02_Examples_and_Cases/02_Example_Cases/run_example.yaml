@@ -169,7 +169,9 @@ solver:
     wake_model: "FLORIS GCH" #"PythonGaussianWake" # "FLORIS GCH"
     op_propagation: "frozen turbulence"
     extrapolation: "pair"
-    n_op: 120
+    # Number of OPs per turbine. The chain of OPs should span long enough to cover the whole wind farm.
+    #  n_op * time_step * u_free_stream = covered distance
+    n_op: 200
 
 
 # Wake model settings
