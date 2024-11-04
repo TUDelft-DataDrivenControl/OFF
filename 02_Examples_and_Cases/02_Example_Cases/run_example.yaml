@@ -1,6 +1,6 @@
 sim:
   name: Test sim
-  description: Test simulation with 40s runtime, devided in 4s steps
+  description: Test simulation with 1200s runtime, features a wind direction change from 225 to 235 deg
 
   sim:
     time step: 4.0
@@ -17,7 +17,7 @@ sim:
 
 wind_farm:
   name: turbine array
-  description: Nine turbine case with DTU 10 MW turbines at 5D distance
+  description: Nine turbine case with IEA 10 MW turbines at 5D distance
 
   farm:
     layout_x:
@@ -84,8 +84,8 @@ ambient:
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 225.0
       - 225.0
-      - 227.0
-      - 227.0
+      - 235.0
+      - 235.0
     wind_directions_t:
       - 0.0
       - 600.0
