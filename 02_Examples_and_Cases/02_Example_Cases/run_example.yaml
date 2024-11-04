@@ -1,3 +1,11 @@
+
+
+
+
+
+
+# Simulation settings
+#  The time step is given in seconds, the start and end time in seconds as well.
 sim:
   name: Test sim
   description: Test simulation with 1200s runtime, features a wind direction change from 225 to 235 deg
@@ -7,6 +15,8 @@ sim:
     time start: 0.0
     time end: 1200.0
 
+  # The logging is split in two, one for the console and one for a file. The level can be set to DEBUG, INFO, WARNING, ERROR, CRITICAL
+  #   The console logging has a feature where the log messages are colored based on their origin.
   logging:
     console:
       enable: true
@@ -15,6 +25,18 @@ sim:
       enable: true
       level: WARNING
 
+# OFF stores all results in a run folder, which is by defalut located at "/runs". The user can specify a different location.
+#   The name of the default folder is "off_run_" followed by the current date and exact time.
+# The run folder contains a copy of the input yaml, the yaml used to init FLORIS, as well as the log file, and outputs.
+io:                             # Needs to be written by the user
+  data folder: ''
+  simulation folder:
+
+
+# Wind farm settings
+#   The layout is given in x, y, z coordinates, where locations can be defined in meters or in D (rotor diameters).
+#   To distinguish between the two, the unit parameter is used. If set to D, the diameter parameter needs to be set.
+#   Note that the layout refers to the BOTTOM of the turbine, not the rotor center. That is calculated internally based on the trubine information.
 wind_farm:
   name: turbine array
   description: Nine turbine case with IEA 10 MW turbines at 5D distance
@@ -72,6 +94,10 @@ wind_farm:
       - 0.0
       - 5.0
 
+
+# Ambient conditions used during the simulation
+#  Currently the code only supports time variations of the wind speed and direction. If a single value is given, it is assumed to be constant.
+#  There is also only one ambient corrector as of now.
 ambient:
   name: ambient_conditions
   description: Constant wind speed at 8m/s coming from 270 deg (0 deg = north)
@@ -99,21 +125,13 @@ ambient:
     wind_veer: 0.0
     corr_overwrite_direction: true # All states are overwritten instead of only the first particle state
 
-wake:
-  name: GCH
-  description: Gaussian Curl Hybrid wake model
-
-  settings:
-    nRP: 10               # Not used yet but required
-    rotor discretization: Isocell  # Not used yet but required
-    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
-    floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
-    floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
-    floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
-
+# Wake solver settings
+#  Here we select the Temporary Wind Farm (TWF) solver and the FLORIS wake model
+#   As of writing, the TWFSolver is the ONLY wake solver available. It can use any FLORIS model, as well as a build in PythonGaussianWake model.
+#   For future wake solvers, the initialization of the solver needs to be adapted, as it is hardcoded of now (see OFF.__init__).
 solver:
   name: TWF FLORIS
-  description:
+  description: FLORIDyn - A dynamic and flexible framework for real-time wind farm control, Becker et al. 2022
 
   settings:
     wake_solver: "TWFSolver"
@@ -121,6 +139,48 @@ solver:
     op_propagation: "frozen turbulence"
     extrapolation: "pair"
     n_op: 120
+
+
+# Wake model settings
+#   These need to fit the wake model that the wake solver is using.
+wake:
+  name: GCH
+  description: Gaussian Curl Hybrid wake model
+
+  settings:
+    # The yaml path is used to create an input file for the FLORIS model, before it is moved to the run folder
+    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/not_relevant_.yaml"
+    # The FLORIS input file is generated based on the settings linked below as well as the info in this yaml (e.g. turbine type, layout)
+    floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
+    floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
+    floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
+    # Settings not used yet
+    nRP: 10
+    rotor discretization: Isocell
+
+
+# Controller settings
+# Multiple controllers are available, each with their own settings. Below you can find examples of the controllers, along with one that is selected.
+ 
+
+
+controller:
+  name: Dead-band LUT yaw controller
+  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough
+  settings:
+    ctl: "Dead-band LUT yaw controller"
+    wind_dir_thresh: 4      # Dead-band width in deg - if you set 2, the ± width is 4 deg
+    average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
+    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
+    # LuT data can be given as a csv or a pckl file.
+    #  The pckl file is a dictionary with the keys "wind_speed" and "wind_direction", "turbulence_intensity" and "yaw_angles_opt"
+    path_to_angles_and_directions_pckl: "02_Examples_and_Cases/04_LuTs/yaw_offsets_HKN_10T.pckl" # Leave empty if using csv instead
+    #  The csv file is a table with the first column being the wind directions and the following nT columns being the yaw angles for the nT turbines
+    #  IMPORTANT: As of now, the csv file is not sufficient to run the Dead-band LUT yaw controller, provide a pckl file instead - the code will throw an error.
+    path_to_angles_and_directions_csv: "/_.csv"
+    k_i : 0.01              # Integral gain (per second)
+    baseline: False         # Activate Baseline mode, yaw = 0
+
 
 # controller:
 #  name: Ideal greedy baseline
@@ -150,20 +210,6 @@ solver:
 #     orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
 #     path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
 
-controller:
-  name: Dead-band LUT yaw controller
-  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough
-  settings:
-    ctl: "Dead-band LUT yaw controller"
-    wind_dir_thresh: 4      # Dead-band width in deg - if you set 2, the ± width is 4 deg
-    average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml
-    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
-    path_to_angles_and_directions_pckl: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/03_Papers/08_OFF_Paper/02_Shared Files/off_paper/data/lut/yaw_offsets.pckl" # Leave empty if using csv instead
-    path_to_angles_and_directions_csv: "/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/Simulations/optimized_angles.csv"
-    k_i : 0.01              # Integral gain (per second)
-    baseline: False         # Activate Baseline mode, yaw = 0
-
-
 #controller:
 #  name: prescribed yaw controller
 #  description: Chooses yaw angles based on the current main wind direction and a lut for it. Only corrects if offset to the averaged wind direction is larger then a given offset
@@ -187,6 +233,9 @@ controller:
 #      - 90000.0
 
 
+# Turbine information
+#  The turbine information is used by OFF as well as by the wake model.
+#  Current issue (FLORIS): The turbine information is NOT passed on to FLORIS, so FLORIS needs to have the same information in its turbine library.
 turbine:
   iea_10MW:
     name: IEA Wind Task 37 10MW Offshore Reference Turbine # Source: FLORIS v3.4, adapted for OFF
@@ -440,10 +489,6 @@ turbine:
     rotor_overhang: 7.07        # in m    # TODO Copied from DTU 10MW - Change!
     shaft_tilt: 5               # in deg  # TODO Copied from DTU 10MW - Change!
     yaw_rate_lim: 0.3           # deg/s   # TODO Find true value
-
-io:                             # Needs to be written by the user
-  data folder: ''
-  simulation folder:
 
 vis:
   grid:

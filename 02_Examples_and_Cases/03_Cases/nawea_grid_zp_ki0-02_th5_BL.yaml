@@ -81,12 +81,15 @@ wake:
   description: Gaussian Curl Hybrid wake model
 
   settings:
-    nRP: 10               # Not used yet but required
-    rotor discretization: Isocell  # Not used yet but required
-    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/gch.yaml"
+    # The yaml path is used to create an input file for the FLORIS model, before it is moved to the run folder
+    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/not_relevant_.yaml"
+    # The FLORIS input file is generated based on the settings linked below as well as the info in this yaml (e.g. turbine type, layout)
     floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
     floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
     floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
+    # Settings not used yet
+    nRP: 10
+    rotor discretization: Isocell
 
 solver:
   name: TWF FLORIS

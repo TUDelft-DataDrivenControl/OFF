@@ -529,6 +529,7 @@ class DeadbandYawSteeringLuTController(Controller):
             phi_and_ori = np.genfromtxt(settings['path_to_angles_and_directions_csv'], delimiter=',')
             self.lut    = phi_and_ori[:,1:]
             self.phi    = phi_and_ori[:,0]
+            TypeError("Controller input: As of now, the csv file in not expected to provide the wind speed and turbulence intensity values. Please provide a pckl file instead.")
 
         self.wind_dir_thresh    = settings['wind_dir_thresh']
         self.k_i                = settings['k_i'] * dt
