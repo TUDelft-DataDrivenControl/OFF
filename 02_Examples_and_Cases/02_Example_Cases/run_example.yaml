@@ -10,7 +10,7 @@
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
-	
+  
 # This program (OFF) is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -45,7 +45,7 @@ sim:
     time step: 4.0
     time start: 0.0
     time end: 1200.0
-
+      
   # The logging is split in two, one for the console and one for a file. The level can be set to DEBUG, INFO, WARNING, ERROR, CRITICAL
   #   The console logging has a feature where the log messages are colored based on their origin.
   logging:
