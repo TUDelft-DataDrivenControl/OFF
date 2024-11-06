@@ -1,4 +1,4 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
@@ -22,7 +22,7 @@ import pandas as pd
 import off.turbine as tur
 import off.utils as util
 import logging
-import ast
+from scipy.interpolate import interpn
 
 lg = logging.getLogger(__name__)
 
@@ -497,24 +497,158 @@ class YawSteeringFilteredPrescribedMotionController(Controller):
         """
         pass
 
-# ============== Tickets ================
-# [x] implement 1st controller -> ideal greedy baseline
-# [ ] Add switch to run file
-#       [ ] Select input data
-# [ ] Add controller to initialization
-#       [ ] Switch between which controller is activated
-# [ ] implement controller into simulation loop
-#       [ ] include ideal greedy baseline and see what issues arise
-#       [ ] check if yaw motions have the desired effect
-#       [ ] output the applied motion / cost (maybe not needed)
-#       [ ] reserve output for controller info (controller states, counters, errors, etc.)
-# [ ] implement realistic yaw controller
-#       [ ] Hysteresis
-#       [ ] Integration behaviour
-# [ ] implement LUT yaw controller
-#       [ ] Hysteresis
-#       [ ] Integration behaviour
-# [ ] implement filtered prescribed motion yaw controller
-# [ ] implement prescribed motion yaw controller
-#       -> extends the prescribed motion yaw controller with 0° tolerance to the set point
+
+class DeadbandYawSteeringLuTController(Controller):
+    """
+    Chooses yaw angles based on the current main wind direction and a lut for it. 
+    Only corrects if offset to the averaged wind direction is larger then a given offset of if there has been a mismatch in wind direction for long enough.
+    """
+
+    def __init__(self, settings: dict, dt: float, nT: int):
+        super(DeadbandYawSteeringLuTController, self).__init__(settings)
+
+        # Get LuT
+        if settings['path_to_angles_and_directions_pckl']:
+            # Read pckl file
+            df_opt = pd.read_pickle(settings['path_to_angles_and_directions_pckl'])
+
+            # available values
+            self.wind_vel = np.sort(df_opt['wind_speed'].value_counts().index)
+            self.wind_dir = np.sort(df_opt['wind_direction'].value_counts().index)
+            self.wind_ti  = np.sort(df_opt['turbulence_intensity'].value_counts().index)
+            
+            n_wind_dir = len(self.wind_dir)
+            n_wind_vel = len(self.wind_vel)
+            n_wind_ti  = len(self.wind_ti)
+            n_wt       = len(df_opt['yaw_angles_opt'][0]) 
+
+            self.lut = np.concatenate(df_opt['yaw_angles_opt'].to_numpy()).reshape((n_wind_dir, n_wind_vel, n_wind_ti, n_wt ))
+
+        else:
+            # Read table
+            phi_and_ori = np.genfromtxt(settings['path_to_angles_and_directions_csv'], delimiter=',')
+            self.lut    = phi_and_ori[:,1:]
+            self.phi    = phi_and_ori[:,0]
+            TypeError("Controller input: As of now, the csv file in not expected to provide the wind speed and turbulence intensity values. Please provide a pckl file instead.")
+
+        self.wind_dir_thresh    = settings['wind_dir_thresh']
+        self.k_i                = settings['k_i'] * dt
+        self.integrated_error   = np.zeros(nT)
+        self.set_wind_dir       = np.zeros(nT)
+        self.run_controller     = True
+        self.first_run          = np.full((nT, 1), False)
+        self.dt                 = dt
+        self.trigger_dir        = np.full((nT, 1), False)
+        self.trigger_int        = np.full((nT, 1), False)
+        self.orientation_lut    = np.zeros(nT)
+        self.baseline           = settings['baseline']
+
+        lg.info('Dead-band yaw steering LUT controller created.')
+
+    def __call__(self, turbine: tur, i_t: int, time_step: float) -> tur:
+        """
+        Reads the given turbine and sets its turbine states
+
+        Parameters
+        ----------
+        turbine: Turbine
+            Turbine object with turbine states, ambient states and observation points
+        i_t:
+            Index of the turbine (for look-up tables & integrated error)
+        time_step:
+            current time step (for look-up tables or counters)
+
+        Returns
+        -------
+        Turbine object with updated turbine states
+        """
+        # Get wind direction and orientation
+        wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
+        wind_vel = turbine.ambient_states.get_turbine_wind_speed_abs()
+        wind_ti = 0.06 #turbine.ambient_states.get_turbulence_intensity(0)
+        orientation = turbine.get_yaw_orientation()
+
+        # Init wind direction setting
+        if self.first_run[i_t]:
+            self.set_wind_dir[i_t] = wind_dir
+            self.first_run[i_t] = False
+
+        # Update integrated error
+        self.integrated_error[i_t] += (wind_dir - self.set_wind_dir[i_t]) * self.k_i
+
+
+        # check if difference is larger than threshold or if the turbine is moving already
+        self.trigger_dir[i_t] = np.abs(self.set_wind_dir[i_t] - wind_dir) > self.wind_dir_thresh
+        self.trigger_int[i_t] = self.integrated_error[i_t] > self.wind_dir_thresh
+
+        if (self.trigger_dir[i_t] or self.trigger_int[i_t]) and self.run_controller:
+            lg.info('Controller update triggered!')
+            # Update set wind direction
+            self.set_wind_dir[i_t] = wind_dir
+            # Reset integrated error
+            self.integrated_error[i_t] = 0
+
+        # TODO add other thresholds for velocity and turbulence intensity
+        
+        if self.baseline:
+            yaw_lut = 0.0
+        else:
+             # Determine yaw angle based on LUT
+            yaw_lut = interpn((self.wind_dir, self.wind_vel, self.wind_ti), 
+                        self.lut, 
+                        np.array([self.set_wind_dir[i_t], wind_vel, wind_ti]).T, bounds_error=False, method='linear',fill_value=None).flatten()[i_t]
+
+        self.orientation_lut[i_t] = util.ot_get_orientation(self.set_wind_dir[i_t], yaw_lut)
+
+        # Move towards yaw angle and complete if possible
+        delta_ori = self.orientation_lut[i_t] - orientation
+        if abs(delta_ori) <= turbine.yaw_rate_lim * self.dt:
+            # Achievable in one step
+            turbine.set_orientation_yaw(self.orientation_lut[i_t], wind_dir)
+        else:
+            # Not achievable in one step
+            turbine.set_orientation_yaw(orientation + np.sign(delta_ori) * turbine.yaw_rate_lim * self.dt, wind_dir)
+
+
+    def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):
+        """
+        Extracts the settings that this controller is setting. Does NOT write new settings.
+
+        Parameters
+        ----------
+        turbine
+        i_t
+        time_step
+
+        Returns
+        -------
+        pd.Dataframe
+        """
+        control_settings = pd.DataFrame(
+            [[
+                i_t,
+                turbine.calc_yaw(turbine.ambient_states.get_wind_dir_ind(0)),
+                turbine.get_yaw_orientation(),
+                self.orientation_lut[i_t],
+                self.integrated_error[i_t],
+                self.trigger_dir[i_t][0],
+                self.trigger_int[i_t][0],
+                self.set_wind_dir[i_t],
+                time_step
+            ]],
+            columns=['t_idx', 'yaw', 'orientation', 'reference orientation','integrated error', 'direction trigger', 'integration trigger', 'set wind dir', 'time']
+        )
+
+        return control_settings
+
+    def update(self, t: float):
+        """
+        Updates the controller state (if needed). Called once BEFORE the control settings are being set
+
+        Parameters
+        ----------
+        t : Simulation time
+        """
+        pass
+
 

@@ -1,4 +1,4 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
@@ -273,6 +273,28 @@ class Turbine(ABC):
             yaw misalignment (deg)
         """
         return ot.ot_get_yaw(wind_direction, self.orientation[0])
+    
+    def get_yaw_orientation(self) -> float:
+        """
+        Get the yaw orientation of the turbine
+
+        Returns
+        -------
+        float:
+            yaw orientation (deg)
+        """
+        return self.orientation[0]
+
+    def get_tilt_orientation(self) -> float:
+        """
+        Get the tilt orientation of the turbine
+
+        Returns
+        -------
+        float:
+            tilt orientation (deg)
+        """
+        return self.orientation[1]
 
     def set_yaw(self, wind_direction: float, yaw: float):
         """

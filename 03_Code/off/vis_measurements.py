@@ -1,4 +1,4 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.

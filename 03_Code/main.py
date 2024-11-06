@@ -1,4 +1,13 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# //////////////////////////////////////////////////////////////////// #
+#    ____  ______ ______ 
+#   / __ \|  ____|  ____|
+#  | |  | | |__  | |__   
+#  | |  | |  __| |  __|  
+#  | |__| | |    | |     
+#   \____/|_|    |_|     
+# //////////////////////////////////////////////////////////////////// #
+
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
@@ -16,6 +25,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
+# //////////////////////////////////////////////////////////////////// #
+# Welcome to the example OFF main file. This showcases how to run a simulation using the OFF framework.
+# The settings are defined in the run_example.yaml file, have a look to see what is possible.
+# If you experience issues, create a new issue on the GitHub page https://github.com/TUDelft-DataDrivenControl/OFF
+# //////////////////////////////////////////////////////////////////// #
+
 import os, logging
 logging.basicConfig(level=logging.ERROR)
 
@@ -32,10 +47,12 @@ def main():
     
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
+    # Example case
     oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
-    # oi.init_simulation_by_path('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/'
-    #                        'Simulations/Input/Torque_320_C1.yaml')
-    #oi.init_simulation_by_path('/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/10_Torque2024/HKN_Corner/03_OFF_Case/off_cases/torque24_225deg_C5.yaml')
+    
+    # One case used for the publication "A dynamic open-source model to investigate wake dynamics in response to wind farm flow control strategies" Becker, Lejeune et al. 2024
+    #oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/03_Cases/nawea_grid_zp_ki0-02_th5_LuT.yaml')
+    
     # Run the simulation
     oi.run_sim()
 
@@ -50,9 +67,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-# =========== TICKETS ===========
-# [ ] implement the yaw controllers
-#   Four controllers with varying complexity are suggested: ideal greedy baseline, realistic greedy baseline, yaw
-#   steering LUT based, yaw steering prescribed motion. The controller object should take into account that the same
-#   input workflow will be required for axial induction and possibly tilt.

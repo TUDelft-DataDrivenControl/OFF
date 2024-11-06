@@ -1,4 +1,4 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
@@ -31,6 +31,7 @@ import yaml
 import pandas as pd
 import shutil
 import os
+import datetime
 
 
 class OFFInterface:
@@ -353,7 +354,9 @@ class OFFInterface:
                            ('wind_veer', settings_amb['flow_field']['wind_veer'])])
         floris_file.update(dict([('flow_field', flow_field)]))
 
-        path_out = path_to_tmp + '/tmp_floris_input.yaml'
+        current_time = datetime.datetime.now()
+
+        path_out = path_to_tmp + '/tmp_floris_input' + current_time.strftime("%Y%m%d%H%M%S%f") + '.yaml'
         with open(path_out, "w") as yaml_file:
             yaml.dump(floris_file, yaml_file)
 

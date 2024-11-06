@@ -1,4 +1,4 @@
-# Copyright (C) <2023>, M Becker (TUDelft), M Lejeune (UCLouvain)
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
 
 # List of the contributors to the development of OFF: see LICENSE file.
 # Description and complete License: see LICENSE file.
@@ -35,6 +35,8 @@ from off.logger import CONSOLE_LVL, FILE_LVL, Formatter, _logger_add
 import shutil
 
 from off import __file__ as OFF_PATH
+import datetime
+
 OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
 
 
@@ -75,6 +77,8 @@ class OFF:
             self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr)
         elif settings_ctr["ctl"] == "LUT yaw controller":
             self.controller = ctr.YawSteeringLUTController(settings_ctr)
+        elif settings_ctr["ctl"] == "Dead-band LUT yaw controller":
+            self.controller = ctr.DeadbandYawSteeringLuTController(settings_ctr, self.settings_sim['time step'], self.wind_farm.nT)
         else:
             raise Warning("Controller %s is undefined!" % settings_ctr["ctl"])
 
@@ -86,6 +90,9 @@ class OFF:
         # =========== Visualization ===========
         self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
 
+        # =========== Progess Bar ===========
+        self.iterations_total = int((self.settings_sim['time end'] - self.settings_sim['time start']) / self.settings_sim['time step'])
+
     def __get_runid__(self) -> int:        
         """ Extract and increment the run id
 
@@ -94,22 +101,10 @@ class OFF:
         int
             Current run id.
         """
-        run_id_path = f'{OFF_PATH}/03_Code/off/.runid'
-        lg.info('RunID path: %s', run_id_path)
+        current_time = datetime.datetime.now()
+        integer = int(current_time.strftime("%Y%m%d%H%M%S%f"))
 
-        try:
-            fid = open(run_id_path)
-        except FileNotFoundError:
-            run_id = 0
-        else: 
-            with fid:
-                run_id = int(fid.readline())
-
-        with open(run_id_path, 'w') as fid:
-            fid.write('{}'.format(run_id+1))
-
-        lg.info('RunID: %s' % run_id)
-        return run_id
+        return integer
 
     def __dir_init__(self, settings_sim: dict):
         """ Initialize the simulation folder and set the data path.
@@ -229,6 +224,9 @@ class OFF:
 
         uv_r = np.zeros((len(self.wind_farm.turbines), 2))
         pow_t = np.zeros((len(self.wind_farm.turbines), 1))
+
+        iteration = 0
+
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
                            self.settings_sim['time step']):
@@ -257,7 +255,7 @@ class OFF:
 
                 # Calculate the power generated
                 pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0], uv_r[idx, 1]))
-                m_tmp['pow'] = pow_t[idx, :]
+                m_tmp['power_OFF'] = pow_t[idx, :]
 
                 # Add turbine index & timestamp to data
                 m_tmp.t_idx = idx
@@ -319,6 +317,8 @@ class OFF:
                 self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
 
             lg.info('Ending time step: %s s.' % t)
+            iteration += 1
+            self._print_progress_bar(iteration, self.iterations_total, prefix = 'Simulation progress:', suffix = 'Complete', length = 50)
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
@@ -347,3 +347,24 @@ class OFF:
         """
         return self.wind_farm
 
+    # Print iterations progress
+    def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+        """
+        Call in a loop to create terminal progress bar
+        @params:
+            iteration   - Required  : current iteration (Int)
+            total       - Required  : total iterations (Int)
+            prefix      - Optional  : prefix string (Str)
+            suffix      - Optional  : suffix string (Str)
+            decimals    - Optional  : positive number of decimals in percent complete (Int)
+            length      - Optional  : character length of bar (Int)
+            fill        - Optional  : bar fill character (Str)
+            printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        """
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+        # Print New Line on Complete
+        if iteration == total: 
+            print()
