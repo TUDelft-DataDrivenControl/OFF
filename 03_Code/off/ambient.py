@@ -25,7 +25,7 @@ from abc import ABC, abstractmethod
 from off.states import States
 from off.utils import ot_deg2rad
 
-from windfarm import WindFarm
+from off.windfarm import WindFarm # TODO threw error, changed from: from windfarm import WindFarm
 class AmbientStates(States, ABC):
 
     def __init__(self, number_of_time_steps: int, number_of_states: int, state_names: list):
