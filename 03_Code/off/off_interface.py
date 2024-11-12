@@ -81,28 +81,70 @@ class OFFInterface:
         sim_info = yaml.safe_load(stream)
 
         # Convert run data into settings and wind farm object
-        settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr = self._run_yaml_to_dict(sim_info)
-        settings_sim['path_to_yaml'] = path_to_yaml
-        wind_farm = self._run_yaml_to_wind_farm(sim_info)
+        self.settings_sim, self.settings_sol, self.settings_wke, self.settings_cor, self.settings_ctr = self._run_yaml_to_dict(sim_info)
+        self.settings_sim['path_to_yaml'] = path_to_yaml
+        self.wind_farm = self._run_yaml_to_wind_farm(sim_info)
 
         # Generate an input file for FLORIS
         tmp_yaml_path = self._gen_FLORIS_yaml(settings_wke,
                                               sim_info["wind_farm"],
                                               sim_info["ambient"],
                                               path_to_yaml.rsplit('/', 1)[0])  # This might not work on Windows
-        settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
+        self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
 
         # Visualization settings
-        vis = sim_info["vis"]
+        self.vis = sim_info["vis"]
 
         # Create OFF simulation object
-        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, settings_ctr, vis)
+        self.create_off_simulation()
+
+    def init_simulation_by_dicts(self, 
+                                 settings_sim: dict = None, 
+                                 settings_sol: dict = None, 
+                                 settings_wke: dict = None, 
+                                 settings_cor: dict = None, 
+                                 settings_ctr: dict = None,
+                                 wind_farm: wfm.WindFarm = None):
+        """
+        Initialize the simulation using dictionaries
+
+        Parameters
+        ----------
+        settings_sim: dict
+            Simulation settings
+        settings_sol: dict
+            Solver settings
+        settings_wke: dict
+            Wake settings
+        settings_cor: dict
+            Corrector settings
+        settings_ctr: dict
+            Controller settings
+        wind_farm: wfm.WindFarm
+            Wind farm object
+        """
+        self.settings_sim = settings_sim if settings_sim is not None else self.settings_sim
+        self.settings_sol = settings_sol if settings_sol is not None else self.settings_sol
+        self.settings_wke = settings_wke if settings_wke is not None else self.settings_wke
+        self.settings_cor = settings_cor if settings_cor is not None else self.settings_cor
+        self.settings_ctr = settings_ctr if settings_ctr is not None else self.settings_ctr
+        self.wind_farm = wind_farm if wind_farm is not None else self.wind_farm
+
+        # Create OFF simulation object
+        self.create_off_simulation()
+
+    def create_off_simulation(self):
+        """
+        Creates the OFF simulation object based on the initialized settings.
+        """
+        # Create OFF simulation object
+        self.off_sim = off.OFF(self.wind_farm, self.settings_sim, self.settings_wke, self.settings_sol, self.settings_cor, self.settings_ctr)
 
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
-            np.array([sim_info["ambient"]["flow_field"]["wind_speeds"][0],
-                      sim_info["ambient"]["flow_field"]["wind_directions"][0],
-                      sim_info["ambient"]["flow_field"]["turbulence_intensities"][0]]),
+            np.array([self.settings_wke["flow_field"]["wind_speeds"][0],
+                      self.settings_wke["flow_field"]["wind_directions"][0],
+                      self.settings_wke["flow_field"]["turbulence_intensities"][0]]),
             np.array([1 / 3, 0, 0]))
 
         self.ready_to_run = True
