@@ -56,8 +56,11 @@ class OFF:
         settings_wke['sim_dir'] = self.root_dir
 
         # =========== FLORIS ===========
+        # Move the FLORIS.yaml file to the simulation directory.
+        # tmp path is updated for reinitialization of the simulation, as a result, the yaml file is only available in the latest simulation folder.
         settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
         shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
+        settings_wke['tmp_yaml_path'] = settings_wke['yaml_path']
 
         # =========== Solver ===========
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
