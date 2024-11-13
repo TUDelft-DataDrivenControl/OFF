@@ -59,7 +59,7 @@ def main():
     # Get and modify wind time series
     ambient_data = oi.settings_cor
 
-    print(ambient_data)
+    print(oi.get_measurements())
 
     ambient_data["ambient"]['wind_directions'] = [270, 270, 260, 270]
     ambient_data["ambient"]['wind_directions_t'] = [0, 100, 300, 1200]
@@ -67,6 +67,8 @@ def main():
     oi.init_simulation_by_dicts(settings_cor=ambient_data)
 
     oi.run_sim()
+
+    print(oi.get_measurements())
 
     print("---OFF Simulation took %s seconds ---" % (time.time() - start_time))
 

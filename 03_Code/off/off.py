@@ -229,7 +229,7 @@ class OFF:
         iteration = 0
 
         for t in np.arange(self.settings_sim['time start'],
-                           self.settings_sim['time end'],
+                           self.settings_sim['time end'] + self.settings_sim['time step'],
                            self.settings_sim['time step']):
             lg.info('Starting time step: %s s.' % t)
 
