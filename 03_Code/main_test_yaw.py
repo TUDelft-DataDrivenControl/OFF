@@ -37,6 +37,7 @@ logging.basicConfig(level=logging.ERROR)
 import off.off as off
 import off.off_interface as offi
 import time
+import matplotlib.pyplot as plt
 
 def main():
     start_time = time.time()
@@ -50,27 +51,54 @@ def main():
     # Example case
     oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/03_Cases/yaw_angle_test.yaml')
     
+    # Get and modify controller setpoints
+    control_data = oi.settings_ctr
+    control_data["orientation_deg"] = [[270, 270], [270, 270], [270, 270], [270, 270]]
+    control_data["orientation_t"]   = [0.0, 100.0, 300.0, 2000.0]
+    oi.init_simulation_by_dicts(settings_ctr=control_data)
+
     # One case used for the publication "A dynamic open-source model to investigate wake dynamics in response to wind farm flow control strategies" Becker, Lejeune et al. 2024
     #oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/03_Cases/nawea_grid_zp_ki0-02_th5_LuT.yaml')
     
     # Run the simulation
     oi.run_sim()
+    results_run1 = oi.get_measurements()
 
-    # Get and modify wind time series
-    ambient_data = oi.settings_cor
 
-    print(oi.get_measurements())
-
-    ambient_data["ambient"]['wind_directions'] = [270, 270, 260, 270]
-    ambient_data["ambient"]['wind_directions_t'] = [0, 100, 300, 1200]
-
-    oi.init_simulation_by_dicts(settings_cor=ambient_data)
+    # Get and modify controller setpoints
+    control_data = oi.settings_ctr
+    control_data["orientation_deg"] = [[270, 270], [270, 270], [240, 270], [240, 270]]
+    control_data["orientation_t"]   = [0.0, 100.0, 300.0, 2000.0]
+    oi.init_simulation_by_dicts(settings_ctr=control_data)
+    
+    # ambient_data = oi.settings_cor
+    # ambient_data["ambient"]['wind_directions']   = [270, 270, 260, 270]
+    # ambient_data["ambient"]['wind_directions_t'] = [0, 100, 300, 1200]
+    # oi.init_simulation_by_dicts(settings_cor=ambient_data)
 
     oi.run_sim()
-
-    print(oi.get_measurements())
+    results_run2 = oi.get_measurements()
 
     print("---OFF Simulation took %s seconds ---" % (time.time() - start_time))
+
+
+    # Extract time and power data
+    time_run1 = results_run1['time']
+    power_run1 = results_run1['Power_FLORIS']
+    power_run2 = results_run2['Power_FLORIS']
+
+    # A plot comparing the power output of the two runs
+    #fig, ax = plt.subplots()
+    plt.plot(time_run1[0::2], power_run1[0::2], label='Run 1, T1', color='green')
+    plt.plot(time_run1[1::2], power_run1[1::2], label='Run 1, T2', color='green', linestyle='dashed')
+    plt.plot(time_run1[0::2], power_run2[0::2], label='Run 2, T1', color='blue')
+    plt.plot(time_run1[1::2], power_run2[1::2], label='Run 2, T2', color='blue', linestyle='dashed')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Power FLORIS')
+    plt.title('Power FLORIS vs Time')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
     # Store output
     # oi.store_measurements()
