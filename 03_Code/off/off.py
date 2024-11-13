@@ -21,10 +21,8 @@ import os
 import logging
 lg = logging.getLogger('off')
 
-import off.turbine as tur
 import off.windfarm as wfm
-import off.observation_points as ops
-import off.ambient as amb
+import off.ambient_corrector as amb_corr
 import off.utils as util
 import off.controller as ctr
 import off.vis_flow_field as vff
@@ -85,7 +83,7 @@ class OFF:
         # =========== Corrector ===========
         if settings_cor['ambient']: 
             states_name = self.wind_farm.turbines[0].ambient_states.get_state_names()
-            self.ambient_corrector = amb.AmbientCorrector(settings_cor['ambient'], self.wind_farm, states_name)
+            self.ambient_corrector = amb_corr.AmbientCorrector(settings_cor['ambient'], self.wind_farm, states_name)
 
         # =========== Visualization ===========
         self.visualizer_ff = vff.Visualizer_FlowField(self.settings_vis, wind_farm.get_layout()[:,:2])
