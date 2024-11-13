@@ -138,13 +138,19 @@ class OFFInterface:
         Creates the OFF simulation object based on the initialized settings.
         """
         # Create OFF simulation object
-        self.off_sim = off.OFF(self.wind_farm, self.settings_sim, self.settings_wke, self.settings_sol, self.settings_cor, self.settings_ctr)
+        self.off_sim = off.OFF(self.wind_farm, 
+                               self.settings_sim, 
+                               self.settings_wke, 
+                               self.settings_sol, 
+                               self.settings_cor, 
+                               self.settings_ctr, 
+                               self.vis)
 
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
-            np.array([self.settings_wke["flow_field"]["wind_speeds"][0],
-                      self.settings_wke["flow_field"]["wind_directions"][0],
-                      self.settings_wke["flow_field"]["turbulence_intensities"][0]]),
+            np.array([self.settings_cor["ambient"]["wind_speeds"][0],
+                      self.settings_cor["ambient"]["wind_directions"][0],
+                      self.settings_cor["ambient"]["turbulence_intensities"][0]]),
             np.array([1 / 3, 0, 0]))
 
         self.ready_to_run = True
