@@ -133,9 +133,16 @@ class OFFInterface:
         # Create OFF simulation object
         self.create_off_simulation()
 
-    def create_off_simulation(self):
+    def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
         """
         Creates the OFF simulation object based on the initialized settings.
+
+        Parameters
+        ----------
+        yaw: float
+            Initial yaw angle for the wind farm (default is 0.0 deg)
+        axind: float
+            Initial axial induction factor for the wind farm (default is the Betzlimit at 1/3)
         """
         # Create OFF simulation object
         self.off_sim = off.OFF(self.wind_farm, 
@@ -151,7 +158,7 @@ class OFFInterface:
             np.array([self.settings_cor["ambient"]["wind_speeds"][0],
                       self.settings_cor["ambient"]["wind_directions"][0],
                       self.settings_cor["ambient"]["turbulence_intensities"][0]]),
-            np.array([1 / 3, 0, 0]))
+            np.array([axind, yaw, 0]))
 
         self.ready_to_run = True
 
