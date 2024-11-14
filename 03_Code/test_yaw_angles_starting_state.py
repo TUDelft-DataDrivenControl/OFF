@@ -11,7 +11,7 @@ import off.off_interface as offi
 import numpy as np
 
 yaw_misalignment_angles_to_test = np.arange(-30, 31, 2.5)
-yaw_starting_angles = np.arange(-20,21,2.5)
+yaw_starting_angles = np.concatenate((np.array([-25]), np.arange(-20,21,2.5), np.array([25])))
 wind_dir = 235.0  # deg
 yaw_rate = 0.3  # deg/s
 path_to_output = '/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/20_max_energy_instead_of_power/01_OFF_results_clean_yaw_starting_angles'
