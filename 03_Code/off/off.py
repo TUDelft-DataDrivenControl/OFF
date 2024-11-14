@@ -300,7 +300,7 @@ class OFF:
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
-                tur.observation_points.propagate_ops(self.settings_sim['time step'])
+                tur.observation_points.propagate_ops(self.settings_sim['time step']) # , tur.get_rotor_pos())
                 lg.debug(tur.observation_points.get_world_coord())
 
             # ///////////////////// CONTROL ///////////////////////

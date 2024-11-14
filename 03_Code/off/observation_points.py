@@ -243,7 +243,7 @@ class FLORIDynOPs6(ObservationPoints):
         self.states[:, 2] = rotor_pos[2]
         self.states[:, 3] = np.arange(self.n_time_steps) * ot_abs_wind_speed(wind_speed_u, wind_speed_v)
 
-    def propagate_ops(self, time_step: float):
+    def propagate_ops(self, time_step: float): # , rotor_pos: np.ndarray):
         """
         Propagates the OPs based on the u and v velocity component
 
@@ -258,3 +258,7 @@ class FLORIDynOPs6(ObservationPoints):
         self.states[1:, 1] = self.states[:-1, 1] + self.op_propagation_speed[:-1, 1] * time_step
         self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(self.op_propagation_speed[:-1, 0] ** 2 +
                                                            self.op_propagation_speed[:-1, 1] ** 2) * time_step
+        
+        # self.states[0, 0] = rotor_pos[0]
+        # self.states[0, 1] = rotor_pos[1]
+        # self.states[0, 2] = rotor_pos[2]
