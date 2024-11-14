@@ -54,6 +54,7 @@ def main():
             #ambient_data["ambient"]['wind_directions_t'] = [0, 100, 300, 2000]
 
             oi.init_simulation_by_dicts(settings_ctr=control_data, settings_cor=ambient_data)
+            oi.create_off_simulation()
 
             # Run the simulation
             oi.run_sim()

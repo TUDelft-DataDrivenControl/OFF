@@ -131,7 +131,7 @@ class OFFInterface:
         self.wind_farm = wind_farm if wind_farm is not None else self.wind_farm
 
         # Create OFF simulation object
-        self.create_off_simulation()
+        #self.create_off_simulation()
 
     def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
         """
