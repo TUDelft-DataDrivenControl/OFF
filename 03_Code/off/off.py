@@ -35,7 +35,7 @@ import shutil
 from off import __file__ as OFF_PATH
 import datetime
 
-OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
+OFF_PATH = os.path.normpath(OFF_PATH).rsplit(os.sep, 3)[0]
 
 
 class OFF:
@@ -139,7 +139,7 @@ class OFF:
                 root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
             else:
                 root_dir = data_dir or f'{os.environ["PWD"]}/runs/'
-            lg.warning('Initial root runs directory path retrieval was unsuccessful, used ' + root_dir)
+            #lg.warning('Initial root runs directory path retrieval was unsuccessful, used ' + root_dir)
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
         self.root_dir = root_dir[:-len("runs/")]
@@ -348,6 +348,28 @@ class OFF:
         """
         return self.wind_farm
 
+    def get_root_dir(self) -> str:
+        """
+        Get the root directory of the simulation
+
+        Returns
+        -------
+        str :
+            Root directory of the simulation
+        """
+        return self.root_dir
+    
+    def get_sim_dir(self) -> str:
+        """
+        Get the simulation directory
+
+        Returns
+        -------
+        str :
+            Simulation directory
+        """
+        return self.sim_dir
+    
     # Print iterations progress
     def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
         """

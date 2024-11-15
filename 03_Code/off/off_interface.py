@@ -123,7 +123,13 @@ class OFFInterface:
         wind_farm: wfm.WindFarm
             Wind farm object
         """
-        self.settings_sim = settings_sim if settings_sim is not None else self.settings_sim
+        # Change root directory to previous simulation folder
+        if settings_sim is not None:
+            self.settings_sim = settings_sim
+        else:
+            # This setting prevents the simulation from creating a new folder with every simulation
+            self.settings_sim['simulation folder'] = self.off_sim.get_sim_dir()
+
         self.settings_sol = settings_sol if settings_sol is not None else self.settings_sol
         self.settings_wke = settings_wke if settings_wke is not None else self.settings_wke
         self.settings_cor = settings_cor if settings_cor is not None else self.settings_cor
