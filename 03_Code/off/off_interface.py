@@ -138,6 +138,7 @@ class OFFInterface:
 
         # Create OFF simulation object
         #self.create_off_simulation()
+        self.ready_to_run = False
 
     def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
         """
