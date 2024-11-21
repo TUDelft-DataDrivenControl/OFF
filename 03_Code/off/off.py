@@ -34,8 +34,8 @@ import shutil
 
 from off import __file__ as OFF_PATH
 import datetime
-
-OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
+# OFF_PATH = 'C:/Users/leendertstarin/PycharmProjects/pythonProject/OFF'
+OFF_PATH = OFF_PATH.rsplit('\\', 3)[0]
 
 
 class OFF:
@@ -47,7 +47,7 @@ class OFF:
     settings_vis = dict()
 
     def __init__(self, wind_farm: wfm.WindFarm, settings_sim: dict, settings_wke: dict, settings_sol: dict,
-                 settings_cor: dict, settings_ctr: dict, vis: dict):
+                 settings_cor: dict, settings_ctr: dict, vis: dict, orientation_array):
         self.wind_farm = wind_farm
         self.settings_sim = settings_sim
         self.settings_vis = vis
@@ -72,7 +72,7 @@ class OFF:
         elif settings_ctr["ctl"] == "prescribed filtered yaw controller":
             self.controller = ctr.YawSteeringFilteredPrescribedMotionController(settings_ctr)
         elif settings_ctr["ctl"] == "prescribed yaw controller":
-            self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr)
+            self.controller = ctr.YawSteeringPrescribedMotionController(settings_ctr, orientation_array=orientation_array)
         elif settings_ctr["ctl"] == "LUT yaw controller":
             self.controller = ctr.YawSteeringLUTController(settings_ctr)
         elif settings_ctr["ctl"] == "Dead-band LUT yaw controller":
@@ -195,7 +195,6 @@ class OFF:
         start_turbine : np.ndarray
             1 x n vector with initial turbine state
         """        
-
         for t in self.wind_farm.turbines:
             t.ambient_states.init_all_states(start_ambient)
             t.turbine_states.init_all_states(start_turbine)
@@ -203,6 +202,20 @@ class OFF:
                                                  t.ambient_states.get_turbine_wind_speed_v(),
                                                  t.get_rotor_pos(), self.settings_sim['time step'])
             pass
+
+        for i in range(4):
+            for idx, t in enumerate(self.wind_farm.turbines):
+                t.u0, *_ = self.wake_solver.get_measurements(idx, self.wind_farm)
+                t.init_floating_states()
+
+            for t in self.wind_farm.turbines:
+                t.ambient_states.init_all_states(start_ambient)
+                t.turbine_states.init_all_states(start_turbine)
+                t.observation_points.init_all_states(t.ambient_states.get_turbine_wind_speed_u(),
+                                                     t.ambient_states.get_turbine_wind_speed_v(),
+                                                     t.get_rotor_pos(), self.settings_sim['time step'])
+                pass
+
 
     def run_sim(self) -> tuple:
         """
@@ -225,15 +238,19 @@ class OFF:
 
         iteration = 0
 
-        for t in np.arange(self.settings_sim['time start'],
+        turbine_floater_states = np.zeros([300, 2, 4])
+        windspeeds = np.zeros([300, 2, 2])
+
+        for i, t in enumerate(np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'],
-                           self.settings_sim['time step']):
+                           self.settings_sim['time step'])):
             lg.info('Starting time step: %s s.' % t)
 
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
                 # Debug flags
+                # tur.FloatingDynamics((tur.orientation[0]-270)*np.pi/180, 0, 0)
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"] and
                         idx in self.settings_vis["debug"]["iT"]):
@@ -250,9 +267,11 @@ class OFF:
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+                turbine_vel = tur.floating_states[2:4]
 
+                windspeeds[i, idx, :] = (uv_r[idx, :]-turbine_vel.reshape(1,2)).squeeze()
                 # Calculate the power generated
-                pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0], uv_r[idx, 1]))
+                pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0]-turbine_vel[0], uv_r[idx, 1]-turbine_vel[1]))
                 m_tmp['power_OFF'] = pow_t[idx, :]
 
                 # Add turbine index & timestamp to data
@@ -297,9 +316,12 @@ class OFF:
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
-                tur.observation_points.propagate_ops(self.settings_sim['time step'])
+                tur.observation_points.propagate_ops(self.settings_sim['time step'], uv_r[idx, 0], uv_r[idx, 1], tur.get_rotor_pos())
                 lg.debug(tur.observation_points.get_world_coord())
 
+                tur.FloatingDynamics((tur.orientation[0]-270)*np.pi/180, uv_r[idx, 0], uv_r[idx, 1])
+
+                turbine_floater_states[i, idx, :] = tur.floating_states.squeeze()
             # ///////////////////// CONTROL ///////////////////////
             self.controller.update(t)
             for idx, tur in enumerate(self.wind_farm.turbines):
@@ -320,7 +342,7 @@ class OFF:
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
-        return measurements, control_applied
+        return measurements, control_applied, turbine_floater_states, windspeeds
 
     def set_wind_farm(self, new_wf: wfm.WindFarm):
         """

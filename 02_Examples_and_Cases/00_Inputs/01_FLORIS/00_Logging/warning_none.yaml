@@ -1,6 +1,6 @@
 logging:
   console:
-    enable: true
+    enable: false
     level: WARNING
   file:
     enable: false

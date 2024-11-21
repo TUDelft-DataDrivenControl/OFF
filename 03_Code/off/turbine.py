@@ -23,6 +23,9 @@ from off.ambient import AmbientStates
 from off.states import States
 import off.utils as ot
 import logging
+import TurbineDynamics.turbinePositionIntegrator as tpi
+import scipy.optimize as opt
+
 lg = logging.getLogger(__name__)
 
 
@@ -252,11 +255,27 @@ class Turbine(ABC):
         ambient_states : AmbientStates
             Ambient states object
         """
+        self.base_location0 = base_location
         self.base_location = base_location
         self.orientation = orientation
         self.turbine_states = turbine_states
         self.observation_points = observation_points
         self.ambient_states = ambient_states
+
+        self.u0 = np.zeros([0, 0])
+        self.turbine_position_integrator = tpi.TurbinePositionIntegrator()
+        self.floating_states = np.array([0,0,0,0])#np.array([0, 0, 0, 0]).reshape(4,1) #x0, y0, xdot0, ydot0
+
+    def init_floating_states(self):
+        x0 = self.floating_states
+        res = opt.minimize(self.init_floating_states_cost, x0, method='BFGS', tol=1e-4, options={'disp': False})
+        self.floating_states = res.x
+        self.base_location = np.array([res.x[0], res.x[1], 0]) + self.base_location0
+
+    def init_floating_states_cost(self, x):
+        u = np.array([0, self.u0[0], self.u0[1]])
+        x_plus = self.turbine_position_integrator(x, u)
+        return np.linalg.norm(x_plus-x)
 
     def calc_yaw(self, wind_direction: float) -> float:
         """
@@ -373,7 +392,7 @@ class Turbine(ABC):
         # TODO this function should either rely on its own states or be more descriptive with what inputs are need
         pass
 
-    def get_rotor_pos(self) -> np.float_:
+    def get_rotor_pos(self) -> np.float64:
         """
         Calculates the rotor position based on the current yaw and tilt
 
@@ -389,7 +408,7 @@ class Turbine(ABC):
         offset = np.array([np.cos(yaw), np.sin(yaw), 1]) * \
             self.nacellePos
 
-        return self.base_location + offset
+        return self.nacellePos + self.base_location
 
     def set_rotor_pos(self, pos_rot: np.ndarray):
         """
@@ -401,6 +420,11 @@ class Turbine(ABC):
         # TODO should pay attention to orientation of the turbine
         self.base_location = pos_rot - self.nacellePos
 
+    def FloatingDynamics(self, yaw_angle, windx, windy):
+        u = np.array([yaw_angle, windx, windy])
+        self.floating_states = self.turbine_position_integrator(self.floating_states, u).full()
+        self.base_location = np.array([self.floating_states[0,0], self.floating_states[1,0], 0])+self.base_location0
+        # self.nacellePos = np.array([self.floating_states[0,0], self.floating_states[1,0], 90])+self.base_location0
 
 class HAWT_ADM(Turbine):
     # Attributes

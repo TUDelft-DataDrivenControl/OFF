@@ -32,6 +32,9 @@
 # //////////////////////////////////////////////////////////////////// #
 
 import os, logging
+import matplotlib.pyplot as plt
+import numpy as np
+
 logging.basicConfig(level=logging.ERROR)
 
 import off.off as off
@@ -48,7 +51,7 @@ def main():
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
     # Example case
-    oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/run_example.yaml')
+    oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/dummy_yaml.yaml')
     
     # One case used for the publication "A dynamic open-source model to investigate wake dynamics in response to wind farm flow control strategies" Becker, Lejeune et al. 2024
     #oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/03_Cases/nawea_grid_zp_ki0-02_th5_LuT.yaml')
@@ -59,10 +62,42 @@ def main():
     print("---OFF Simulation took %s seconds ---" % (time.time() - start_time))
 
     # Store output
-    oi.store_measurements()
+    # oi.store_measurements('../runs/measurements.csv')
     oi.store_applied_control()
     oi.store_run_file()
 
+    plt.figure()
+    plt.plot(oi.floating_states[:,0,1])
+    plt.plot(oi.floating_states[:,1,1])
+    plt.show()
+    plt.figure()
+    plt.plot(oi.floating_states[:,0,0])
+    plt.plot(oi.floating_states[:,1,0])
+    plt.show()
+
+    plt.figure()
+    plt.plot(oi.windspeeds[:,0,0], label = 'Wind x')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    plt.figure()
+    plt.plot(oi.windspeeds[:,1,0])
+    plt.plot(oi.windspeeds[:,1,1])
+    plt.show()
+
+    print(oi.measurements.keys())
+    power = oi.measurements["power_OFF"]
+    idx_t1 = np.arange(0, 600, 2)
+    idx_t2 = np.arange(1, 600, 2)
+
+    plt.figure()
+    plt.plot(power[idx_t1])
+    plt.plot(power[idx_t2])
+    plt.ylim(np.array([0, 2e6]))
+    plt.grid(True)
+    plt.title('Power output')
+    plt.show()
 
 if __name__ == "__main__":
     main()

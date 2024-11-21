@@ -68,7 +68,7 @@ class OFFInterface:
             raise ImportError('At least one required package can not be imported.')
         # ===== end check requirements =====
 
-    def init_simulation_by_path(self, path_to_yaml: str):
+    def init_simulation_by_path(self, path_to_yaml: str, orientation_array):
         """
         Initialize the simulation using a .yaml file
 
@@ -96,7 +96,7 @@ class OFFInterface:
         vis = sim_info["vis"]
 
         # Create OFF simulation object
-        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, settings_ctr, vis)
+        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, settings_ctr, vis, orientation_array)
 
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
@@ -112,7 +112,7 @@ class OFFInterface:
         Runs the initialized simulation.
         """
         if self.ready_to_run:
-            self.measurements, self.control_applied = self.off_sim.run_sim()
+            self.measurements, self.control_applied, self.floating_states, self.windspeeds = self.off_sim.run_sim()
         else:
             print('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
 
