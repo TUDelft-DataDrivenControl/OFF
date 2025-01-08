@@ -16,17 +16,16 @@ The toolbox allows you to run dynamic wind farm simulations using a prescribed (
 - The flow field can change uniformly in direction and speed, 
 - the FLORISv4 wake can be changed, 
 - the number and location of turbines can be altered,
-- Dead-band LuT Wake steerig control is available on a controller test branch
+- Wake steerig control is available
 
 *Current limitations include:*
-- Heterogeneous flow field behaviour is not included, 
-- Wake steerig control is not officially included yet (controller on test branch), 
+- Heterogeneous flow field behaviour is not included,
 - The dynamic solver is a preliminary implementation, and cannot be changed
   -  OnWaRDS \[3\] approach not yet impemented
   -  Particle model and behaviour not yet changable
 
 *Features include:*
-- Logging is impemented
+- Logging
 - There is an [auto-documentation framework](https://tudelft-datadrivencontrol.github.io/OFF/)
 - UML diagram of the code
 - Measurements are stored in run-folders
@@ -60,6 +59,12 @@ Run the main.py in the 03_Code folder.
 To change the simulation, you have to change the .yaml file OFF calls. This is defined by one of the first limes of code in the main function. The .yaml structure is showed in 02_Examples_and_Cases/02_Example_Cases/run_example.yaml . This is where you can change the wind farm layout, the flow conditions, the wake model etc.
 
 A thorough description of the code is available [here](https://tudelft-datadrivencontrol.github.io/OFF/). The documentation is handled automatically using Sphinx.
+
+## How to cite
+If OFF has played a role in your work, please cite the following publication:
+
+Becker, M., Lejeune, M., Chatelain, P., Allaerts, D., Mudafort, R., and van Wingerden, J.W.: A dynamic open-source model to investigate wake dynamics in response to wind farm flow control strategies, Wind Energ. Sci. Discuss. [preprint], https://doi.org/10.5194/wes-2024-150, in review, 2024.
+
 
 ## Contact and sources
 ### Core Developers
