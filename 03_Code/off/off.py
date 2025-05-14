@@ -236,7 +236,7 @@ class OFF:
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
-                # Debug flags
+                # Plotting flags
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"] and
                         idx in self.settings_vis["debug"]["iT"]):
@@ -250,6 +250,8 @@ class OFF:
                     self.wake_solver.raise_flag_plot_tile(
                         grid_points_iT[:,0], grid_points_iT[:,1],
                         np.array(self.settings_vis["grid"]["slice_2d_xy"]))
+                
+                
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
@@ -295,6 +297,11 @@ class OFF:
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
                     t in self.settings_vis["debug"]["time"]):
                 self.wake_solver.vis_turbine_eff_wind_speed_field(self.wind_farm, self.sim_dir, t)
+
+            if (self.settings_vis["flow_field_plots"]["mountains"] and
+                    self.settings_vis["flow_field_plots"]["plot"] and
+                    t in self.settings_vis["flow_field_plots"]["time"]):
+                self.wake_solver.vis_OP_mountains(self.wind_farm, self.sim_dir, t)
 
             # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):

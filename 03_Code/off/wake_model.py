@@ -558,8 +558,40 @@ class Floris4Wake(WakeModel):
         # Check if z is of the same size as x
         if z.shape != x.shape:
             # Add z points for every height stored in z
-            Z = np.ones(x.shape) * z[0]
+            Z = np.ones(x.shape) * z
             return self.fmodel.sample_flow_at_points(x, y, Z)
+        else:
+            return self.fmodel.sample_flow_at_points(x, y, z)
+        
+    def get_point_vel(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """
+        Get datapoints to visualize the turbine wake field
+        Difference to vis_tile is that the FLORIS model is solved here.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinates of the points to visualize
+
+        Returns
+        -------
+        np.ndarray
+            effective velocity at the points
+        """
+        # Solve the wind farm
+        #self.fmodel.run()
+
+        # Check if z is of the same size as x
+        if z.shape != x.shape:
+            # Add z points for every height stored in z
+            Z = np.ones(x.shape) * z
+            return self.fmodel.sample_flow_at_points(x, y, Z)
+        elif not isinstance(x,np.ndarray): # Scalar values, not passed as array need to be converted
+            return self.fmodel.sample_flow_at_points([x], [y], [z])
         else:
             return self.fmodel.sample_flow_at_points(x, y, z)
         

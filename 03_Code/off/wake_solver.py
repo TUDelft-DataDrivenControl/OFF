@@ -55,6 +55,7 @@ class WakeSolver(ABC):
         self.settings_vis = settings_vis
         self._flag_plot_wakes = False
         self._flag_plot_tile  = False
+        self._flag_plot_OP_mountain = False
         
         lg.info('Wake solver settings:')
         lg.info(settings_sol)
@@ -113,6 +114,37 @@ class WakeSolver(ABC):
         Lowers the flag to plot the tile after it has been plotted
         """
         self._flag_plot_tile = False
+
+    def raise_flag_plot_OP_mountain(self, x:np.ndarray, y:np.ndarray, z:np.ndarray):
+        """
+        Raises a flag to plot a mountain range like visualization of the wind speed along the OP location during the next call of the wake model
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinate of the OP
+        """
+        self._flag_plot_OP_mountain = True
+        self._OP_mountain_x = x
+        self._OP_mountain_y = y
+        self._OP_mountain_z = z
+        self._mountain_u = np.zeros(x.shape)
+
+    def _lower_flag_plot_OP_mountains(self):
+        """
+        Lowers the flag to plot the mountain range after it has been plotted
+        """
+        self._flag_plot_OP_mountain = False
+
+    def get_OP_mountain_u(self):
+        """
+        Returns the |u| component of the flow field
+        """
+        return self._mountain_u
 
     def get_tile_u(self):
         """
@@ -217,6 +249,137 @@ class WakeSolver(ABC):
                            grid_x, delimiter=',')
                 np.savetxt(sim_dir + "/turbine_effective_wind_speed_y_grid.csv",
                            grid_y, delimiter=',')
+                
+    def vis_OP_mountains(self, wind_farm: wfm.WindFarm, sim_dir, t):
+        """
+        Goes through all OPs and plots the wind speed along the OP location
+        Parameters
+        ----------
+        wind_farm: wfm.WindFarm
+            Object containing all real wind turbines
+        sim_dir: str
+            Directory to save the plots
+        t: float
+            Time of the simulation
+        """
+
+        # create an empty list to store the x,y,u values
+        data_x = np.array([])
+        data_y = np.array([])
+        data_u = np.array([])
+        data_v = np.array([])
+
+        scale_grid = 1
+        if self.settings_vis["grid"]["unit"][0] == 'D':
+            # Scale the coordinates to the grid size
+            scale_grid = self.settings_vis["grid"]["diameter"][0]
+
+        # Go through all Turbines
+        for  i_t, tur in enumerate(wind_farm.turbines):
+            # Get all OP coordinates of the turbine
+            op_coord = tur.observation_points.get_world_coord()
+
+            # Go through the list of all OPs
+            for i in range(0,len(op_coord),self.settings_vis["flow_field_plots"]["mountains_stride"]):
+                # Get the x,y coordinates of the OP
+                x = op_coord[i, 0]
+                y = op_coord[i, 1]
+                    
+                # Check if OP is outside the grid ± one diameter
+                if (x < self.settings_vis["grid"]["boundaries"][0][0] * scale_grid - self.settings_vis["grid"]["diameter"][0] or
+                    x > self.settings_vis["grid"]["boundaries"][0][1] * scale_grid + self.settings_vis["grid"]["diameter"][0] or
+                    y < self.settings_vis["grid"]["boundaries"][1][0] * scale_grid - self.settings_vis["grid"]["diameter"][0] or
+                    y > self.settings_vis["grid"]["boundaries"][1][1] * scale_grid + self.settings_vis["grid"]["diameter"][0]):
+                    continue
+
+                # Get wind direction at the OP
+                wind_dir_at_op = ot.ot_deg2rad(tur.ambient_states.get_wind_dir_ind(i))
+
+                # Generate a line of points orthogonal to the wind direction
+                line_length = 4 * self.settings_vis["grid"]["diameter"][0] # TODO Line width hardcoded
+                line_x = np.linspace(x - line_length * np.sin(wind_dir_at_op) / 2,
+                                     x + line_length * np.sin(wind_dir_at_op) / 2,
+                                     num=101)
+                line_y = np.linspace(y + line_length * np.cos(wind_dir_at_op) / 2,
+                                    y - line_length * np.cos(wind_dir_at_op) / 2,
+                                    num=101)
+                
+                # Get wind speed at the line points
+                u_line = np.zeros(line_x.shape)
+                self.raise_flag_plot_OP_mountain(line_x, line_y, op_coord[i, 2])
+                # TODO ISSUE!!! _get_wind_speeds_rp only calculates the wind speeds at turbine i_t, NOT at the location of the OP
+                self._get_wind_speeds_location(op_coord[i,:], wind_farm) # FIXED? TODO this function is NOT part of the abstract class!
+                uv_line = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
+                
+                # Attach the data to the list
+                if data_x.size == 0:
+                    data_x = line_x[np.newaxis, :]
+                    data_y = line_y[np.newaxis, :]
+                    data_u = uv_line[0, :]
+                    data_v = uv_line[1, :]
+                else:
+                    # Concatenate the data
+                    data_x = np.vstack((data_x, line_x))
+                    data_y = np.vstack((data_y, line_y))
+                    data_u = np.vstack((data_u, uv_line[0, :]))
+                    data_v = np.vstack((data_v, uv_line[1, :]))
+
+        # Store the data in a csv file
+        np.savetxt(sim_dir + "/mountain_plot_x_" + str(int(t)).zfill(6) + "s.csv",
+                       data_x, delimiter=',')
+        np.savetxt(sim_dir + "/mountain_plot_y_" + str(int(t)).zfill(6) + "s.csv",
+                       data_y, delimiter=',')
+        np.savetxt(sim_dir + "/mountain_plot_u_" + str(int(t)).zfill(6) + "s.csv",
+                       data_u, delimiter=',')
+        np.savetxt(sim_dir + "/mountain_plot_v_" + str(int(t)).zfill(6) + "s.csv",
+                       data_v, delimiter=',')
+        
+        # Plot data as line plot
+        fig, ax = plt.subplots()
+
+        max_u = np.max(data_u)
+        max_v = np.max(data_v)
+        amplification_factor = 10.0 #m/(m/s)
+        #ax.plot(data_x.flatten(), data_y.flatten(), 'o', markersize=2, color='lightgrey')
+        for i in range(0,data_x.shape[0]):
+            ax.fill(np.hstack((data_x[i, :] + (max_u - data_u[i, :]) * amplification_factor, data_x[i, ::-1])),
+                    np.hstack((data_y[i, :] + (max_v - data_v[i, :]) * amplification_factor, data_y[i, ::-1])), 
+                    color='#0c2340', alpha=0.5, edgecolor='#0c2340')
+            
+        ax.plot(data_x[:,data_x.shape[1]//2], data_y[:,data_x.shape[1]//2], 'o', markersize=2, color='#ec6842')
+        #ax.tricontourf(data_x.flatten(), 
+        #              data_y.flatten(), 
+        #              np.sqrt(data_u.flatten()**2 + data_v.flatten()**2), 
+        #              levels=np.linspace(0, 9, 10))
+        
+        ax.set_aspect('equal')
+        ax.set_title('Wind speed along OPs')
+        ax.set_xlabel('x (m)')
+        ax.set_ylabel('y (m)')
+        ax.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid, self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
+        ax.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid, self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
+        plt.savefig(sim_dir + "/mountain_plot_at_" + str(int(t)).zfill(6) + "s.png")
+        #plt.show()
+
+        #print("Plot done!")
+
+
+        """
+        fig, ax = plt.subplots()
+        for i in range(data_x.shape[0]):
+            ax.plot(data_x[i, :] + (8-data_u), data_y[i, :] + (8-data_v), color='blue', alpha=0.5)
+        
+        ax.set_aspect('equal')
+        ax.set_title('Wind speed along OPs')
+        ax.set_xlabel('x (m)')
+        ax.set_ylabel('y (m)')
+        ax.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid, self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
+        ax.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid, self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
+        plt.savefig(sim_dir + "/mountain_plot_at_" + str(int(t)).zfill(6) + "s.png")
+        plt.show()
+
+        print("Plot done!")
+        """
 
 
 class TWFSolver(WakeSolver):
@@ -355,23 +518,145 @@ class TWFSolver(WakeSolver):
         # Set wind farm in the wake model
         self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
 
-        # Debug plot of effective wind farm layout
+        # Visualizations
+        # Plot of effective wind farm layout
         if self._flag_plot_wakes:
             self.floris_wake.vis_flow_field()
             self._lower_flag_plot_wakes()
 
-        # Get effective wind speed from TWF "tile"
+        # Plot of the effective wind speed from TWF "tile"
         if self._flag_plot_tile:
             self._flow_field_u = self.floris_wake.vis_tile(
                 self._flow_field_x, self._flow_field_y, self._flow_field_z)
-            
             self._lower_flag_plot_tile()
+
+        # Plot of the effective wind speed along the cross stream direction of an OP
+        if self._flag_plot_OP_mountain:
+            self._mountain_u_abs = self.floris_wake.vis_tile(
+                self._OP_mountain_x, self._OP_mountain_y, self._OP_mountain_z)
+            self._lower_flag_plot_OP_mountains()
 
         # Get the measurements
         ueff, m = self.floris_wake.get_measurements_i_t(i_t_tmp)
         lg.info('Effective wind speed of turbine %s : %s m/s' % (i_t, ueff))
         [u_eff, v_eff] = ot.ot_abs2uv(ueff, twf_a_states[i_t_tmp].get_turbine_wind_dir())
+        
         return np.array([u_eff, v_eff]), m
+
+    def _get_wind_speeds_location(self, loc: np.ndarray, wind_farm: wfm.WindFarm) -> np.ndarray:
+        """
+        Calculates the effective wind speed at a location
+        Parameters
+        ----------
+        loc : np.ndarray
+            x,y,z coordinates with which respect to the effective wind speed should be derived
+        wind_farm
+            influencing wind farm
+
+        Returns
+        -------
+        nd.array
+            abs wind speed at location
+        """
+        # Load current data
+        wind_farm_layout = wind_farm.get_layout()
+
+        # Create an index range over all nT turbines
+        # DEL inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
+        inf_turbines = np.arange(wind_farm.nT)
+        # index i_t is not correct anymore as only a subset of turbines are considered
+        # DEL i_t_tmp = np.sum(wind_farm.dependencies[i_t, 0:i_t])
+
+        twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines
+        twf_t_states = []
+        twf_a_states = []
+
+        # Get reference point of main wind turbine
+        # DEL rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
+
+        # Go through dependencies
+        for idx in np.arange(inf_turbines.shape[0]):
+            # DEL if idx == i_t_tmp:
+            # DEL     # Turbine itself
+            # DEL     twf_layout[idx, :] = wind_farm_layout[i_t_tmp, :]
+            # DEL     twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(0, 1, 0, 1))
+            # DEL     twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(0, 1, 0, 1))
+            # DEL     continue
+
+            lg.debug('Ambient states: Two OP interpolation')
+            # Interpolation of turbine states
+            #   Step 1 retrieve closest up and downstream OPs
+            op_locations = wind_farm.turbines[inf_turbines[idx]].observation_points.get_world_coord()
+            ind_op = ot.ot_get_closest_2_points_3d_sorted(loc, op_locations)
+
+            #   Step 2 calculate interpolation weights
+            point_a = op_locations[ind_op[0], 0:2].transpose()
+            point_b = op_locations[ind_op[1], 0:2].transpose()
+            point_c = loc[0:2].transpose()
+
+            weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
+
+            # Logging Interpolation OPs
+            # DEL lg.info('2 OP interpolation: T%s influence on T%s, OP1 (index: %s, loc: %s), OP2 (index: %s, loc: %s)' %
+            # DEL         (inf_turbines[idx], i_t, ind_op[0], point_a, ind_op[1], point_b))
+            # DEL lg.info('TWF - OP interpolation weight (should be between 0 and 1): %s' % weight_d)
+            weight_d = np.fmin(np.fmax(weight_d, 0), 1)
+            # DEL lg.info('TWF - Used OP interpolation weight:  %s' % weight_d)
+
+            r0 = 1 - weight_d
+            r1 = weight_d
+
+            #   Interpolate states
+            #       1. OP location
+            tmp_op = op_locations[ind_op[0], 0:3] * r0 + op_locations[ind_op[1], 0:3] * r1
+            #       2. Ambient
+            twf_a_states.append(wind_farm.turbines[idx].ambient_states.create_interpolated_state(ind_op[0],
+                                                                                                     ind_op[1], r0, r1))
+            #       3. Turbine state
+            twf_t_states.append(wind_farm.turbines[idx].turbine_states.create_interpolated_state(ind_op[0],
+                                                                                                     ind_op[1], r0, r1))
+            #   Reconstruct turbine location
+            tmp_phi = twf_a_states[-1].get_turbine_wind_dir()
+            tmp_phi = ot.ot_deg2rad(tmp_phi)
+            #       1. Get vector from OP to related turbine
+            vec_op2t = wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[0]) * r0 \
+                + wind_farm.turbines[inf_turbines[idx]].observation_points.get_vec_op_to_turbine(ind_op[1]) * r1
+            #       2. Set turbine location
+            twf_layout[idx, 0:3] = tmp_op + np.array([[np.cos(tmp_phi), -np.sin(tmp_phi), 0],
+                                                    [np.sin(tmp_phi), np.cos(tmp_phi),  0],
+                                                    [0, 0, 1]]) @ vec_op2t
+            #       3. Set diameter
+            twf_layout[idx, 3] = wind_farm_layout[inf_turbines[idx], 3]
+
+        lg.info('TWF layout for the location is:')
+        lg.info(twf_layout)
+
+        # Set wind farm in the wake model
+        self.floris_wake.set_wind_farm(twf_layout, twf_t_states, twf_a_states)
+
+        # Run FLORIS and get velocities for points
+        vel_at_loc = self.floris_wake.get_point_vel(
+                loc[0], loc[1], loc[2])
+
+        # Visualizations
+        # Plot of effective wind farm layout
+        if self._flag_plot_wakes:
+            self.floris_wake.vis_flow_field()
+            self._lower_flag_plot_wakes()
+
+        # Plot of the effective wind speed from TWF "tile"
+        if self._flag_plot_tile:
+            self._flow_field_u = self.floris_wake.vis_tile(
+                self._flow_field_x, self._flow_field_y, self._flow_field_z)
+            self._lower_flag_plot_tile()
+
+        # Plot of the effective wind speed along the cross stream direction of an OP
+        if self._flag_plot_OP_mountain:
+            self._mountain_u_abs = self.floris_wake.vis_tile(
+                self._OP_mountain_x, self._OP_mountain_y, self._OP_mountain_z)
+            self._lower_flag_plot_OP_mountains()
+
+        return vel_at_loc
 
     def _get_wind_speeds_op(self, i_t: int, wind_farm: wfm.WindFarm) -> np.ndarray:
         """

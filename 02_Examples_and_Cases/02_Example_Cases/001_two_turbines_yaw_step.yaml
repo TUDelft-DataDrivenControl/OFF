@@ -76,41 +76,13 @@ wind_farm:
     layout_x:
       - 0.0
       - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
     layout_y:
       - 0.0
       - 0.0
-      - 0.0
-      - 5.0
-      - 5.0
-      - 5.0
-      - 10.0
-      - 10.0
-      - 10.0
     layout_z:
       - 0.0
       - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
     turbine_type:
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
       - iea_10MW
       - iea_10MW
     unit:
@@ -139,14 +111,10 @@ ambient:
     turbulence_intensities:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 255.0
-      - 255.0
-      - 195.0
-      - 195.0
+      - 270.0
+      - 270.0
     wind_directions_t:
       - 0.0
-      - 600.0
-      - 900.0
       - 1200.0
     wind_shear: 0.12
     wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
@@ -257,14 +225,14 @@ controller:
    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
    path_to_orientation_csv: "/_.csv"
    orientation_deg:        # in deg
-     - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-     - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-     - [215, 195, 195, 195, 195, 195, 195, 195, 195]
-     - [215, 195, 195, 195, 195, 195, 195, 195, 195]
+     - [270, 270]
+     - [270, 270]
+     - [240, 270]
+     - [240, 270]
    orientation_t:          # in s
      - 0.0
      - 600.0
-     - 900.0
+     - 700.0
      - 90000.0
 
 
@@ -538,13 +506,13 @@ vis:
     # As OFF isn't grid based, the flow field plots need a grid to be generated.
     boundaries:
       - [ -2, 12]                 # x in D or m
-      - [ -2, 12]                 # y in D or m
+      - [ -4, 4]                 # y in D or m
       - [ 0, 3]                   # z in D or m
     unit:
       - D
     # Needed for plotting also if boundaries are given in D
     diameter:
-      - 178.4
+      - 198.0
     # x, y, z in points
     resolution: [ 301, 301, 10 ] 
     volume_3d: False
@@ -580,13 +548,13 @@ vis:
 
   flow_field_plots: # Plots are not generated online but rather stored in the run folder
     # Times at witch a plot of the flow field is generated
-    time: [600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] 
+    time: [600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900] 
     # Master-switch to generate & store flow field data
     plot: True  
     # Generates a mountain range like visualization of the wind speed based on the OPs
     mountains: True 
     # Steps between the OPs -> 1 every OP, 5 -> every 5th OP
-    mountains_stride: 5
+    mountains_stride: 2
     # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
     effective_wf_tile: False 
     # Generates the tiled landscape in a 5 color scheme
