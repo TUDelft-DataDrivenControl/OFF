@@ -266,6 +266,8 @@ class WakeSolver(ABC):
         # create an empty list to store the x,y,u values
         data_x = np.array([])
         data_y = np.array([])
+        if self.settings_vis["flow_field_plots"]["mountains_3d"]:
+            data_z = np.array([])
         data_u = np.array([])
         data_v = np.array([])
 
@@ -307,8 +309,7 @@ class WakeSolver(ABC):
                 # Get wind speed at the line points
                 u_line = np.zeros(line_x.shape)
                 self.raise_flag_plot_OP_mountain(line_x, line_y, op_coord[i, 2])
-                # TODO ISSUE!!! _get_wind_speeds_rp only calculates the wind speeds at turbine i_t, NOT at the location of the OP
-                self._get_wind_speeds_location(op_coord[i,:], wind_farm) # FIXED? TODO this function is NOT part of the abstract class!
+                self._get_wind_speeds_location(op_coord[i,:], wind_farm) # TODO this function is NOT part of the abstract class!
                 uv_line = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
                 
                 # Attach the data to the list
