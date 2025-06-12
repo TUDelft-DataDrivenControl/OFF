@@ -250,9 +250,33 @@ class WakeSolver(ABC):
                 np.savetxt(sim_dir + "/turbine_effective_wind_speed_y_grid.csv",
                            grid_y, delimiter=',')
                 
+    def _get_wind_speeds_location(self, loc: np.ndarray, wind_farm: wfm.WindFarm) -> np.ndarray:
+        """
+        Calculates the effective wind speed at a location
+        Parameters
+        ----------
+        loc : np.ndarray
+            x,y,z coordinates with which respect to the effective wind speed should be derived
+        wind_farm
+            influencing wind farm
+
+        Returns
+        -------
+        nd.array
+            abs wind speed at location
+        """
+        raise NotImplementedError("_get_wind_speeds_location() is not implemented in the base class, please implement it in the derived class.")
+    
     def vis_OP_mountains(self, wind_farm: wfm.WindFarm, sim_dir, t):
         """
         Goes through all OPs and plots the wind speed along the OP location
+        Creates a plot like this ASCI art:
+        |    |    |   |   |   |
+         `-.  `\.  \  \   |   |
+            )    )  )  )   )  |
+         ,-'  ,/´  /  /   |   |
+        |    |    |   |   |   |
+
         Parameters
         ----------
         wind_farm: wfm.WindFarm
@@ -309,7 +333,7 @@ class WakeSolver(ABC):
                 # Get wind speed at the line points
                 u_line = np.zeros(line_x.shape)
                 self.raise_flag_plot_OP_mountain(line_x, line_y, op_coord[i, 2])
-                self._get_wind_speeds_location(op_coord[i,:], wind_farm) # TODO this function is NOT part of the abstract class!
+                self._get_wind_speeds_location(op_coord[i,:], wind_farm)
                 uv_line = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
                 
                 # Attach the data to the list
@@ -345,9 +369,27 @@ class WakeSolver(ABC):
         for i in range(0,data_x.shape[0]):
             ax.fill(np.hstack((data_x[i, :] + (max_u - data_u[i, :]) * amplification_factor, data_x[i, ::-1])),
                     np.hstack((data_y[i, :] + (max_v - data_v[i, :]) * amplification_factor, data_y[i, ::-1])), 
-                    color='#0c2340', alpha=0.5, edgecolor='#0c2340')
+                    color='#0c2340', alpha=0.5, edgecolor='none')#'#0c2340')
             
         ax.plot(data_x[:,data_x.shape[1]//2], data_y[:,data_x.shape[1]//2], 'o', markersize=2, color='#ec6842')
+
+        # Plot yawed turbines
+        for i_t, tur in enumerate(wind_farm.turbines):
+            # Get the turbine position
+            x = tur.base_location[0]
+            y = tur.base_location[1]
+            # Get the yaw angle
+            yaw = ot.ot_deg2rad(tur.get_yaw_orientation())
+            
+            # Plot the turbine as a line
+            ax.plot([x - 0.5 * tur.diameter * np.sin(yaw), x + 0.5 * tur.diameter * np.sin(yaw)],
+                    [y + 0.5 * tur.diameter * np.cos(yaw), y - 0.5 * tur.diameter * np.cos(yaw)],
+                    color='black', linewidth=1.5)
+            
+            ax.plot([x, x + 0.2 * tur.diameter * np.cos(yaw)],
+                    [y, y + 0.2 * tur.diameter * np.sin(yaw)],
+                    color='black', linewidth=1.5)
+        
         #ax.tricontourf(data_x.flatten(), 
         #              data_y.flatten(), 
         #              np.sqrt(data_u.flatten()**2 + data_v.flatten()**2), 
@@ -563,26 +605,14 @@ class TWFSolver(WakeSolver):
         wind_farm_layout = wind_farm.get_layout()
 
         # Create an index range over all nT turbines
-        # DEL inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
         inf_turbines = np.arange(wind_farm.nT)
-        # index i_t is not correct anymore as only a subset of turbines are considered
-        # DEL i_t_tmp = np.sum(wind_farm.dependencies[i_t, 0:i_t])
 
         twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines
         twf_t_states = []
         twf_a_states = []
 
-        # Get reference point of main wind turbine
-        # DEL rotor_center_i_t = wind_farm.turbines[i_t].get_rotor_pos()
-
         # Go through dependencies
         for idx in np.arange(inf_turbines.shape[0]):
-            # DEL if idx == i_t_tmp:
-            # DEL     # Turbine itself
-            # DEL     twf_layout[idx, :] = wind_farm_layout[i_t_tmp, :]
-            # DEL     twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(0, 1, 0, 1))
-            # DEL     twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(0, 1, 0, 1))
-            # DEL     continue
 
             lg.debug('Ambient states: Two OP interpolation')
             # Interpolation of turbine states
@@ -596,13 +626,8 @@ class TWFSolver(WakeSolver):
             point_c = loc[0:2].transpose()
 
             weight_d = ((point_b - point_a) @ (point_c - point_a)) / ((point_b - point_a) @ (point_b - point_a))
-
-            # Logging Interpolation OPs
-            # DEL lg.info('2 OP interpolation: T%s influence on T%s, OP1 (index: %s, loc: %s), OP2 (index: %s, loc: %s)' %
-            # DEL         (inf_turbines[idx], i_t, ind_op[0], point_a, ind_op[1], point_b))
-            # DEL lg.info('TWF - OP interpolation weight (should be between 0 and 1): %s' % weight_d)
+            # Limit weight_d to [0,1]
             weight_d = np.fmin(np.fmax(weight_d, 0), 1)
-            # DEL lg.info('TWF - Used OP interpolation weight:  %s' % weight_d)
 
             r0 = 1 - weight_d
             r1 = weight_d

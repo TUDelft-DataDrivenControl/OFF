@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 #HKN
 wf_x = [1000.0, 1293.3, 1900.4, 1586.6, 2801.7, 1879.9, 3870.6, 2173.2, 3749.4, 3688.8]
 wf_y = [1000.0, 1743.5, 1082.0, 2487.0, 1164.9, 3230.5, 1645.4, 3974.0, 2747.3, 3792.2]
-orientation = np.array([270.0, 225.0, 270.0, 225.0, 270.0, 225.0, 270.0, 225.0, 270.0, 225.0])
+#orientation = np.array([270.0, 225.0, 270.0, 225.0, 270.0, 225.0, 270.0, 225.0, 270.0, 225.0])
+
+orientation = np.array([ 246.90165, 249.5082, 255.5082, 246.35845, 226.4997, 254.220675, 246.35845, 246.35845, 246.35845, 246.35845 ])
+orientation = np.array([201.8422,201.8422,201.8422,201.8422,197.8954,204.231,213.231,213.231,213.231,213.231])
+
 D   = 178.4
 Hh  = 119
 phi = np.linspace(0, 2*np.pi)
@@ -47,7 +51,7 @@ ax.set_proj_type('persp', focal_length=0.2)
 ax.set_aspect('equal')
 plt.savefig('wind_farm_3d_layout.svg', format='svg', dpi=300)
 plt.show()
-
+plt.savefig('wind_farm_3d_layout.svg', format='svg', dpi=300)
 
 
 
