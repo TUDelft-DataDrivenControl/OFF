@@ -295,10 +295,16 @@ class WakeSolver(ABC):
         data_u = np.array([])
         data_v = np.array([])
 
+        # Get the scale of the grid
         scale_grid = 1
         if self.settings_vis["grid"]["unit"][0] == 'D':
             # Scale the coordinates to the grid size
             scale_grid = self.settings_vis["grid"]["diameter"][0]
+
+        # If the grid starts at 0, FLORIS throws errors, thus we need a small offset to the floor
+        floor_offset = 0
+        if self.settings_vis["grid"]["boundaries"][2][0] == 0:
+            floor_offset = 1
 
         # Go through all Turbines
         for  i_t, tur in enumerate(wind_farm.turbines):
@@ -306,7 +312,11 @@ class WakeSolver(ABC):
             op_coord = tur.observation_points.get_world_coord()
 
             # Go through the list of all OPs
-            for i in range(0,len(op_coord),self.settings_vis["flow_field_plots"]["mountains_stride"]):
+            for i in range(
+                self.settings_vis["flow_field_plots"]["mountains_offset"],
+                len(op_coord),
+                self.settings_vis["flow_field_plots"]["mountains_stride"]):
+
                 # Get the x,y coordinates of the OP
                 x = op_coord[i, 0]
                 y = op_coord[i, 1]
@@ -321,33 +331,76 @@ class WakeSolver(ABC):
                 # Get wind direction at the OP
                 wind_dir_at_op = ot.ot_deg2rad(tur.ambient_states.get_wind_dir_ind(i))
 
-                # Generate a line of points orthogonal to the wind direction
-                line_length = 4 * self.settings_vis["grid"]["diameter"][0] # TODO Line width hardcoded
-                line_x = np.linspace(x - line_length * np.sin(wind_dir_at_op) / 2,
-                                     x + line_length * np.sin(wind_dir_at_op) / 2,
-                                     num=101)
-                line_y = np.linspace(y + line_length * np.cos(wind_dir_at_op) / 2,
-                                    y - line_length * np.cos(wind_dir_at_op) / 2,
-                                    num=101)
-                
-                # Get wind speed at the line points
-                u_line = np.zeros(line_x.shape)
-                self.raise_flag_plot_OP_mountain(line_x, line_y, op_coord[i, 2])
-                self._get_wind_speeds_location(op_coord[i,:], wind_farm)
-                uv_line = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
-                
-                # Attach the data to the list
-                if data_x.size == 0:
-                    data_x = line_x[np.newaxis, :]
-                    data_y = line_y[np.newaxis, :]
-                    data_u = uv_line[0, :]
-                    data_v = uv_line[1, :]
+                # Generate a line of points orthogonal to the wind direction or generate a 3D meshgrid from the floor to the upper boundary of the domain
+                if self.settings_vis["flow_field_plots"]["mountains_3d"]:
+                    # Generate 3D meshgrid
+                    mesh_width = 4 * self.settings_vis["grid"]["diameter"][0] # TODO width hardcoded
+
+                    
+
+                    mesh_x, mesh_z = np.meshgrid(
+                        np.linspace(- mesh_width / 2,
+                                    mesh_width / 2,
+                                    num=101),
+                        np.linspace(self.settings_vis["grid"]["boundaries"][2][0] * scale_grid + floor_offset,
+                                    self.settings_vis["grid"]["boundaries"][2][1] * scale_grid,
+                                    num=101))
+                    
+                    mesh_y = mesh_x * np.cos(wind_dir_at_op) + y
+                    mesh_x = mesh_x * np.sin(wind_dir_at_op) + x
+
+                    mesh_x = mesh_x.flatten()
+                    mesh_y = mesh_y.flatten()
+                    mesh_z = mesh_z.flatten()
+
+                    # Pass meshgrid to raise_flag_plot_OP_mountain
+                    self.raise_flag_plot_OP_mountain(mesh_x, mesh_y, mesh_z)
+                    # Get wind speed at the meshgrid points
+                    self._get_wind_speeds_location(op_coord[i,:], wind_farm)
+                    uv_mesh = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
+
+                    if data_x.size == 0:
+                        data_x = mesh_x[np.newaxis, :]
+                        data_y = mesh_y[np.newaxis, :]
+                        data_z = mesh_z[np.newaxis, :]
+                        data_u = uv_mesh[0, :]
+                        data_v = uv_mesh[1, :]
+                    else:
+                        # Concatenate the data
+                        data_x = np.vstack((data_x, mesh_x))
+                        data_y = np.vstack((data_y, mesh_y))
+                        data_z = np.vstack((data_z, mesh_z))
+                        data_u = np.vstack((data_u, uv_mesh[0, :]))
+                        data_v = np.vstack((data_v, uv_mesh[1, :]))
+                    
+                                    
                 else:
-                    # Concatenate the data
-                    data_x = np.vstack((data_x, line_x))
-                    data_y = np.vstack((data_y, line_y))
-                    data_u = np.vstack((data_u, uv_line[0, :]))
-                    data_v = np.vstack((data_v, uv_line[1, :]))
+                    line_length = 4 * self.settings_vis["grid"]["diameter"][0] # TODO Line width hardcoded
+                    line_x = np.linspace(x - line_length * np.sin(wind_dir_at_op) / 2,
+                                        x + line_length * np.sin(wind_dir_at_op) / 2,
+                                        num=101)
+                    line_y = np.linspace(y + line_length * np.cos(wind_dir_at_op) / 2,
+                                        y - line_length * np.cos(wind_dir_at_op) / 2,
+                                        num=101)
+                
+                    # Get wind speed at the line points
+                    #u_line = np.zeros(line_x.shape)                                    TODO: This is not used, remove it?
+                    self.raise_flag_plot_OP_mountain(line_x, line_y, op_coord[i, 2])
+                    self._get_wind_speeds_location(op_coord[i,:], wind_farm)
+                    uv_line = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
+                
+                    # Attach the data to the list
+                    if data_x.size == 0:
+                        data_x = line_x[np.newaxis, :]
+                        data_y = line_y[np.newaxis, :]
+                        data_u = uv_line[0, :]
+                        data_v = uv_line[1, :]
+                    else:
+                        # Concatenate the data
+                        data_x = np.vstack((data_x, line_x))
+                        data_y = np.vstack((data_y, line_y))
+                        data_u = np.vstack((data_u, uv_line[0, :]))
+                        data_v = np.vstack((data_v, uv_line[1, :]))
 
         # Store the data in a csv file
         np.savetxt(sim_dir + "/mountain_plot_x_" + str(int(t)).zfill(6) + "s.csv",
@@ -358,6 +411,13 @@ class WakeSolver(ABC):
                        data_u, delimiter=',')
         np.savetxt(sim_dir + "/mountain_plot_v_" + str(int(t)).zfill(6) + "s.csv",
                        data_v, delimiter=',')
+        
+        
+        # Don't plot if the 3d data has been collected
+        if self.settings_vis["flow_field_plots"]["mountains_3d"]:
+            np.savetxt(sim_dir + "/mountain_plot_z_" + str(int(t)).zfill(6) + "s.csv",
+                       data_z, delimiter=',')
+            return 
         
         # Plot data as line plot
         fig, ax = plt.subplots()

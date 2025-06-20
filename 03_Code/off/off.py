@@ -293,15 +293,25 @@ class OFF:
                 # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
 
+
             # ///////////////////// VISUALIZE /////////////////////
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
                     t in self.settings_vis["debug"]["time"]):
                 self.wake_solver.vis_turbine_eff_wind_speed_field(self.wind_farm, self.sim_dir, t)
 
             if (self.settings_vis["flow_field_plots"]["mountains"] and
-                    self.settings_vis["flow_field_plots"]["plot"] and
-                    t in self.settings_vis["flow_field_plots"]["time"]):
-                self.wake_solver.vis_OP_mountains(self.wind_farm, self.sim_dir, t)
+                    self.settings_vis["flow_field_plots"]["plot"]):
+                # Plot the mountains of the flow field
+                if t in self.settings_vis["flow_field_plots"]["time"]:
+                    self.wake_solver.vis_OP_mountains(self.wind_farm, self.sim_dir, t)
+
+                # Increase OP counter if wandering is enabled
+                if self.settings_vis["flow_field_plots"]["mountains_wandering"]:
+                    self.settings_vis["flow_field_plots"]["mountains_offset"] += 1
+                    self.settings_vis["flow_field_plots"]["mountains_offset"] = np.mod(
+                        self.settings_vis["flow_field_plots"]["mountains_offset"],
+                        self.settings_vis["flow_field_plots"]["mountains_stride"])
+
 
             # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):
@@ -309,6 +319,7 @@ class OFF:
                 tur.turbine_states.iterate_states_and_keep()
                 tur.observation_points.propagate_ops(self.settings_sim['time step']) # , tur.get_rotor_pos())
                 lg.debug(tur.observation_points.get_world_coord())
+
 
             # ///////////////////// CONTROL ///////////////////////
             self.controller.update(t)
@@ -319,14 +330,15 @@ class OFF:
                 lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
 
+
             # ///////////////////// STORE ///////////////////////
             if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
                 self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
 
             lg.info('Ending time step: %s s.' % t)
-            iteration += 1
             self._print_progress_bar(iteration, self.iterations_total, prefix = 'Simulation progress:', suffix = 'Complete', length = 50)
+            iteration += 1
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
