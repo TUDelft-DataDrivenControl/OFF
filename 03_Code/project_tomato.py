@@ -13,9 +13,12 @@ import sqlite3
 import shutil
 
 yaw_rate        = 0.3  # deg/s
-path_to_output  = '/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/16_Torque2026/Research/02_OFF_Results/'
+path_to_output  = '/home/marcusbecker/03_Results/2026_Torque/'
+#path_to_output  = '/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/16_Torque2026/Research/02_OFF_Results/'
 path_to_db      = 'tomato_simulations.db'
-path_to_WindDirOffset = '/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/20_max_energy_instead_of_power/07_New_Wind_Model/'
+#path_to_WindDirOffset = '/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/20_max_energy_instead_of_power/07_New_Wind_Model/'
+path_to_WindDirOffset = '/home/marcusbecker/01_Data/02_GeneratedData/02_Wind_Dir_Changes_Torque2026/'
+
 
 # connect to the SQLite database tomato_simulations.db
 if not os.path.exists('tomato_simulations.db'):
