@@ -75,7 +75,11 @@ def main():
         for yaw_start in test_yaw_start:
             for yaw_end in test_yaw_end:
                 for sigma in test_sigma:
-                    insert_simulation(db_path, wind_direction, yaw_start, yaw_end, sigma)
+                    insert_simulation(db_path, 
+                                      float(wind_direction),
+                                      float(yaw_start), 
+                                      float(yaw_end), 
+                                      int(sigma))
     
     print(f"Database '{db_path}' created and populated with simulation data.")
 
