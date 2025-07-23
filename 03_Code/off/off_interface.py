@@ -79,6 +79,7 @@ class OFFInterface:
         """
         stream = open(path_to_yaml, 'r')
         sim_info = yaml.safe_load(stream)
+        stream.close()
 
         # Convert run data into settings and wind farm object
         self.settings_sim, self.settings_sol, self.settings_wke, self.settings_cor, self.settings_ctr = self._run_yaml_to_dict(sim_info)
@@ -396,14 +397,17 @@ class OFFInterface:
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_logging"], 'r')
         f_logging = yaml.safe_load(stream)
         floris_file.update(f_logging)
+        stream.close()
 
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_solver"], 'r')
         f_solver = yaml.safe_load(stream)
         floris_file.update(f_solver)
+        stream.close()
 
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_wake"], 'r')
         f_wake = yaml.safe_load(stream)
         floris_file.update(f_wake)
+        stream.close()
 
         # Write yaml data for farm and flow field
         farm = dict([('layout_x', settings_wf['farm']['layout_x']),  # Will be overwritten by twf solver
