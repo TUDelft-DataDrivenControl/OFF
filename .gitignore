@@ -24,3 +24,5 @@ off_run_*
 *.m
 *.asv
 wind_farm_3d_layout.svg
+*.obj
+*.db
