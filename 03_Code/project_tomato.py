@@ -40,7 +40,8 @@ def retrieve_settings_from_db(db_path):
     cursor = conn.cursor()
 
     # Read the variables test_wind_direction, test_yaw_start, test_yaw_end, test_yaw_sigma from the first entry from the database where sim_done is 0
-    cursor.execute('SELECT * FROM tomato_simulations WHERE sim_done = 0 LIMIT 1')
+    #cursor.execute('SELECT * FROM tomato_simulations WHERE sim_done = 0 LIMIT 1')
+    cursor.execute('SELECT * FROM tomato_simulations WHERE sim_done = 0 ORDER BY RANDOM() LIMIT 1')
     row = cursor.fetchone()
 
     if row:
