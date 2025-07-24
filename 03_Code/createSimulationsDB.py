@@ -1,5 +1,59 @@
 import sqlite3
 import numpy as np
+import os
+
+def count_simulations(db_path):
+    """
+    Count the number of simulations in the database.
+    
+    Parameters:
+    db_path (str): Path to the SQLite database file.
+    
+    Returns:
+    int: Number of simulations in the database.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT COUNT(*) FROM tomato_simulations')
+    count = cursor.fetchone()[0]
+    
+    conn.close()
+    return count
+
+def count_remaining_simulations(db_path):
+    """
+    Count the number of remaining simulations in the database where sim_done is 0.
+    
+    Parameters:
+    db_path (str): Path to the SQLite database file.
+    
+    Returns:
+    int: Number of remaining simulations in the database.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT COUNT(*) FROM tomato_simulations WHERE sim_done = 0')
+    count = cursor.fetchone()[0]
+    
+    conn.close()
+    return count
+
+def reset_simulation(db_path, id):
+    """
+    Reset the simulation with the given ID in the database.
+    
+    Parameters:
+    db_path (str): Path to the SQLite database file.
+    id (int): ID of the simulation to reset.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute('UPDATE tomato_simulations SET sim_done = 0 WHERE rowid = ?', (id,))
+    conn.commit()
+    conn.close()
 
 def create_simulations_db(db_path):
     """
@@ -8,14 +62,7 @@ def create_simulations_db(db_path):
     Parameters:
     db_path (str): Path to the SQLite database file.
     """
-    # Remove existing db
-    try:
-        import os
-        if os.path.exists(db_path):
-            os.remove(db_path)
-    except Exception as e:
-        print(f"Error removing existing database: {e}")
-
+    
     
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -58,16 +105,44 @@ def insert_simulation(db_path, wind_direction, yaw_start, yaw_end, sigma):
     conn.commit()
     conn.close()
 
-
-def main():
-    db_path = 'tomato_simulations.db'
+def check_if_entry_exists(db_path, wind_direction, yaw_start, yaw_end, sigma):
+    """
+    Check if a simulation entry with the given parameters already exists in the database.
     
-    # Create the database
-    create_simulations_db(db_path)
+    Parameters:
+    db_path (str): Path to the SQLite database file.
+    wind_direction (float): Wind direction for the simulation.
+    yaw_start (float): Starting yaw angle for the simulation.
+    yaw_end (float): Ending yaw angle for the simulation.
+    sigma (float): Yaw sigma value for the simulation.
+    
+    Returns:
+    bool: True if the entry exists, False otherwise.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT COUNT(*) FROM tomato_simulations 
+        WHERE test_wind_direction = ? AND test_yaw_start = ? AND test_yaw_end = ? AND test_sigma = ?
+    ''', (wind_direction, yaw_start, yaw_end, sigma))
+    
+    exists = cursor.fetchone()[0] > 0
+    
+    conn.close()
+    return exists
 
-    test_wind_directions = np.arange(250, 290, 2.5)  # deg
-    test_yaw_start       = np.arange(-30, 30, 2.5)   # deg
-    test_yaw_end         = np.arange(-30, 30, 2.5)   # deg
+
+def main(db_path):
+    
+    # Create the database if needed
+    if not os.path.exists(db_path):
+        create_simulations_db(db_path)
+    
+    # Define test parameters
+    test_wind_directions = np.arange(250, 291, 2.5)  # deg
+    test_yaw_start       = np.arange(-30, 31, 2.5)   # deg
+    test_yaw_end         = np.arange(-30, 31, 2.5)   # deg
     test_sigma           = np.arange(1, 10, 1)  # deg
     
     # Insert test data into the database
@@ -75,14 +150,26 @@ def main():
         for yaw_start in test_yaw_start:
             for yaw_end in test_yaw_end:
                 for sigma in test_sigma:
-                    insert_simulation(db_path, 
-                                      float(wind_direction),
-                                      float(yaw_start), 
-                                      float(yaw_end), 
-                                      int(sigma))
+                    if not check_if_entry_exists(db_path, wind_direction, yaw_start, yaw_end, sigma):
+                        insert_simulation(db_path, 
+                                        float(wind_direction),
+                                        float(yaw_start), 
+                                        float(yaw_end), 
+                                        int(sigma))
     
     print(f"Database '{db_path}' created and populated with simulation data.")
 
 
 if __name__ == "__main__":
-    main()
+    #db_path = 'tomato_simulations.db'
+    db_path = '/home/marcusbecker/02_Code/01_FLORIDyn/OFF/tomato_simulations.db'
+    to_reset = [16, 22, 3, 4, 7, 9]  # IDs to reset
+    
+    main(db_path)
+
+    for id in to_reset:
+        reset_simulation(db_path, id)
+
+    print(f'Current number of simulations in the database: {count_simulations(db_path)}')
+    print(f'Current number of remaining simulations in the database: {count_remaining_simulations(db_path)}')
+    print(f'Percentage of remaining simulations: {count_remaining_simulations(db_path) / count_simulations(db_path) * 100:.2f}%')
