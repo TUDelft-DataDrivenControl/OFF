@@ -814,13 +814,23 @@ class PyWakeModel(WakeModel):
         Power = sim_res.Power.values.flatten()[i_t]
         CT = sim_res.CT.values.flatten()[i_t]
         
+        # Calculate axial induction factor from thrust coefficient
+        # Using momentum theory: CT = 4a(1-a)
+        # Solving for a: a = 0.5 * (1 - sqrt(1 - CT))
+        # For CT > 1 (Glauert region), use empirical correction
+        if CT < 0.96:
+            AI = 0.5 * (1 - np.sqrt(1 - CT))
+        else:
+            # Empirical correction for high thrust (CT > 0.96)
+            AI = 1.0 / (2.0 - CT)
+        
         # Store measurements in pandas dataframe
         measurements = pd.DataFrame(
             [[
                 i_t,
                 WS_eff,
                 CT,
-                0.0,  # AI not directly available in PyWake
+                AI,
                 TI_eff,
                 Power
             ]],
