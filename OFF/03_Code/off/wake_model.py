@@ -925,8 +925,8 @@ class PyWakeModel(WakeModel):
         lg.warning("get_point_vel for PyWake uses simplified implementation (returning ambient wind speed)")
         
         # FLORIS returns shape (3, n_points) for u, v, w components
-        # Match the same shape
-        n_points = len(x) if hasattr(x, '__len__') else 1
+        # Match the same shape - use converted arrays for length
+        n_points = len(x)
         result = np.ones((3, n_points)) * wind_speed
         result[1, :] = 0  # v component
         result[2, :] = 0  # w component
