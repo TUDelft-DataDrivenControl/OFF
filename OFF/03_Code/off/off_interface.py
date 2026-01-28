@@ -86,12 +86,23 @@ class OFFInterface:
         self.settings_sim['path_to_yaml'] = path_to_yaml
         self.wind_farm = self._run_yaml_to_wind_farm(sim_info)
 
-        # Generate an input file for FLORIS
-        tmp_yaml_path = self._gen_FLORIS_yaml(self.settings_wke,
-                                              sim_info["wind_farm"],
-                                              sim_info["ambient"],
-                                              path_to_yaml.parent)  # This might not work on Windows
-        self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
+        # Generate an input file for FLORIS (only if using FLORIS wake model)
+        if self.settings_sol["wake_model"].startswith("FLORIS"):
+            tmp_yaml_path = self._gen_FLORIS_yaml(self.settings_wke,
+                                                  sim_info["wind_farm"],
+                                                  sim_info["ambient"],
+                                                  path_to_yaml.parent)  # This might not work on Windows
+            self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
+        elif self.settings_sol["wake_model"] == "PyWake":
+            # PyWake doesn't need a FLORIS yaml file
+            pass
+        # PythonGaussianWake also needs FLORIS yaml for parameters
+        elif self.settings_sol["wake_model"] == "PythonGaussianWake":
+            tmp_yaml_path = self._gen_FLORIS_yaml(self.settings_wke,
+                                                  sim_info["wind_farm"],
+                                                  sim_info["ambient"],
+                                                  path_to_yaml.parent)
+            self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
 
         # Visualization settings
         self.vis = sim_info["vis"]

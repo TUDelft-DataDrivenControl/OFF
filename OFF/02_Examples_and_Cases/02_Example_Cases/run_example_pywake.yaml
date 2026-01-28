@@ -39,28 +39,33 @@
 
 
 # Basic simulation settings 
-simulation:
+sim:
   name: Example PyWake Simulation
   description: Two turbines in a row with yaw step change
 
-  # How often the OFF simulation updates states
-  time_step: 1
+  sim:
+    # How often the OFF simulation updates states
+    time step: 1.0
+    time start: 0.0
+    time end: 400.0
 
-  # How often all turbines should update their controllers
-  control_update_freq: 10
+  # Log levels options (see https://docs.python.org/3/library/logging.html#logging-levels)
+  logging:
+    console:
+      enable: true
+      level: INFO
+    file:
+      enable: true
+      level: INFO
 
-  # Simulation runtime
-  max_time: 400
-
-  settings:
-    # Data folder to store results, leave empty to use default /runs/ folder
-    data folder: ""
-    
-    # Log levels options (see https://docs.python.org/3/library/logging.html#logging-levels)
-    # log console lvl: INFO
-    # log file lvl: DEBUG
-    log console lvl: INFO
-    log file lvl: INFO
+# OFF stores all results in a run folder by default at "/runs"
+run_info:
+  name: "Test run"
+  tags:
+    - "PyWake"
+    - "Example"
+  notes: "Testing PyWake integration with OFF"
+  save: True
 
 
 
@@ -71,47 +76,26 @@ simulation:
 #   The wind farm should also define, where in the wind farm area measurements should be taken, called observation points (OPs).
 #   An OP per turbine is created between each pair, with n_op OPs in total.
 wind_farm:
-  # Wind farm specific settings
-  settings:
-    name: "Test wind farm"
-    visualize: True
-    
-  # Turbine locations (global coordinate system [m])
-  turbines: 
-    x_y:
-      - [0, 0]
-      - [1500, 0]
+  name: turbine array
+  description: Two turbines in a row with IEA 10 MW turbines at 5D distance
 
-  # Path to turbine definition. This needs to contain the turbine class as yaml:
-  turbine path: "02_Examples_and_Cases/00_Inputs/00_OFF/05_Turbine/DTU_10MW_turbine.yaml"
-
-  # Dependency definition: 
-  #   Which turbines influence which? E.g. in the example below, turbine 0 is not influenced by any other turbine. Turbine 1 is influenced by turbine 0.
-  #   If OFF sees the same layout to often, you can give it a different name in "dependency_id". This way, if there is already a .pckl file for this layout it can just load the dependencies instead of recalculating them over and over again.
-  dependencies:
-    dependency_id: "two_turbine_in_row_downwind"
-    # all = creates a fully connected graph (every turbine influences every other turbine)
-    # direction = only adds dependencies if a turbine is downwind of another turbine
-    dependency_type: "direction"
-    # The angle_spread is the angle in degrees that is used to determine if a turbine is downwind of another turbine
-    angle_spread: 20
-  
-  # Definition of observation points [x_local, y_local, z_local] in rotor coordinates [m]
-  #   These don't need be be in the rotor plane, they can be anywhere.
-  #   Positive x is downstream of the turbine, z is up.
-  #   Each turbine has a number of OPs stored and the wind speed and TI is calculated at the center of these OPs.
-  observation_points:
-    coordinates:
-      - [1000, 0, 0]
-      - [2000, 0, 0]
-      - [3000, 0, 0]
-      - [4000, 0, 0]
-      - [5000, 0, 0]
-      - [6000, 0, 0]
-      - [7000, 0, 0]
-      - [8000, 0, 0]
-      - [9000, 0, 0]
-      - [10000, 0, 0]
+  farm:
+    layout_x:
+      - 0.0
+      - 7.5
+    layout_y:
+      - 0.0
+      - 0.0
+    layout_z:
+      - 0.0
+      - 0.0
+    turbine_type:
+      - iea_10MW
+      - iea_10MW
+    unit:
+      - D
+    diameter: # Only needed if unit was set to D
+      - 198.0
 
 
 
