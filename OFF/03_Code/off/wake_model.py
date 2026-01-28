@@ -986,13 +986,16 @@ class PyWakeModel(WakeModel):
             Z = z
         
         # Get flow field values at points
-        try:
-            flow_map = sim_res.flow_map(wd=wind_direction, ws=wind_speed)
-            # PyWake flow_map doesn't have direct point sampling, so we approximate
-            # This is a simplified implementation - may need refinement
-            lg.warning("vis_tile for PyWake uses simplified interpolation")
-            return np.ones_like(x) * wind_speed  # Placeholder
-        except Exception as e:
-            lg.warning(f"Error in vis_tile: {e}")
-            return np.ones_like(x) * wind_speed
+        # PyWake flow_map doesn't have direct point sampling like FLORIS
+        # For now, return ambient wind speed as approximation
+        # TODO: Implement proper flow field interpolation from PyWake flow_map
+        lg.warning("vis_tile for PyWake uses simplified interpolation")
+        
+        # FLORIS returns shape (3, n_points) for u, v, w components
+        # Match the same shape
+        n_points = x.size
+        result = np.ones((3, n_points)) * wind_speed
+        result[1, :] = 0  # v component
+        result[2, :] = 0  # w component
+        return result
         
