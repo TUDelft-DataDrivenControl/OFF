@@ -866,6 +866,72 @@ class PyWakeModel(WakeModel):
         plt.title("PyWake Flow Field")
         plt.show()
 
+    def get_point_vel(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """
+        Get velocity at specific points in the flow field
+        
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points
+        y : np.ndarray
+            y coordinates of the points
+        z : np.ndarray
+            z coordinates of the points
+            
+        Returns
+        -------
+        np.ndarray
+            effective velocity at the points
+        """
+        if self.wake_model is None:
+            lg.warning("Wake model not initialized, returning ambient wind speed")
+            if self.ambient_states:
+                return np.ones_like(x) * self.ambient_states[0].get_turbine_wind_speed_abs()
+            return np.zeros_like(x)
+        
+        # Get ambient conditions
+        wind_speed = self.ambient_states[0].get_turbine_wind_speed_abs()
+        wind_direction = self.ambient_states[0].get_turbine_wind_dir()
+        
+        # Get yaw angles
+        n_t = len(self.turbine_states)
+        yaw_angles = np.zeros(n_t)
+        for ii_t in range(n_t):
+            yaw_angles[ii_t] = self.turbine_states[ii_t].get_current_yaw()
+        
+        # Run simulation
+        wf_x = self.wind_farm_layout[:, 0]
+        wf_y = self.wind_farm_layout[:, 1]
+        
+        sim_res = self.wake_model(
+            x=wf_x,
+            y=wf_y,
+            wd=wind_direction,
+            ws=wind_speed,
+            yaw=yaw_angles
+        )
+        
+        # Handle different input shapes
+        if not isinstance(x, np.ndarray):
+            x = np.array([x])
+            y = np.array([y])
+            z = np.array([z])
+        
+        # PyWake doesn't have direct point velocity sampling like FLORIS
+        # Use flow_map and interpolate
+        # For now, return ambient wind speed as approximation
+        # TODO: Implement proper flow field interpolation
+        lg.warning("get_point_vel for PyWake uses simplified implementation (returning ambient wind speed)")
+        
+        # FLORIS returns shape (3, n_points) for u, v, w components
+        # Match the same shape
+        n_points = len(x) if hasattr(x, '__len__') else 1
+        result = np.ones((3, n_points)) * wind_speed
+        result[1, :] = 0  # v component
+        result[2, :] = 0  # w component
+        return result
+
     def vis_tile(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
         """
         Get datapoints to visualize the turbine wake field
