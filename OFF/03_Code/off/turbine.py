@@ -373,7 +373,7 @@ class Turbine(ABC):
         # TODO this function should either rely on its own states or be more descriptive with what inputs are need
         pass
 
-    def get_rotor_pos(self) -> np.float_:
+    def get_rotor_pos(self) -> np.float64:
         """
         Calculates the rotor position based on the current yaw and tilt
 

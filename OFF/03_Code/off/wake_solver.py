@@ -268,7 +268,7 @@ class WakeSolver(ABC):
         raise NotImplementedError("_get_wind_speeds_location() is not implemented in the base class, please implement it in the derived class.")
     
     def vis_OP_mountains(self, wind_farm: wfm.WindFarm, sim_dir, t):
-        """
+        r"""
         Goes through all OPs and plots the wind speed along the OP location
         Creates a plot like this ASCI art:
         |    |    |   |   |   |
@@ -508,8 +508,11 @@ class TWFSolver(WakeSolver):
             self.floris_wake = wm.Floris4Wake(settings_wke, np.array([]), np.array([]), np.array([]))
         elif settings_sol["wake_model"] == "PythonGaussianWake":
             self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        elif settings_sol["wake_model"].startswith("PyWake"):
+            self.floris_wake = wm.PyWakeModel(settings_wke, np.array([]), np.array([]), np.array([]))
+            lg.info(f'PyWake model initialized: {settings_wke.get("deficit_model", "default")}')
         else:
-            raise ImportError('Wake model unknown!')
+            raise ImportError(f'Wake model unknown: {settings_sol["wake_model"]}!')
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """
