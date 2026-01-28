@@ -1,0 +1,245 @@
+# //////////////////////////////////////////////////////////////////// #
+#    ____  ______ ______ 
+#   / __ \|  ____|  ____|
+#  | |  | | |__  | |__   
+#  | |  | |  __| |  __|  
+#  | |__| | |    | |     
+#   \____/|_|    |_|     
+# //////////////////////////////////////////////////////////////////// #
+# Copyright (C) <2024>, M Becker (TUDelft), M Lejeune (UCLouvain)
+
+# List of the contributors to the development of OFF: see LICENSE file.
+# Description and complete License: see LICENSE file.
+  
+# This program (OFF) is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+
+
+
+
+# //////////////////////////////////////////////////////////////////// #
+# Example simulation of two turbines - using PyWake instead of FLORIS
+#
+#  To use PyWake, simply change:
+#  1. solver.settings.wake_model to "PyWake"
+#  2. wake.settings to include PyWake-specific parameters
+# //////////////////////////////////////////////////////////////////// #
+
+
+
+
+# Basic simulation settings 
+simulation:
+  name: Example PyWake Simulation
+  description: Two turbines in a row with yaw step change
+
+  # How often the OFF simulation updates states
+  time_step: 1
+
+  # How often all turbines should update their controllers
+  control_update_freq: 10
+
+  # Simulation runtime
+  max_time: 400
+
+  settings:
+    # Data folder to store results, leave empty to use default /runs/ folder
+    data folder: ""
+    
+    # Log levels options (see https://docs.python.org/3/library/logging.html#logging-levels)
+    # log console lvl: INFO
+    # log file lvl: DEBUG
+    log console lvl: INFO
+    log file lvl: INFO
+
+
+
+
+# Wind farm definition
+#   The wind turbines in a wind farm have a global coordinate system with x pointing east and y pointing north (0 deg wind is from the west).
+#   Each turbine knows its own position, turbine model. In our case, the turbine model is passed by the yaml, as it is assumed all turbines are the same.
+#   The wind farm should also define, where in the wind farm area measurements should be taken, called observation points (OPs).
+#   An OP per turbine is created between each pair, with n_op OPs in total.
+wind_farm:
+  # Wind farm specific settings
+  settings:
+    name: "Test wind farm"
+    visualize: True
+    
+  # Turbine locations (global coordinate system [m])
+  turbines: 
+    x_y:
+      - [0, 0]
+      - [1500, 0]
+
+  # Path to turbine definition. This needs to contain the turbine class as yaml:
+  turbine path: "02_Examples_and_Cases/00_Inputs/00_OFF/05_Turbine/DTU_10MW_turbine.yaml"
+
+  # Dependency definition: 
+  #   Which turbines influence which? E.g. in the example below, turbine 0 is not influenced by any other turbine. Turbine 1 is influenced by turbine 0.
+  #   If OFF sees the same layout to often, you can give it a different name in "dependency_id". This way, if there is already a .pckl file for this layout it can just load the dependencies instead of recalculating them over and over again.
+  dependencies:
+    dependency_id: "two_turbine_in_row_downwind"
+    # all = creates a fully connected graph (every turbine influences every other turbine)
+    # direction = only adds dependencies if a turbine is downwind of another turbine
+    dependency_type: "direction"
+    # The angle_spread is the angle in degrees that is used to determine if a turbine is downwind of another turbine
+    angle_spread: 20
+  
+  # Definition of observation points [x_local, y_local, z_local] in rotor coordinates [m]
+  #   These don't need be be in the rotor plane, they can be anywhere.
+  #   Positive x is downstream of the turbine, z is up.
+  #   Each turbine has a number of OPs stored and the wind speed and TI is calculated at the center of these OPs.
+  observation_points:
+    coordinates:
+      - [1000, 0, 0]
+      - [2000, 0, 0]
+      - [3000, 0, 0]
+      - [4000, 0, 0]
+      - [5000, 0, 0]
+      - [6000, 0, 0]
+      - [7000, 0, 0]
+      - [8000, 0, 0]
+      - [9000, 0, 0]
+      - [10000, 0, 0]
+
+
+
+
+# Ambient conditions
+#   Define the background wind that does not come from any turbine
+ambient:
+  name: constant_wind
+  description: Constant wind speed and direction over time
+
+  settings:
+    # Option 1: All wind turbines in the farm share the same ambient conditions
+    #  Select the ambient condition with one number
+    ambient_selection: 0
+    
+    # Option 2: Each wind turbine has its own ambient conditions
+    #  Select the ambient condition with a list of numbers: [0, 0, 1] for 3 turbines -> 1st and 2nd turbine have the same ambient conditions, 3rd has different ones
+    # ambient_selection: [0, 0]
+
+    # List of possible ambient conditions. Ids need to be defined with: amb_id: <some number>
+    ambient_list:
+      # Ambient id 0 (see ambient_selection above)
+      - amb_id: 0
+        # Fully describing the ambient conditions with a list of time steps
+        definition: full
+        # 1 x 3 array with [t, u_abs, phi] - time, absolute wind speed, wind direction in radians
+        u_amb:
+          # Time: 0s, wind speed: 8 m/s, wind direction: 270 deg (from west -> turbine 0 is upwind of turbine 1, as x is 'east', y is 'north')
+          - [0, 8, 4.71238898038469]
+          # If you set the time to 400s, this will give you a constant wind speed and direction over the whole simulation
+          - [400, 8, 4.71238898038469]
+
+
+
+
+# Solver selection and solver settings
+#  Here we select the Temporary Wind Farm (TWF) solver and the PyWake wake model
+solver:
+  name: TWF PyWake
+  description: FLORIDyn with PyWake backend for wake modeling
+
+  settings:
+    wake_solver: "TWFSolver"
+    wake_model: "PyWake"
+    op_propagation: "frozen turbulence"
+    extrapolation: "pair"
+    # Number of OPs per turbine. The chain of OPs should span long enough to cover the whole wind farm.
+    #  n_op * time_step * u_free_stream = covered distance
+    n_op: 200
+
+
+# Wake model settings for PyWake
+wake:
+  name: PyWake
+  description: PyWake wake modeling framework
+
+  settings:
+    # Deficit model to use - options include:
+    #   "IEA37SimpleBastankhahGaussian" (default, simple Gaussian)
+    #   "BastankhahGaussian" (full Gaussian model)
+    #   "NOJDeficit" or "Jensen" (Jensen/Park model)
+    #   "TurboNOJDeficit" (TurboPark model)
+    #   "GCLDeficit" (Gaussian with Curl)
+    deficit_model: "IEA37SimpleBastankhahGaussian"
+    
+    # Optional: Turbulence model - options include:
+    #   null/None (no turbulence model)
+    #   "CrespoHernandez"
+    #   "STF2017TurbulenceModel"
+    turbulence_model: null
+    
+    # Site turbulence intensity (default: 0.06)
+    site_ti: 0.06
+    
+    # Site shear exponent (default: 0.0)
+    site_shear: 0.0
+    
+    # Settings not used yet but kept for compatibility
+    nRP: 10
+    rotor discretization: Isocell
+
+
+
+
+# Controller settings
+controller:
+  name: yaw_step
+  description: Yaw step change at t=100s
+
+  settings:
+    # Select which controller to use
+    type: "yaw_prescribed"
+
+    # Yaw prescribed controller settings
+    #   This controller sets the yaw angle of each turbine at specific time steps
+    yaw_prescribed:
+      # List of yaw angles for each turbine at each time step
+      # Format: [turbine_id, time, yaw_angle_deg]
+      yaw_schedule:
+        # Turbine 0 starts at 0 deg and stays there
+        - [0, 0, 0]
+        - [0, 400, 0]
+        
+        # Turbine 1 starts at 0 deg, then steps to 25 deg at t=100s
+        - [1, 0, 0]
+        - [1, 99, 0]
+        - [1, 100, 25]
+        - [1, 400, 25]
+
+
+
+
+# Visualization settings
+#  These control what plots and data are generated during the simulation
+visualization:
+  settings:
+    # Plot wake field (flow field)
+    plot_wakes: False
+    
+    # Create mountain range plots (wind speed profiles)
+    plot_mountain: False
+    
+    # Plot effective wind speed at turbines
+    plot_ueff_all: False
+    
+    # Export flow field data
+    export_flow_field: False
+    
+    # Time steps at which to create visualizations (list of times in seconds)
+    # Empty list means no visualizations
+    visualization_times: []

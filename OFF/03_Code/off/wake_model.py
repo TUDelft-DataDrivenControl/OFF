@@ -595,4 +595,339 @@ class Floris4Wake(WakeModel):
             return self.fmodel.sample_flow_at_points([x], [y], [z])
         else:
             return self.fmodel.sample_flow_at_points(x, y, z)
+
+
+class PyWakeModel(WakeModel):
+    """
+    Interface to PyWake wake models
+    """
+
+    def __init__(self, settings: dict, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
+        """
+        Initialize PyWake model interface
+
+        Parameters
+        ----------
+        settings : dict
+            .["deficit_model"] : str - name of the deficit model (e.g., "IEA37SimpleBastankhahGaussian", "NOJDeficit")
+            .["turbulence_model"] : str - (optional) name of the turbulence model (e.g., "CrespoHernandez")
+            .["site_ti"] : float - (optional) site turbulence intensity (default: 0.06)
+            .["site_shear"] : float - (optional) site shear exponent (default: 0.0)
+        wind_farm_layout : np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states : array of TurbineStates objects
+            array with n_t TurbineStates objects with each one state
+        ambient_states : array of AmbientStates objects
+            array with n_t AmbientStates objects with each one state
+        """
+        super(PyWakeModel, self).__init__(settings, wind_farm_layout, turbine_states, ambient_states)
+        
+        # Import PyWake modules
+        try:
+            from py_wake.site._site import UniformSite
+            from py_wake.wind_turbines import WindTurbines
+            from py_wake.wind_turbines.power_ct_functions import PowerCtTabular
+        except ImportError as e:
+            raise ImportError(f"PyWake not installed or import failed: {e}")
+        
+        lg.info(f'PyWake model initialized with deficit model: {settings.get("deficit_model", "default")}')
+        
+        # Store settings
+        self.site_ti = settings.get('site_ti', 0.06)
+        self.site_shear = settings.get('site_shear', 0.0)
+        self.deficit_model_name = settings.get('deficit_model', 'IEA37SimpleBastankhahGaussian')
+        self.turbulence_model_name = settings.get('turbulence_model', None)
+        
+        # Initialize deficit model
+        self.deficit_model_class = self._get_deficit_model_class(self.deficit_model_name)
+        
+        # Initialize turbulence model if specified
+        self.turbulence_model = None
+        if self.turbulence_model_name:
+            self.turbulence_model = self._get_turbulence_model_class(self.turbulence_model_name)
+        
+        # Create site
+        self.site = UniformSite(ti=self.site_ti, shear=self.site_shear)
+        
+        # Initialize wind turbine model (will be updated with actual turbine data)
+        self.wind_turbines = None
+        self.wake_model = None
+        
+        lg.info('PyWake model interface created.')
+
+    def _get_deficit_model_class(self, model_name: str):
+        """Get the PyWake deficit model class by name"""
+        try:
+            if model_name == "IEA37SimpleBastankhahGaussian":
+                from py_wake.deficit_models.gaussian import IEA37SimpleBastankhahGaussian
+                return IEA37SimpleBastankhahGaussian
+            elif model_name == "BastankhahGaussian":
+                from py_wake.deficit_models.gaussian import BastankhahGaussian
+                return BastankhahGaussian
+            elif model_name == "NOJDeficit" or model_name == "Jensen":
+                from py_wake.deficit_models.noj import NOJDeficit
+                return NOJDeficit
+            elif model_name == "TurboNOJDeficit":
+                from py_wake.deficit_models.turbopark import TurboNOJDeficit
+                return TurboNOJDeficit
+            elif model_name == "GCLDeficit":
+                from py_wake.deficit_models.gcl import GCLDeficit
+                return GCLDeficit
+            else:
+                lg.warning(f"Unknown deficit model '{model_name}', defaulting to IEA37SimpleBastankhahGaussian")
+                from py_wake.deficit_models.gaussian import IEA37SimpleBastankhahGaussian
+                return IEA37SimpleBastankhahGaussian
+        except ImportError as e:
+            lg.error(f"Failed to import deficit model {model_name}: {e}")
+            raise
+
+    def _get_turbulence_model_class(self, model_name: str):
+        """Get the PyWake turbulence model class by name"""
+        try:
+            if model_name == "CrespoHernandez":
+                from py_wake.turbulence_models.crespo import CrespoHernandez
+                return CrespoHernandez()
+            elif model_name == "STF2017TurbulenceModel":
+                from py_wake.turbulence_models.stf import STF2017TurbulenceModel
+                return STF2017TurbulenceModel()
+            else:
+                lg.warning(f"Unknown turbulence model '{model_name}', using None")
+                return None
+        except ImportError as e:
+            lg.warning(f"Failed to import turbulence model {model_name}: {e}")
+            return None
+
+    def _create_wind_turbine_from_states(self):
+        """Create PyWake wind turbine object from turbine states"""
+        from py_wake.wind_turbines import WindTurbines
+        from py_wake.wind_turbines.power_ct_functions import PowerCtTabular
+        
+        n_t = len(self.turbine_states)
+        
+        # Extract turbine parameters from first turbine (assuming homogeneous farm)
+        # In reality, you might have different turbines, so this should be adapted
+        D = self.wind_farm_layout[0, 3]  # Rotor diameter
+        hub_height = self.wind_farm_layout[0, 2]  # Hub height
+        
+        # Create simple Ct curve from current states
+        # For dynamic simulation, we use a lookup based on current AI (axial induction)
+        # This is a simplified approach - ideally we'd have full Ct/Cp curves
+        ws = np.linspace(0, 30, 31)
+        
+        # Get Ct from first turbine's current state
+        Ct_current = self.turbine_states[0].get_current_Ct()
+        Ct_curve = np.ones_like(ws) * Ct_current
+        Ct_curve[ws < 3] = 0.0  # Cut-in
+        Ct_curve[ws > 25] = 0.0  # Cut-out
+        
+        # Simple power curve estimation (not used for wake calc, but needed by PyWake)
+        power_curve = 0.5 * 1.225 * (np.pi * (D/2)**2) * ws**3 * Ct_curve * 0.4  # Simplified
+        power_curve[ws < 3] = 0.0
+        power_curve[ws > 25] = 0.0
+        
+        # Create wind turbine
+        self.wind_turbines = WindTurbines(
+            names=['Turbine'],
+            diameters=[D],
+            hub_heights=[hub_height],
+            powerCtFunctions=[PowerCtTabular(ws, power_curve/1e6, 'w', Ct_curve)]  # Power in MW
+        )
+        
+        return self.wind_turbines
+
+    def set_wind_farm(self, wind_farm_layout: np.ndarray, turbine_states, ambient_states):
+        """
+        Changes the states of the stored wind farm
+
+        Parameters
+        ----------
+        wind_farm_layout: np.ndarray
+            n_t x 4 array with [x,y,z,D] - world coordinates of the rotor center & diameter
+        turbine_states: TurbineStates object with n_t entries
+        ambient_states: AmbientStates object with 1 entry for wind speed and direction
+        """
+        self.wind_farm_layout = wind_farm_layout
+        self.turbine_states = turbine_states
+        self.ambient_states = ambient_states
+        
+        # Create wind turbine model from states
+        self._create_wind_turbine_from_states()
+        
+        # Initialize wake model with deficit model
+        if self.turbulence_model:
+            self.wake_model = self.deficit_model_class(
+                site=self.site,
+                windTurbines=self.wind_turbines,
+                turbulenceModel=self.turbulence_model
+            )
+        else:
+            self.wake_model = self.deficit_model_class(
+                site=self.site,
+                windTurbines=self.wind_turbines
+            )
+
+    def get_measurements_i_t(self, i_t: int) -> tuple:
+        """
+        Returns the measurements of the wake model including the effective wind speed at the turbine i_t
+
+        Parameters
+        ----------
+        i_t : int
+            Index of the turbine of interest
+
+        Returns
+        -------
+        tuple:
+            float: u_eff
+                effective wind speed at turbine i_t
+            pandas.dataframe: measurements
+                all measurements (Power gen, added turbulence, etc.)
+        """
+        if self.wake_model is None:
+            raise RuntimeError("Wake model not initialized. Call set_wind_farm first.")
+        
+        # Get yaw angles
+        n_t = len(self.turbine_states)
+        yaw_angles = np.zeros(n_t)
+        for ii_t in range(n_t):
+            yaw_angles[ii_t] = self.turbine_states[ii_t].get_current_yaw()
+        
+        # Get ambient conditions
+        wind_speed = self.ambient_states[0].get_turbine_wind_speed_abs()
+        wind_direction = self.ambient_states[0].get_turbine_wind_dir()
+        
+        # Run simulation
+        x = self.wind_farm_layout[:, 0]
+        y = self.wind_farm_layout[:, 1]
+        
+        sim_res = self.wake_model(
+            x=x,
+            y=y,
+            wd=wind_direction,
+            ws=wind_speed,
+            yaw=yaw_angles,
+            ti=self.site_ti
+        )
+        
+        # Extract results for turbine i_t
+        WS_eff = sim_res.WS_eff.values.flatten()[i_t]
+        TI_eff = sim_res.TI_eff.values.flatten()[i_t]
+        Power = sim_res.Power.values.flatten()[i_t]
+        CT = sim_res.CT.values.flatten()[i_t]
+        
+        # Store measurements in pandas dataframe
+        measurements = pd.DataFrame(
+            [[
+                i_t,
+                WS_eff,
+                CT,
+                0.0,  # AI not directly available in PyWake
+                TI_eff,
+                Power
+            ]],
+            columns=['t_idx', 'u_abs_eff_PyWake', 'Ct_PyWake', 'AI_PyWake', 'TI_PyWake', 'Power_PyWake']
+        )
+        
+        return WS_eff, measurements
+
+    def vis_flow_field(self):
+        """
+        Creates a plot of the wind farm using PyWake visualization
+        """
+        if self.wake_model is None:
+            lg.warning("Wake model not initialized, cannot visualize")
+            return
+        
+        # Get ambient conditions
+        wind_speed = self.ambient_states[0].get_turbine_wind_speed_abs()
+        wind_direction = self.ambient_states[0].get_turbine_wind_dir()
+        
+        # Get yaw angles
+        n_t = len(self.turbine_states)
+        yaw_angles = np.zeros(n_t)
+        for ii_t in range(n_t):
+            yaw_angles[ii_t] = self.turbine_states[ii_t].get_current_yaw()
+        
+        # Run simulation
+        x = self.wind_farm_layout[:, 0]
+        y = self.wind_farm_layout[:, 1]
+        
+        sim_res = self.wake_model(
+            x=x,
+            y=y,
+            wd=wind_direction,
+            ws=wind_speed,
+            yaw=yaw_angles
+        )
+        
+        # Plot horizontal plane at hub height
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        sim_res.flow_map(wd=wind_direction, ws=wind_speed).plot_wake_map(ax=ax)
+        plt.title("PyWake Flow Field")
+        plt.show()
+
+    def vis_tile(self, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """
+        Get datapoints to visualize the turbine wake field
+
+        Parameters
+        ----------
+        x : np.ndarray
+            x coordinates of the points to visualize
+        y : np.ndarray
+            y coordinates of the points to visualize
+        z : np.ndarray
+            z coordinates of the points to visualize
+
+        Returns
+        -------
+        np.ndarray
+            effective velocity at the points
+        """
+        if self.wake_model is None:
+            lg.warning("Wake model not initialized, returning zeros")
+            return np.zeros_like(x)
+        
+        # Get ambient conditions
+        wind_speed = self.ambient_states[0].get_turbine_wind_speed_abs()
+        wind_direction = self.ambient_states[0].get_turbine_wind_dir()
+        
+        # Get yaw angles
+        n_t = len(self.turbine_states)
+        yaw_angles = np.zeros(n_t)
+        for ii_t in range(n_t):
+            yaw_angles[ii_t] = self.turbine_states[ii_t].get_current_yaw()
+        
+        # Run simulation
+        wf_x = self.wind_farm_layout[:, 0]
+        wf_y = self.wind_farm_layout[:, 1]
+        
+        sim_res = self.wake_model(
+            x=wf_x,
+            y=wf_y,
+            wd=wind_direction,
+            ws=wind_speed,
+            yaw=yaw_angles
+        )
+        
+        # Create flow map and interpolate at requested points
+        # Handle different z shapes
+        if z.shape != x.shape:
+            Z = np.ones(x.shape) * z
+        elif not isinstance(x, np.ndarray):
+            x, y, Z = np.array([x]), np.array([y]), np.array([z])
+        else:
+            Z = z
+        
+        # Get flow field values at points
+        try:
+            flow_map = sim_res.flow_map(wd=wind_direction, ws=wind_speed)
+            # PyWake flow_map doesn't have direct point sampling, so we approximate
+            # This is a simplified implementation - may need refinement
+            lg.warning("vis_tile for PyWake uses simplified interpolation")
+            return np.ones_like(x) * wind_speed  # Placeholder
+        except Exception as e:
+            lg.warning(f"Error in vis_tile: {e}")
+            return np.ones_like(x) * wind_speed
         

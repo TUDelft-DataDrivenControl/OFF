@@ -9,17 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Path to data
-path_to_data = 'runs/off_run_20250513115216959633'
+path_to_data = 'OFF/runs/off_run_20260128104823422709'
 amplification_factor = 10.0 #m/(m/s)
 # TODO
 # change storage type into something like a pickle file? Or a hdf5 file?
 
 
 # Load the csv data
-data_x = np.loadtxt(f'{path_to_data}/mountain_plot_x_000700s.csv', delimiter=',')
-data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_000700s.csv', delimiter=',')
-data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_000700s.csv', delimiter=',')
-data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_000700s.csv', delimiter=',')
+data_x = np.loadtxt(f'{path_to_data}/mountain_plot_x_000736s.csv', delimiter=',')
+data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_000736s.csv', delimiter=',')
+data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_000736s.csv', delimiter=',')
+data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_000736s.csv', delimiter=',')
 # find the largest value in the data_u and data_v arrays
 max_u = np.max(data_u)
 max_v = np.max(data_v)
