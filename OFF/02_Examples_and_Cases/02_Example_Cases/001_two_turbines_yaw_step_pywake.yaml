@@ -129,12 +129,12 @@ ambient:
 #   As of writing, the TWFSolver is the ONLY wake solver available. It can use any FLORIS model, as well as a build in PythonGaussianWake model.
 #   For future wake solvers, the initialization of the solver needs to be adapted, as it is hardcoded of now (see OFF.__init__).
 solver:
-  name: TWF FLORIS
-  description: FLORIDyn - A dynamic and flexible framework for real-time wind farm control, Becker et al. 2022
+  name: TWF PyWake
+  description: FLORIDyn with PyWake backend for wake modeling
 
   settings:
     wake_solver: "TWFSolver"
-    wake_model: "FLORIS GCH" #"PythonGaussianWake" # "FLORIS GCH"
+    wake_model: "PyWake"
     op_propagation: "frozen turbulence"
     extrapolation: "pair"
     # Number of OPs per turbine. The chain of OPs should span long enough to cover the whole wind farm.
@@ -145,18 +145,19 @@ solver:
 # Wake model settings
 #   These need to fit the wake model that the wake solver is using.
 wake:
-  name: GCH
-  description: Gaussian Curl Hybrid wake model
+  name: PyWake
+  description: PyWake wake modeling framework
 
   settings:
-    # The yaml path is used to create an input file for the FLORIS model, before it is moved to the run folder
-    yaml_path: "02_Examples_and_Cases/00_Inputs/01_FLORIS/not_relevant_.yaml"
-    # The FLORIS input file is generated based on the settings linked below as well as the info in this yaml (e.g. turbine type, layout)
-    floris_logging: "02_Examples_and_Cases/00_Inputs/01_FLORIS/00_Logging/warning_none.yaml"
-    floris_solver: "02_Examples_and_Cases/00_Inputs/01_FLORIS/01_Solver/turbine_grid_3.yaml"
-    # This is where the floris model and settings are changed!
-    floris_wake: "02_Examples_and_Cases/00_Inputs/01_FLORIS/02_Wake/gch.yaml"
-    # Settings not used yet
+    # Deficit model to use (IEA37SimpleBastankhahGaussian, BastankhahGaussian, NOJDeficit, TurboNOJDeficit, GCLDeficit)
+    deficit_model: "IEA37SimpleBastankhahGaussian"
+    # Optional turbulence model (CrespoHernandez, STF2017TurbulenceModel, or null)
+    turbulence_model: null
+    # Site turbulence intensity
+    site_ti: 0.06
+    # Site shear exponent
+    site_shear: 0.0
+    # Settings not used yet but kept for compatibility
     nRP: 10
     rotor discretization: Isocell
 

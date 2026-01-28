@@ -714,7 +714,7 @@ class PyWakeModel(WakeModel):
         ws = np.linspace(0, 30, 31)
         
         # Get Ct from first turbine's current state
-        Ct_current = self.turbine_states[0].get_current_Ct()
+        Ct_current = self.turbine_states[0].get_current_ct()
         Ct_curve = np.ones_like(ws) * Ct_current
         Ct_curve[ws < 3] = 0.0  # Cut-in
         Ct_curve[ws > 25] = 0.0  # Cut-out
@@ -804,8 +804,7 @@ class PyWakeModel(WakeModel):
             y=y,
             wd=wind_direction,
             ws=wind_speed,
-            yaw=yaw_angles,
-            ti=self.site_ti
+            yaw=yaw_angles
         )
         
         # Extract results for turbine i_t
