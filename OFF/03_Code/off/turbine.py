@@ -312,7 +312,7 @@ class Turbine(ABC):
         self.turbine_states.set_yaw(yaw)
         lg.debug("Turbine yaw angle set to %s deg, resulting orientation %s deg" % (yaw, self.orientation[0]))
 
-    def set_orientation_yaw(self, orientation_yaw: float, wind_direction=orientation):
+    def set_orientation_yaw(self, orientation_yaw: float, wind_direction=None):
         """
         Sets the orientation of the turbine in yaw direction (opposed to tilt), calculates the effective yaw angle and
         updates the turbine states
@@ -324,7 +324,9 @@ class Turbine(ABC):
             Wind direction in deg
         """
         self.orientation[0] = orientation_yaw
+        # Debug logging removed
         yaw = self.calc_yaw(wind_direction)
+        # Debug logging removed
         self.turbine_states.set_yaw(yaw)
         lg.debug("Turbine yaw orientation set to %s deg, resulting yaw angle %s deg" % (orientation_yaw, yaw))
 
@@ -575,8 +577,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         if self.n_time_steps > 1:
             self.states[0, 1] = yaw_angle
+            # Debug logging removed
         else:
             self.states[1] = yaw_angle
+            # Debug logging removed
 
     def get_ct(self, index: int) -> float:
         """
@@ -608,7 +612,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         if self.n_time_steps > 1:
             return self.states[index, 0]
         else:
-            return self.states[0]
+            return self.states[0, 0]  # For single timestep, access [0, 0]
 
     def set_ax_ind(self, ax_ind):
         """
@@ -639,7 +643,7 @@ class TurbineStatesFLORIDyn(TurbineStates):
         if self.n_time_steps > 1:
             return self.states[index, 1]
         else:
-            return self.states[1]
+            return self.states[0, 1]  # For single timestep, access [0, 1]
 
     def get_all_ct(self) -> np.ndarray:
         """
@@ -698,7 +702,10 @@ class TurbineStatesFLORIDyn(TurbineStates):
         """
         # TODO create check for weights
         t_s = TurbineStatesFLORIDyn(1)
-        t_s.set_all_states(self.states[index1, :]*w1 + self.states[index2, :]*w2)
+        interpolated_value = self.states[index1, :]*w1 + self.states[index2, :]*w2
+        # Debug logging removed
+        # Reshape to (1, n_states) for single timestep
+        t_s.set_all_states(interpolated_value.reshape(1, -1))
         return t_s
 
 

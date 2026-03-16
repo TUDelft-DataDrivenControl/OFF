@@ -84,6 +84,28 @@ class OFFInterface:
         # Convert run data into settings and wind farm object
         self.settings_sim, self.settings_sol, self.settings_wke, self.settings_cor, self.settings_ctr = self._run_yaml_to_dict(sim_info)
         self.settings_sim['path_to_yaml'] = path_to_yaml
+        
+        # CRITICAL: If using PyWake turbine library, populate curves NOW
+        # (BEFORE creating wind_farm, so Turbine objects can read the curves)
+        if (self.settings_sol.get("wake_model", "").startswith("PyWake") and 
+            self.settings_wke.get('use_pywake_turbine_library', False)):
+            
+            # Get unique turbine types from the wind farm layout
+            turbine_types = set(sim_info["wind_farm"]["farm"]["turbine_type"])
+            
+            # Populate curves for each turbine type that has pywake_turbine_name
+            for turbine_type in turbine_types:
+                turbine_def = self.settings_wke['turbine_library'].get(turbine_type, {})
+                pywake_name = turbine_def.get('pywake_turbine_name')
+                
+                if pywake_name:
+                    self._populate_pywake_curves(
+                        turbine_type,
+                        pywake_name,
+                        self.settings_wke['turbine_library'],
+                        sim_info["wind_farm"]["farm"]
+                    )
+        
         self.wind_farm = self._run_yaml_to_wind_farm(sim_info)
 
         # Generate an input file for FLORIS (only if using FLORIS wake model)
@@ -331,6 +353,7 @@ class OFFInterface:
         settings_sol = sim_info["solver"]["settings"]
 
         settings_wke = sim_info["wake"]["settings"]
+        settings_wke['turbine_library'] = sim_info["turbine"]  # Pass turbine definitions to wake model
 
         settings_cor = {'ambient': sim_info["ambient"].get('flow_field', False),
                         'turbine': sim_info["turbine"].get('feed', False),
@@ -341,6 +364,101 @@ class OFFInterface:
         settings_ctr['number of turbines'] = len(sim_info["wind_farm"]["farm"]["layout_x"])
 
         return settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr
+
+    def _populate_pywake_curves(self, turbine_type: str, pywake_turbine_name: str, turbine_library: dict, wind_farm_info: dict):
+        """
+        Populate Cp/Ct curves from PyWake library BEFORE Turbine objects are created.
+        This is called early in initialization to ensure curves exist when Turbine.__init__ reads them.
+        
+        Parameters
+        ----------
+        turbine_type : str
+            The turbine type key in the YAML (e.g., 'iea22mw')
+        pywake_turbine_name : str
+            The PyWake class name to import (e.g., 'IEA_22MW_280_RWT')
+        """
+        import logging as lg
+        import inspect
+        from py_wake.wind_turbines import WindTurbine
+        
+        lg.info(f'Pre-loading PyWake turbine curves for: {turbine_type} (using {pywake_turbine_name})')
+        
+        # Generate possible module names (lowercase variations)
+        # "DTU10MW" -> ["dtu10mw", "dtu10mw"]
+        # "IEA_22MW_280_RWT" -> ["iea_22mw_280_rwt", "iea22mw280rwt", "iea22mw", ...]
+        import re
+        module_name_lower = pywake_turbine_name.lower()
+        module_name_no_underscore = pywake_turbine_name.replace('_', '').lower()
+        # Extract base name (e.g., "IEA_22MW" from "IEA_22MW_280_RWT")
+        match = re.match(r'([a-zA-Z]+_?\d+(?:mw|kw)?)', pywake_turbine_name, re.IGNORECASE)
+        module_name_base = match.group(1).lower().replace('_', '') if match else module_name_no_underscore
+        
+        # Try possible module names in order of likelihood
+        module_names = [module_name_base, module_name_no_underscore, module_name_lower]
+        
+        turbine_obj = None
+        for module_name in module_names:
+            try:
+                # Import the module package
+                module = __import__(f'py_wake.examples.data.{module_name}', fromlist=[''])
+                
+                # Find all WindTurbine classes in the module
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    if issubclass(obj, WindTurbine) and obj is not WindTurbine:
+                        # Check if class name matches (case-insensitive)
+                        if name.lower() == pywake_turbine_name.lower() or name.lower().replace('_', '') == pywake_turbine_name.lower().replace('_', ''):
+                            turbine_obj = obj()
+                            lg.info(f'Loaded turbine "{pywake_turbine_name}" from py_wake.examples.data.{module_name}.{name}')
+                            break
+                
+                if turbine_obj is not None:
+                    break
+            except (ImportError, AttributeError) as e:
+                lg.debug(f'Module py_wake.examples.data.{module_name} not found or has no matching turbine')
+                continue
+        
+        if turbine_obj is None:
+            raise ImportError(f'Cannot load turbine "{pywake_turbine_name}" from PyWake library. Tried modules: {", ".join(module_names)}')
+        
+        # Get diameter - use YAML value if available
+        if turbine_type in turbine_library and 'rotor_diameter' in turbine_library[turbine_type]:
+            diameter = turbine_library[turbine_type]['rotor_diameter']
+        else:
+            # Get from PyWake or wind farm layout
+            try:
+                diameter = turbine_obj.diameter() if callable(getattr(turbine_obj, 'diameter', None)) else turbine_obj.diameter
+            except Exception:
+                diameter = wind_farm_info.get('diameter', [178.4])[0]  # Default to DTU10MW diameter
+        
+        # Extract curves
+        ws = np.arange(3, 26)
+        power_w = turbine_obj.power(ws)
+        ct_values = turbine_obj.ct(ws)
+        
+        # Convert to Cp
+        rho = 1.225
+        rotor_area = np.pi * (diameter / 2) ** 2
+        cp_values = power_w / (0.5 * rho * rotor_area * ws ** 3)
+        cp_values = np.clip(cp_values, 0, 0.59)
+        ct_values = np.clip(ct_values, 0, 1.2)
+        
+        # Populate turbine_library
+        if turbine_type not in turbine_library:
+            turbine_library[turbine_type] = {}
+        if 'performance' not in turbine_library[turbine_type]:
+            turbine_library[turbine_type]['performance'] = {}
+        
+        perf = turbine_library[turbine_type]['performance']
+        perf['Cp_curve'] = {
+            'Cp_u_values': cp_values.tolist(),
+            'Cp_u_wind_speeds': ws.tolist()
+        }
+        perf['Ct_curve'] = {
+            'Ct_u_values': ct_values.tolist(),
+            'Ct_u_wind_speeds': ws.tolist()
+        }
+        
+        lg.info(f'Pre-loaded Cp/Ct curves from PyWake: {len(ws)} points')
 
     def _run_yaml_to_wind_farm(self, sim_info: dict) -> wfm.WindFarm:
         """

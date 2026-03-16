@@ -1,0 +1,20 @@
+# Core dependencies
+numpy
+pandas
+scipy
+matplotlib
+pyyaml
+networkx
+
+# Wind farm simulation packages
+floris
+py_wake
+
+# Jupyter support (for notebooks)
+ipykernel
+ipython
+jupyter_client
+jupyter_core
+
+# Development tools
+ipython_pygments_lexers
