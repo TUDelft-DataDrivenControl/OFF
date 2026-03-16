@@ -76,13 +76,21 @@ wind_farm:
     layout_x:
       - 0.0
       - 5.0
+      - 10.0
+      - 15.0
     layout_y:
+      - 0.0
+      - 0.0
       - 0.0
       - 0.0
     layout_z:
       - 0.0
       - 0.0
+      - 0.0
+      - 0.0
     turbine_type:
+      - iea_10MW
+      - iea_10MW
       - iea_10MW
       - iea_10MW
     unit:
@@ -91,7 +99,7 @@ wind_farm:
       - 198.0
     boundaries_xyz:
       - -2.0
-      - 12.0
+      - 20.0
       - -4.0
       - 4.0
       - 0.0
@@ -225,12 +233,12 @@ controller:
    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
    path_to_orientation_csv: "/_.csv"
    orientation_deg:        # in deg
-     - [270, 270]
-     - [270, 270]
-     - [240, 270]
-     - [240, 270]
-     - [270, 270]
-     - [270, 270]
+     - [270, 270, 270, 270]
+     - [270, 270, 270, 270]
+     - [240, 270, 240, 270]
+     - [240, 270, 240, 270]
+     - [270, 270, 270, 270]
+     - [270, 270, 270, 270]
    orientation_t:          # in s
      - 0.0
      - 600.0

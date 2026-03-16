@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Simulation outputs and temporary files
+simulation_output*.txt
+temp_output.txt
+**/simulation_output*.txt
+**/temp_output.txt
+
+# Generated figures
+Figures/
+
+# Development notes
+DEV_NOTES/
+
+# Run outputs
+runs/*/
+!runs/Processing/
+OFF/03_Code/runs/
+
+# Figures
+Figures/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Documentation builds
+OFF/01_Docs/build/
