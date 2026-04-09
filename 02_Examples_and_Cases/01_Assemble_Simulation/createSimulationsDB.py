@@ -164,7 +164,7 @@ def main(db_path):
 
 if __name__ == "__main__":
     # Define the path to the database
-    #   if the database does not exist, it will be created. If it already exists, it will be used as is.
+    #   If the database does not exist, it will be created. If it already exists, it will be used as is.
     db_path = '/home/marcusbecker/02_Code/01_FLORIDyn/OFF/tomato_simulations.db'
 
     # Reset specific simulations by their IDs, if simulations were not successfully completed. 
