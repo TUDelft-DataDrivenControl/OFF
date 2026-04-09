@@ -26,3 +26,6 @@ off_run_*
 wind_farm_3d_layout.svg
 *.obj
 *.db
+
+### directories ###
+.vscode/
