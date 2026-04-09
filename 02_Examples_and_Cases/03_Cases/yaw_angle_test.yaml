@@ -83,12 +83,12 @@ wind_farm:
       - 0.0
       - 0.0
     turbine_type:
-      - dtu_10MW
-      - dtu_10MW
+      - iea_10MW
+      - iea_10MW
     unit:
       - D
     diameter: # Only needed if unit was set to D
-      - 178.3
+      - 198.0
     boundaries_xyz:
       - -2.0
       - 10.0
@@ -111,10 +111,10 @@ ambient:
     turbulence_intensities:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 225.0
-      - 225.0
-      - 225.0
-      - 225.0
+      - 270.0
+      - 270.0
+      - 270.0
+      - 270.0
     wind_directions_t:
       - 0.0
       - 600.0
@@ -652,7 +652,7 @@ vis:
       - D
     # Only needed if unit was set to D
     diameter:
-      - 178.3
+      - 198.0
     # x, y, z in points
     resolution: [ 301, 301, 10 ] 
     volume_3d: False
@@ -685,6 +685,27 @@ vis:
     farm_interaction: False
     farm_layout: False
     store_data: True
+
+  flow_field_plots: # Plots are not generated online but rather stored in the run folder
+    # Times at witch a plot of the flow field is generated
+    time: [656, 696, 736, 776, 816, 856, 896, 936]
+    #[600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1040, 1060, 1080, 1100, 1120, 1140, 1160, 1180] 
+    # Master-switch to generate & store flow field data
+    plot: False  
+    # Generates a mountain range like visualization of the wind speed based on the OPs
+    mountains: False
+    # Steps between the OPs -> 1 every OP, 5 -> every 5th OP
+    mountains_stride: 10
+    # Offset in OPs, e.g. 0 -> first OP, 1 -> second OP, etc. Is treated as variable if mountain wandering is True
+    mountains_offset: 5
+    # Mountains wandering through the farm, i.e. the mountains are not static but move with the wind
+    mountains_wandering: False
+    # 3D mountains
+    mountains_3d: False
+    # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
+    effective_wf_tile: False 
+    # Generates the tiled landscape in a 5 color scheme
+    effective_wf_tile_5color: False 
 
   debug:
     # Triggers a debug plot, which creates a voronoi "prism" with the TWF models

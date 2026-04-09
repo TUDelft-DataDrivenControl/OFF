@@ -6,22 +6,23 @@ logging.basicConfig(level=logging.ERROR)
 
 import off.off as off
 import off.off_interface as offi
-#import time
-#import matplotlib.pyplot as plt
 import numpy as np
 import sqlite3
 import shutil
+from pathlib import Path
+OFF_PATH: Path = Path(off.OFF_PATH)
+
+name_database = 'off_simulations_database'
+filename_database = f'{name_database}.db'
 
 yaw_rate        = 0.3  # deg/s
-path_to_output  = '/home/marcusbecker/03_Results/2026_Torque/'
-#path_to_output  = '/Users/marcusbecker/surfdrive/PhD_Surf/02_Communication/04_Conferences/16_Torque2026/Research/02_OFF_Results/'
-path_to_db      = 'tomato_simulations.db'
-#path_to_WindDirOffset = '/Users/marcusbecker/surfdrive/PhD_Surf/01_Research/20_max_energy_instead_of_power/07_New_Wind_Model/'
+path_to_output  = Path.cwd() / (name_database + '_results')
+path_to_db      = Path.cwd() / filename_database 
 path_to_WindDirOffset = '/home/marcusbecker/01_Data/02_GeneratedData/02_Wind_Dir_Changes_Torque2026/'
 
 
 # connect to the SQLite database tomato_simulations.db
-if not os.path.exists('tomato_simulations.db'):
+if not os.path.exists(path_to_db):
     print('Database does not exist, aborting')
     exit()
 
@@ -39,14 +40,13 @@ def retrieve_settings_from_db(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Read the variables test_wind_direction, test_yaw_start, test_yaw_end, test_yaw_sigma from the first entry from the database where sim_done is 0
-    #cursor.execute('SELECT * FROM tomato_simulations WHERE sim_done = 0 LIMIT 1')
-    cursor.execute('SELECT * FROM tomato_simulations WHERE sim_done = 0 ORDER BY RANDOM() LIMIT 1')
+    # Read the variables test_wind_direction, test_yaw_start, test_yaw_end, test_yaw_sigma from a random entry from the database where sim_done is 0
+    cursor.execute(f'SELECT * FROM {name_database} WHERE sim_done = 0 ORDER BY RANDOM() LIMIT 1')
     row = cursor.fetchone()
 
     if row:
         # Set sim_done to 1 for the first entry
-        cursor.execute('UPDATE tomato_simulations SET sim_done = 1 WHERE rowid = ?', (row[0],))
+        cursor.execute(f'UPDATE {name_database} SET sim_done = 1 WHERE rowid = ?', (row[0],))
         conn.commit()
         conn.close()
         return row[0], row[2], row[3], row[4], row[5]
@@ -86,7 +86,7 @@ def main():
                 # Tell the simulation what to run
                 #   The run file needs to contain everything, the wake model, the ambient conditions etc.
                 # Example case
-                oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/001_two_turbines_yaw_step.yaml')
+                oi.init_simulation_by_path(OFF_PATH / '02_Examples_and_Cases' / '02_Example_Cases' / '001_two_turbines_yaw_step.yaml')
 
                 print('Created simulation object')
                 delta_t = abs(test_yaw_end - test_yaw_start) / yaw_rate

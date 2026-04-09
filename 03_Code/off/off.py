@@ -139,7 +139,6 @@ class OFF:
                 root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
             else:
                 root_dir = data_dir or f'{os.environ["PWD"]}/runs/'
-            #lg.warning('Initial root runs directory path retrieval was unsuccessful, used ' + root_dir)
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
         self.root_dir = root_dir[:-len("runs/")]

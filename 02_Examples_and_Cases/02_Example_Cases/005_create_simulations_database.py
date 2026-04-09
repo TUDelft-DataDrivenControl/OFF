@@ -3,6 +3,7 @@
 import sqlite3
 import numpy as np
 import os
+from pathlib import Path
 
 def count_simulations(db_path):
     """
@@ -17,7 +18,7 @@ def count_simulations(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    cursor.execute('SELECT COUNT(*) FROM tomato_simulations')
+    cursor.execute('SELECT COUNT(*) FROM off_simulations_database')
     count = cursor.fetchone()[0]
     
     conn.close()
@@ -36,7 +37,7 @@ def count_remaining_simulations(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    cursor.execute('SELECT COUNT(*) FROM tomato_simulations WHERE sim_done = 0')
+    cursor.execute('SELECT COUNT(*) FROM off_simulations_database WHERE sim_done = 0')
     count = cursor.fetchone()[0]
     
     conn.close()
@@ -53,7 +54,7 @@ def reset_simulation(db_path, id):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    cursor.execute('UPDATE tomato_simulations SET sim_done = 0 WHERE rowid = ?', (id,))
+    cursor.execute('UPDATE off_simulations_database SET sim_done = 0 WHERE rowid = ?', (id,))
     conn.commit()
     conn.close()
 
@@ -71,7 +72,7 @@ def create_simulations_db(db_path):
     
     # Create table for simulations
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tomato_simulations (
+        CREATE TABLE IF NOT EXISTS off_simulations_database (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sim_done BOOLEAN DEFAULT 0,
             test_wind_direction REAL,
@@ -100,7 +101,7 @@ def insert_simulation(db_path, wind_direction, yaw_start, yaw_end, sigma):
     cursor = conn.cursor()
     
     cursor.execute('''
-        INSERT INTO tomato_simulations (test_wind_direction, test_yaw_start, test_yaw_end, test_sigma)
+        INSERT INTO off_simulations_database (test_wind_direction, test_yaw_start, test_yaw_end, test_sigma)
         VALUES (?, ?, ?, ?)
     ''', (wind_direction, yaw_start, yaw_end, sigma))
     
@@ -125,7 +126,7 @@ def check_if_entry_exists(db_path, wind_direction, yaw_start, yaw_end, sigma):
     cursor = conn.cursor()
     
     cursor.execute('''
-        SELECT COUNT(*) FROM tomato_simulations 
+        SELECT COUNT(*) FROM off_simulations_database 
         WHERE test_wind_direction = ? AND test_yaw_start = ? AND test_yaw_end = ? AND test_sigma = ?
     ''', (wind_direction, yaw_start, yaw_end, sigma))
     
@@ -142,10 +143,10 @@ def main(db_path):
         create_simulations_db(db_path)
     
     # Define test parameters
-    test_wind_directions = np.arange(250, 291, 2.5)  # deg
-    test_yaw_start       = np.arange(-30, 31, 2.5)   # deg
-    test_yaw_end         = np.arange(-30, 31, 2.5)   # deg
-    test_sigma           = np.arange(1, 10, 1)  # deg
+    test_wind_directions = np.arange(250, 291, 20)  # deg
+    test_yaw_start       = np.arange(-30, 31, 30)   # deg
+    test_yaw_end         = np.arange(-30, 31, 15)   # deg
+    test_sigma           = np.array([2,5])  # deg
     
     # Insert test data into the database
     for wind_direction in test_wind_directions:
@@ -165,10 +166,10 @@ def main(db_path):
 if __name__ == "__main__":
     # Define the path to the database
     #   If the database does not exist, it will be created. If it already exists, it will be used as is.
-    db_path = '/home/marcusbecker/02_Code/01_FLORIDyn/OFF/tomato_simulations.db'
+    db_path = Path.cwd() / 'off_simulations_database.db'
 
     # Reset specific simulations by their IDs, if simulations were not successfully completed. 
-    to_reset = [16, 22, 3, 4, 7, 9]  # IDs to reset
+    to_reset = []  # IDs to reset
     
     main(db_path)
 

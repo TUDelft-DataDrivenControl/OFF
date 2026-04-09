@@ -32,7 +32,7 @@ import pandas as pd
 import shutil
 import os
 import datetime
-
+from pathlib import Path
 
 class OFFInterface:
     """
@@ -90,7 +90,7 @@ class OFFInterface:
         tmp_yaml_path = self._gen_FLORIS_yaml(self.settings_wke,
                                               sim_info["wind_farm"],
                                               sim_info["ambient"],
-                                              path_to_yaml.rsplit('/', 1)[0])  # This might not work on Windows
+                                              path_to_yaml.parent)  # This might not work on Windows
         self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
 
         # Visualization settings
@@ -177,7 +177,9 @@ class OFFInterface:
         if self.ready_to_run:
             self.measurements, self.control_applied = self.off_sim.run_sim()
         else:
-            print('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
+            # Throw an error or warning that the simulation is not ready to run yet, possibly it has not yet been initialized
+            logging.error('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
+            
 
     def store_measurements(self, path_to_csv=""):
         """
@@ -198,15 +200,17 @@ class OFFInterface:
         """
         Stores the yaml file used to run the simulation
         """
+        # shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
+        #                 self.off_sim.sim_dir + '/' + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
         shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
-                        self.off_sim.sim_dir + '/' + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
+                        Path(self.off_sim.sim_dir) / self.off_sim.settings_sim['path_to_yaml'].name)
 
     def store_applied_control(self, path_to_csv=""):
         """
         Stores the measurements as a csv in the run folder or at a given path.
         """
         if len(path_to_csv) == 0:
-            path_to_csv = self.off_sim.sim_dir + "/applied_control.csv"
+            path_to_csv = Path(self.off_sim.sim_dir) / "applied_control.csv"
 
         self.control_applied.to_csv(path_or_buf=path_to_csv)
 
@@ -427,8 +431,8 @@ class OFFInterface:
         floris_file.update(dict([('flow_field', flow_field)]))
 
         current_time = datetime.datetime.now()
-
-        path_out = path_to_tmp + '/tmp_floris_input' + current_time.strftime("%Y%m%d%H%M%S%f") + '.yaml'
+        
+        path_out = path_to_tmp / ('tmp_floris_input' + current_time.strftime("%Y%m%d%H%M%S%f") + '.yaml')
         with open(path_out, "w") as yaml_file:
             yaml.dump(floris_file, yaml_file)
 
