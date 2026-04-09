@@ -1,3 +1,5 @@
+### Example script to create and manage a SQLite database for storing simulation settings.
+
 import sqlite3
 import numpy as np
 import os
@@ -161,8 +163,11 @@ def main(db_path):
 
 
 if __name__ == "__main__":
-    #db_path = 'tomato_simulations.db'
+    # Define the path to the database
+    #   if the database does not exist, it will be created. If it already exists, it will be used as is.
     db_path = '/home/marcusbecker/02_Code/01_FLORIDyn/OFF/tomato_simulations.db'
+
+    # Reset specific simulations by their IDs, if simulations were not successfully completed. 
     to_reset = [16, 22, 3, 4, 7, 9]  # IDs to reset
     
     main(db_path)
