@@ -37,6 +37,8 @@ logging.basicConfig(level=logging.ERROR)
 import off.off as off
 import off.off_interface as offi
 import time
+from pathlib import Path
+OFF_PATH: Path = Path(off.OFF_PATH)
 
 def main():
     start_time = time.time()
@@ -48,7 +50,7 @@ def main():
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
     # Example case
-    oi.init_simulation_by_path(f'{off.OFF_PATH}/02_Examples_and_Cases/02_Example_Cases/001_two_turbines_yaw_step.yaml')
+    oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "001_two_turbines_yaw_step.yaml" )
     
     # Run the simulation
     oi.run_sim()
