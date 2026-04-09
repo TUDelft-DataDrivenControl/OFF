@@ -8,11 +8,9 @@ Welcome to the working repo for a dynamic parametric wake toolbox which combines
 The OFF toolbox is meant to provide one interface to dynamic parametric wake modelling. The goal is to enable testing of different approaches, comparisons using the same interface and an environment to develop new approaches.
 
 ## Development
-> [!INFO]
 > OFF is under maintenance! We are working under the hood on a better interface and internal structure of the model.
 The goal is to simplify the installation of the model, improve performance, make it easier to extend, add more examples, and much more.
 
-> [!INFO]
 > However, for these changes to happen, we may need to make some braking changes. This may mean that the code you wrote may not work with future versions anymore, and that additions you made may not fit anymore. If you have code additions, create a pull request and we'll try to merge them asap. If you have wishes for the model, create an issue.
 
 ### Current state
