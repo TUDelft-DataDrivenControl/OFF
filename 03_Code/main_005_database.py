@@ -18,10 +18,10 @@ filename_database = f'{name_database}.db'
 yaw_rate        = 0.3  # deg/s
 path_to_output  = Path.cwd() / (name_database + '_results')
 path_to_db      = Path.cwd() / filename_database 
-path_to_WindDirOffset = '/home/marcusbecker/01_Data/02_GeneratedData/02_Wind_Dir_Changes_Torque2026/'
+path_to_WindDirOffset = Path.cwd() / '02_Examples_and_Cases' / '02_Example_Cases' / '005_WindDirOffsetData'
 
 
-# connect to the SQLite database tomato_simulations.db
+# connect to the SQLite database
 if not os.path.exists(path_to_db):
     print('Database does not exist, aborting')
     exit()
@@ -60,6 +60,9 @@ def retrieve_settings_from_db(db_path):
 
 def main():
 
+    # Create output directory if it does not exist
+    if not os.path.exists(path_to_output):
+        os.makedirs(path_to_output)
 
     while True:
         # Retrieve the next set of simulation parameters from the database
@@ -72,7 +75,7 @@ def main():
         print(f'Running simulation for wind direction {test_wind_direction} deg, yaw start {test_yaw_start} deg, yaw end {test_yaw_end} deg, sigma {test_sigma} deg')
 
         # Retrieve Wind Dir Offsets
-        wind_dir_offset_data = np.loadtxt(os.path.join(path_to_WindDirOffset, f'WindDirOffset_std_{test_sigma:.0f}_len_1800s.txt'), delimiter=',')
+        wind_dir_offset_data = np.loadtxt(path_to_WindDirOffset / f'WindDirOffset_std_{test_sigma:.0f}_len_1800s.txt', delimiter=',')
         wind_dir_t = wind_dir_offset_data[0, :]  # Time in seconds
         wind_dir_t += 100  # Offset to start at t=100s
         
