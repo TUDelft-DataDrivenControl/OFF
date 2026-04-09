@@ -1,13 +1,20 @@
 <p align="center">
-  <img width="880" height="240" src="https://github.com/TUDelft-DataDrivenControl/OFF/blob/main/99_Design/01_Logo/OFF_Logo_wide.png">
+  <img width="880" height="240" src="https://github.com/TUDelft-DataDrivenControl/OFF/blob/main/99_Design/01_Logo/OFF_Logo_wide_maintenance.png">
 </p>
 
 # OFF
 Welcome to the working repo for a dynamic parametric wake toolbox which combines and connects OnWaRDS, FLORIDyn and FLORIS (OFF).
 ## Purpose
-The OFF toolbox is meant to provide one interface to dynamic parametric wake modelling. The goal is to enable testing of different approaches, comparisons using the same interface and a environment to develop new approaches.
+The OFF toolbox is meant to provide one interface to dynamic parametric wake modelling. The goal is to enable testing of different approaches, comparisons using the same interface and an environment to develop new approaches.
 
 ## Development
+> [!INFO]
+> OFF is under maintenance! We are working under the hood on a better interface and internal structure of the model.
+The goal is to simplify the installation of the model, improve performance, make it easier to extend, add more examples, and much more.
+
+> [!INFO]
+> However, for these changes to happen, we may need to make some braking changes. This may mean that the code you wrote may not work with future versions anymore, and that additions you made may not fit anymore. If you have code additions, create a pull request and we'll try to merge them asap. If you have wishes for the model, create an issue.
+
 ### Current state
 So what can you expect today?
 The toolbox allows you to run dynamic wind farm simulations using a prescribed (uniform) flow field. The code uses an implementation of the FLORIDyn-framework \[1\], which then interfaces to the FLORISv4 model \[2\].
@@ -20,8 +27,7 @@ The toolbox allows you to run dynamic wind farm simulations using a prescribed (
 
 *Current limitations include:*
 - Heterogeneous flow field behaviour is not included, 
-- Wake steerig control is not officially included yet (controller on test branch), 
-- The dynamic solver is a preliminary implementation, and cannot be changed
+- There is only one dynamic solver which cannot be changed
   -  OnWaRDS \[3\] approach not yet impemented
   -  Particle model and behaviour not yet changable
 
