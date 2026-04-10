@@ -550,8 +550,11 @@ class TWFSolver(WakeSolver):
         wind_farm_layout = wind_farm.get_layout()
 
         # Create an index range over all nT turbines and only select the ones saved in the dependencies
+        #   inf_turbines: indexes of all turbines that influence the turbine with index i_t, including itself
         inf_turbines = np.arange(wind_farm.nT)[wind_farm.dependencies[i_t, :]]
-        # index i_t is not correct anymore as only a subset of turbines are considered
+
+        # Since index i_t accounts for all turbines, it cannot be used for inf_turbines
+        #   i_t_tmp: index of turbine i_t in the list of influencing turbines
         i_t_tmp = np.sum(wind_farm.dependencies[i_t, 0:i_t])
 
         twf_layout = np.zeros((inf_turbines.shape[0], 4))  # Allocation of x, y, z coordinates of the turbines
@@ -565,9 +568,9 @@ class TWFSolver(WakeSolver):
         for idx in np.arange(inf_turbines.shape[0]):
             if idx == i_t_tmp:
                 # Turbine itself
-                twf_layout[idx, :] = wind_farm_layout[i_t_tmp, :]
-                twf_t_states.append(wind_farm.turbines[i_t_tmp].turbine_states.create_interpolated_state(0, 1, 0, 1))
-                twf_a_states.append(wind_farm.turbines[i_t_tmp].ambient_states.create_interpolated_state(0, 1, 0, 1))
+                twf_layout[idx, :] = wind_farm_layout[i_t, :]
+                twf_t_states.append(wind_farm.turbines[i_t].turbine_states.create_interpolated_state(0, 1, 1, 0))
+                twf_a_states.append(wind_farm.turbines[i_t].ambient_states.create_interpolated_state(0, 1, 1, 0))
                 continue
 
             lg.debug('Ambient states: Two OP interpolation')
@@ -597,10 +600,10 @@ class TWFSolver(WakeSolver):
             #       1. OP location
             tmp_op = op_locations[ind_op[0], 0:3] * r0 + op_locations[ind_op[1], 0:3] * r1
             #       2. Ambient
-            twf_a_states.append(wind_farm.turbines[idx].ambient_states.create_interpolated_state(ind_op[0],
+            twf_a_states.append(wind_farm.turbines[inf_turbines[idx]].ambient_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #       3. Turbine state
-            twf_t_states.append(wind_farm.turbines[idx].turbine_states.create_interpolated_state(ind_op[0],
+            twf_t_states.append(wind_farm.turbines[inf_turbines[idx]].turbine_states.create_interpolated_state(ind_op[0],
                                                                                                      ind_op[1], r0, r1))
             #   Reconstruct turbine location
             tmp_phi = twf_a_states[-1].get_turbine_wind_dir()
