@@ -469,9 +469,10 @@ class Floris4Wake(WakeModel):
 
         # Set ambient conditions 
         # TODO: Replace turbulence intensity with actual value + index of turbine
+        # TODO: Find way to combine wind speed and direction of all turbines into one input for FLORIS
         time_series = TimeSeries(
-            wind_directions=np.ones(1)*ambient_states[0].get_turbine_wind_dir(),
-            wind_speeds=np.ones(1)*ambient_states[0].get_turbine_wind_speed_abs(),
+            wind_directions =np.ones(1)*ambient_states[0].get_turbine_wind_dir(),
+            wind_speeds     =np.ones(1)*ambient_states[0].get_turbine_wind_speed_abs(),
             turbulence_intensities=np.ones(1)*0.06,
         )
         
