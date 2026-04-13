@@ -243,7 +243,7 @@ def ot_get_closest_2_points_3d_sorted(ref_loc: np.ndarray, points: np.ndarray) -
     distSqr = (ref_loc[0] - points[:, 0]) ** 2 + (ref_loc[1] - points[:, 1]) ** 2 + (ref_loc[2] - points[:, 2]) ** 2
     i_1 = np.argmin(distSqr)
 
-    if i_1 == 1:
+    if i_1 == 0:
         # First OP
         return [i_1, 2]
     elif i_1 == points.shape[0]-1:

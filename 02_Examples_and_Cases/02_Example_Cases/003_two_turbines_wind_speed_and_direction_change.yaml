@@ -44,7 +44,7 @@ sim:
   sim:
     time step: 4.0
     time start: 0.0
-    time end: 1200.0
+    time end: 2000.0
       
   # The logging is split in two, one for the console and one for a file. The level can be set to DEBUG, INFO, WARNING, ERROR, CRITICAL
   #   The console logging has a feature where the log messages are colored based on their origin.
@@ -76,41 +76,13 @@ wind_farm:
     layout_x:
       - 0.0
       - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
-      - 0.0
-      - 5.0
-      - 10.0
     layout_y:
       - 0.0
       - 0.0
-      - 0.0
-      - 5.0
-      - 5.0
-      - 5.0
-      - 10.0
-      - 10.0
-      - 10.0
     layout_z:
       - 0.0
       - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
     turbine_type:
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
-      - iea_10MW
       - iea_10MW
       - iea_10MW
     unit:
@@ -139,20 +111,34 @@ ambient:
     turbulence_intensities:
       - 0.06
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
-      - 255.0
-      - 255.0
-      - 195.0
-      - 195.0
+      - 270.0
+      - 270.0
+      - 250.0
+      - 240.0
+      - 270.0
+      - 270.0
     wind_directions_t:
       - 0.0
       - 600.0
       - 900.0
       - 1200.0
+      - 1500.0
+      - 9000.0
     wind_shear: 0.12
     wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 8.0
+      - 8.0
+      - 14.0
+      - 10.0
+      - 8.0
+      - 8.0
     wind_speeds_t:
       - 0.0
+      - 600.0
+      - 900.0
+      - 1200.0
+      - 1500.0
+      - 9000.0
     wind_veer: 0.0
     corr_overwrite_direction: true # All states are overwritten instead of only the first particle state
 
@@ -221,15 +207,15 @@ wake:
 #  settings:
 #    ctl: "IdealGreedyBaseline"
 
-# controller:
-#   name: Realistic greedy baseline
-#   description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
-#
-#   settings:
-#     ctl: "RealGreedyBaseline"
-#     misalignment_thresh: 5  # in deg
-#     average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml # Not used yet
-#     apply_frequency: 6      # in time steps, has to be an integer. Time step length is set in the simulation yaml # Not used yet
+controller:
+  name: Realistic greedy baseline
+  description: Follows the main wind direction, only corrects if offset to the averaged wind direction is larger then a given offset
+
+  settings:
+    ctl: "RealGreedyBaseline"
+    misalignment_thresh: 5  # in deg
+    average_window: 1       # in time steps, has to be an integer. Time step length is set in the simulation yaml # Not used yet
+    apply_frequency: 6      # in time steps, has to be an integer. Time step length is set in the simulation yaml # Not used yet
 
 # Use "Dead-band LUT yaw controller" instead
 # controller:
@@ -244,28 +230,28 @@ wake:
 #     # The csv file is a table with the first column being the wind directions and the following nT columns being the yaw angles for the nT turbines
 #     path_to_angles_and_directions_csv: "/optimized_angles.csv"
 
-controller:
- name: prescribed yaw controller
- description: Sets the turbine orientations based on a set of prescribed yaw angles along with time stamps
-
- settings:
-   ctl: "prescribed yaw controller"
-   # Can be "csv" or "yaml"
-   #  - csv:  The file needs to contain the time stamps in the first column, and yaw / orientation angles for each turbine in the following columns.
-   #  - yaml: The orientation needs to be added below
-   input_method: "yaml"    
-   orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
-   path_to_orientation_csv: "/_.csv"
-   orientation_deg:        # in deg
-     - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-     - [255, 255, 255, 255, 255, 255, 255, 255, 255]
-     - [215, 195, 195, 195, 195, 195, 195, 195, 195]
-     - [215, 195, 195, 195, 195, 195, 195, 195, 195]
-   orientation_t:          # in s
-     - 0.0
-     - 600.0
-     - 900.0
-     - 90000.0
+# controller:
+#  name: prescribed yaw controller
+#  description: Sets the turbine orientations based on a set of prescribed yaw angles along with time stamps
+# 
+#  settings:
+#    ctl: "prescribed yaw controller"
+#    # Can be "csv" or "yaml"
+#    #  - csv:  The file needs to contain the time stamps in the first column, and yaw / orientation angles for each turbine in the following columns.
+#    #  - yaml: The orientation needs to be added below
+#    input_method: "yaml"    
+#    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
+#    path_to_orientation_csv: "/_.csv"
+#    orientation_deg:        # in deg
+#      - [270, 270]
+#      - [270, 270]
+#      - [240, 270]
+#      - [240, 270]
+#    orientation_t:          # in s
+#      - 0.0
+#      - 600.0
+#      - 700.0
+#      - 90000.0
 
 
 # Turbine information
@@ -538,13 +524,13 @@ vis:
     # As OFF isn't grid based, the flow field plots need a grid to be generated.
     boundaries:
       - [ -2, 12]                 # x in D or m
-      - [ -2, 12]                 # y in D or m
+      - [ -4, 4]                 # y in D or m
       - [ 0, 3]                   # z in D or m
     unit:
       - D
     # Needed for plotting also if boundaries are given in D
     diameter:
-      - 178.4
+      - 198.0
     # x, y, z in points
     resolution: [ 301, 301, 10 ] 
     volume_3d: False
@@ -580,27 +566,35 @@ vis:
 
   flow_field_plots: # Plots are not generated online but rather stored in the run folder
     # Times at witch a plot of the flow field is generated
-    time: [600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] 
+    time: [600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1040, 1060, 1080, 1100, 1120, 1140, 1160, 1180, 1200, 1220, 1240, 1260, 1280, 1300, 1320, 1340, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540, 1560, 1580, 1600, 1620, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960, 1980] 
     # Master-switch to generate & store flow field data
     plot: True  
     # Generates a mountain range like visualization of the wind speed based on the OPs
-    mountains: True 
+    mountains: True
     # Steps between the OPs -> 1 every OP, 5 -> every 5th OP
-    mountains_stride: 5
+    mountains_stride: 2
+    # Offset in OPs, e.g. 0 -> first OP, 1 -> second OP, etc. Is treated as variable if mountain wandering is True
+    mountains_offset: 5
+    # Mountains wandering through the farm, i.e. the mountains are not static but move with the wind
+    mountains_wandering: True
+    # 3D mountains
+    mountains_3d: False
     # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
     effective_wf_tile: False 
     # Generates the tiled landscape in a 5 color scheme
     effective_wf_tile_5color: False 
+    
+
 
   debug: # Plots are generated online
     # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
-    effective_wf_tile: False  
+    effective_wf_tile: False
     # Generates the tiled landscape in a 5 color scheme
     effective_wf_tile_5color: False  
     # Triggers a debug plot during runtime of the wakes passed on to the wake model
     effective_wf_layout: False  
     # Times at witch a debug plot of the wind farm is generated
-    time: [400, 452, 500, 552, 600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152] 
+    time: [400, 452, 500, 552, 600, 652, 700, 752, 800, 852, 900, 952, 1000, 1052, 1100, 1152, 1200, 1252, 1300, 1352, 1400, 1452, 1500, 1552, 1600, 1652, 1700, 1752, 1800, 1852, 1900, 1952, 2000] 
     # Turbines for which the debug plot is created
     iT: [0,1] 
     # Generates the effective wind speed across the farm based on a ghost turbine

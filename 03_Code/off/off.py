@@ -35,7 +35,7 @@ import shutil
 from off import __file__ as OFF_PATH
 import datetime
 
-OFF_PATH = OFF_PATH.rsplit('/', 3)[0]
+OFF_PATH = os.path.normpath(OFF_PATH).rsplit(os.sep, 3)[0]
 
 
 class OFF:
@@ -56,8 +56,11 @@ class OFF:
         settings_wke['sim_dir'] = self.root_dir
 
         # =========== FLORIS ===========
+        # Move the FLORIS.yaml file to the simulation directory.
+        # tmp path is updated for reinitialization of the simulation, as a result, the yaml file is only available in the latest simulation folder.
         settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
         shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
+        settings_wke['tmp_yaml_path'] = settings_wke['yaml_path']
 
         # =========== Solver ===========
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
@@ -136,7 +139,6 @@ class OFF:
                 root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
             else:
                 root_dir = data_dir or f'{os.environ["PWD"]}/runs/'
-            lg.warning('Initial root runs directory path retrieval was unsuccessful, used ' + root_dir)
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
         self.root_dir = root_dir[:-len("runs/")]
@@ -226,14 +228,14 @@ class OFF:
         iteration = 0
 
         for t in np.arange(self.settings_sim['time start'],
-                           self.settings_sim['time end'],
+                           self.settings_sim['time end'] + self.settings_sim['time step'],
                            self.settings_sim['time step']):
             lg.info('Starting time step: %s s.' % t)
 
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
             for idx, tur in enumerate(self.wind_farm.turbines):
-                # Debug flags
+                # Plotting flags
                 if (self.settings_vis["debug"]["effective_wf_layout"] and
                         t in self.settings_vis["debug"]["time"] and
                         idx in self.settings_vis["debug"]["iT"]):
@@ -247,6 +249,8 @@ class OFF:
                     self.wake_solver.raise_flag_plot_tile(
                         grid_points_iT[:,0], grid_points_iT[:,1],
                         np.array(self.settings_vis["grid"]["slice_2d_xy"]))
+                
+                
 
                 # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
                 uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
@@ -288,17 +292,33 @@ class OFF:
                 # Apply new values to the turbine states
                 self.ambient_corrector(idx, tur.ambient_states)
 
+
             # ///////////////////// VISUALIZE /////////////////////
             if (self.settings_vis["debug"]["turbine_effective_wind_speed"] and
                     t in self.settings_vis["debug"]["time"]):
                 self.wake_solver.vis_turbine_eff_wind_speed_field(self.wind_farm, self.sim_dir, t)
 
+            if (self.settings_vis["flow_field_plots"]["mountains"] and
+                    self.settings_vis["flow_field_plots"]["plot"]):
+                # Plot the mountains of the flow field
+                if t in self.settings_vis["flow_field_plots"]["time"]:
+                    self.wake_solver.vis_OP_mountains(self.wind_farm, self.sim_dir, t)
+
+                # Increase OP counter if wandering is enabled
+                if self.settings_vis["flow_field_plots"]["mountains_wandering"]:
+                    self.settings_vis["flow_field_plots"]["mountains_offset"] += 1
+                    self.settings_vis["flow_field_plots"]["mountains_offset"] = np.mod(
+                        self.settings_vis["flow_field_plots"]["mountains_offset"],
+                        self.settings_vis["flow_field_plots"]["mountains_stride"])
+
+
             # ///////////////////// PROPAGATE /////////////////////
             for idx, tur in enumerate(self.wind_farm.turbines):
                 tur.ambient_states.iterate_states_and_keep()
                 tur.turbine_states.iterate_states_and_keep()
-                tur.observation_points.propagate_ops(self.settings_sim['time step'])
+                tur.observation_points.propagate_ops(self.settings_sim['time step']) # , tur.get_rotor_pos())
                 lg.debug(tur.observation_points.get_world_coord())
+
 
             # ///////////////////// CONTROL ///////////////////////
             self.controller.update(t)
@@ -309,14 +329,15 @@ class OFF:
                 lg.debug("Turbine %s states after control-> yaw = %s deg, ax ind = %s." %
                          (idx, tur.turbine_states.get_current_yaw(), tur.turbine_states.get_current_ax_ind()))
 
+
             # ///////////////////// STORE ///////////////////////
             if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
                 self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
 
             lg.info('Ending time step: %s s.' % t)
-            iteration += 1
             self._print_progress_bar(iteration, self.iterations_total, prefix = 'Simulation progress:', suffix = 'Complete', length = 50)
+            iteration += 1
 
         lg.info('Simulation finished. Resulting measurements:')
         lg.info(measurements)
@@ -345,6 +366,28 @@ class OFF:
         """
         return self.wind_farm
 
+    def get_root_dir(self) -> str:
+        """
+        Get the root directory of the simulation
+
+        Returns
+        -------
+        str :
+            Root directory of the simulation
+        """
+        return self.root_dir
+    
+    def get_sim_dir(self) -> str:
+        """
+        Get the simulation directory
+
+        Returns
+        -------
+        str :
+            Simulation directory
+        """
+        return self.sim_dir
+    
     # Print iterations progress
     def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
         """

@@ -32,7 +32,7 @@ import pandas as pd
 import shutil
 import os
 import datetime
-
+from pathlib import Path
 
 class OFFInterface:
     """
@@ -79,31 +79,94 @@ class OFFInterface:
         """
         stream = open(path_to_yaml, 'r')
         sim_info = yaml.safe_load(stream)
+        stream.close()
 
         # Convert run data into settings and wind farm object
-        settings_sim, settings_sol, settings_wke, settings_cor, settings_ctr = self._run_yaml_to_dict(sim_info)
-        settings_sim['path_to_yaml'] = path_to_yaml
-        wind_farm = self._run_yaml_to_wind_farm(sim_info)
+        self.settings_sim, self.settings_sol, self.settings_wke, self.settings_cor, self.settings_ctr = self._run_yaml_to_dict(sim_info)
+        self.settings_sim['path_to_yaml'] = path_to_yaml
+        self.wind_farm = self._run_yaml_to_wind_farm(sim_info)
 
         # Generate an input file for FLORIS
-        tmp_yaml_path = self._gen_FLORIS_yaml(settings_wke,
+        tmp_yaml_path = self._gen_FLORIS_yaml(self.settings_wke,
                                               sim_info["wind_farm"],
                                               sim_info["ambient"],
-                                              path_to_yaml.rsplit('/', 1)[0])  # This might not work on Windows
-        settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
+                                              path_to_yaml.parent)  # This might not work on Windows
+        self.settings_wke.update(dict([('tmp_yaml_path', tmp_yaml_path)]))
 
         # Visualization settings
-        vis = sim_info["vis"]
+        self.vis = sim_info["vis"]
 
         # Create OFF simulation object
-        self.off_sim = off.OFF(wind_farm, settings_sim, settings_wke, settings_sol, settings_cor, settings_ctr, vis)
+        self.create_off_simulation()
+
+    def init_simulation_by_dicts(self, 
+                                 settings_sim: dict = None, 
+                                 settings_sol: dict = None, 
+                                 settings_wke: dict = None, 
+                                 settings_cor: dict = None, 
+                                 settings_ctr: dict = None,
+                                 wind_farm: wfm.WindFarm = None):
+        """
+        Initialize the simulation using dictionaries
+
+        Parameters
+        ----------
+        settings_sim: dict
+            Simulation settings
+        settings_sol: dict
+            Solver settings
+        settings_wke: dict
+            Wake settings
+        settings_cor: dict
+            Corrector settings
+        settings_ctr: dict
+            Controller settings
+        wind_farm: wfm.WindFarm
+            Wind farm object
+        """
+        # Change root directory to previous simulation folder
+        if settings_sim is not None:
+            self.settings_sim = settings_sim
+        else:
+            # This setting prevents the simulation from creating a new folder with every simulation
+            self.settings_sim['simulation folder'] = self.off_sim.get_sim_dir()
+
+        self.settings_sol = settings_sol if settings_sol is not None else self.settings_sol
+        self.settings_wke = settings_wke if settings_wke is not None else self.settings_wke
+        self.settings_cor = settings_cor if settings_cor is not None else self.settings_cor
+        self.settings_ctr = settings_ctr if settings_ctr is not None else self.settings_ctr
+        self.wind_farm = wind_farm if wind_farm is not None else self.wind_farm
+
+        # Create OFF simulation object
+        #self.create_off_simulation()
+        self.ready_to_run = False
+
+    def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
+        """
+        Creates the OFF simulation object based on the initialized settings.
+
+        Parameters
+        ----------
+        yaw: float
+            Initial yaw angle for the wind farm (default is 0.0 deg)
+        axind: float
+            Initial axial induction factor for the wind farm (default is the Betzlimit at 1/3)
+        """
+        # Create OFF simulation object
+        self.off_sim = off.OFF(self.wind_farm, 
+                               self.settings_sim, 
+                               self.settings_wke, 
+                               self.settings_sol, 
+                               self.settings_cor, 
+                               self.settings_ctr, 
+                               self.vis)
 
         # TODO init based on sim_info inputs & used ambient state model / turbine state model
         self.off_sim.init_sim(
-            np.array([sim_info["ambient"]["flow_field"]["wind_speeds"][0],
-                      sim_info["ambient"]["flow_field"]["wind_directions"][0],
-                      sim_info["ambient"]["flow_field"]["turbulence_intensities"][0]]),
-            np.array([1 / 3, 0, 0]))
+            np.array([self.settings_cor["ambient"]["wind_speeds"][0],
+                      self.settings_cor["ambient"]["wind_directions"][0],
+                      self.settings_cor["ambient"]["turbulence_intensities"][0]]),
+            np.array([axind, yaw, 0]))
 
         self.ready_to_run = True
 
@@ -114,7 +177,9 @@ class OFFInterface:
         if self.ready_to_run:
             self.measurements, self.control_applied = self.off_sim.run_sim()
         else:
-            print('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
+            # Throw an error or warning that the simulation is not ready to run yet, possibly it has not yet been initialized
+            logging.error('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
+            
 
     def store_measurements(self, path_to_csv=""):
         """
@@ -125,19 +190,27 @@ class OFFInterface:
 
         self.measurements.to_csv(path_or_buf=path_to_csv)
 
+    def get_measurements(self) -> pd.DataFrame:
+        """
+        Returns the measurements generated by the simulation
+        """
+        return self.measurements
+
     def store_run_file(self):
         """
         Stores the yaml file used to run the simulation
         """
+        # shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
+        #                 self.off_sim.sim_dir + '/' + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
         shutil.copyfile(self.off_sim.settings_sim['path_to_yaml'],
-                        self.off_sim.sim_dir + '/' + self.off_sim.settings_sim['path_to_yaml'].rsplit('/', 1)[-1])
+                        Path(self.off_sim.sim_dir) / self.off_sim.settings_sim['path_to_yaml'].name)
 
     def store_applied_control(self, path_to_csv=""):
         """
         Stores the measurements as a csv in the run folder or at a given path.
         """
         if len(path_to_csv) == 0:
-            path_to_csv = self.off_sim.sim_dir + "/applied_control.csv"
+            path_to_csv = Path(self.off_sim.sim_dir) / "applied_control.csv"
 
         self.control_applied.to_csv(path_or_buf=path_to_csv)
 
@@ -328,14 +401,17 @@ class OFFInterface:
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_logging"], 'r')
         f_logging = yaml.safe_load(stream)
         floris_file.update(f_logging)
+        stream.close()
 
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_solver"], 'r')
         f_solver = yaml.safe_load(stream)
         floris_file.update(f_solver)
+        stream.close()
 
         stream = open(off.OFF_PATH + '/' + settings_wke["floris_wake"], 'r')
         f_wake = yaml.safe_load(stream)
         floris_file.update(f_wake)
+        stream.close()
 
         # Write yaml data for farm and flow field
         farm = dict([('layout_x', settings_wf['farm']['layout_x']),  # Will be overwritten by twf solver
@@ -355,8 +431,8 @@ class OFFInterface:
         floris_file.update(dict([('flow_field', flow_field)]))
 
         current_time = datetime.datetime.now()
-
-        path_out = path_to_tmp + '/tmp_floris_input' + current_time.strftime("%Y%m%d%H%M%S%f") + '.yaml'
+        
+        path_out = path_to_tmp / ('tmp_floris_input' + current_time.strftime("%Y%m%d%H%M%S%f") + '.yaml')
         with open(path_out, "w") as yaml_file:
             yaml.dump(floris_file, yaml_file)
 
