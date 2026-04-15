@@ -268,7 +268,7 @@ class WakeSolver(ABC):
         raise NotImplementedError("_get_wind_speeds_location() is not implemented in the base class, please implement it in the derived class.")
     
     def vis_OP_mountains(self, wind_farm: wfm.WindFarm, sim_dir, t):
-        """
+        r""""
         Goes through all OPs and plots the wind speed along the OP location
         Creates a plot like this ASCI art:
         |    |    |   |   |   |
@@ -412,6 +412,99 @@ class WakeSolver(ABC):
         np.savetxt(sim_dir + "/mountain_plot_v_" + str(int(t)).zfill(6) + "s.csv",
                        data_v, delimiter=',')
         
+        # # Also create a WS_eff contour map at hub height with OP lines overlay
+        # try:
+        #     # Build grid from visualization settings
+        #     x_bounds = self.settings_vis["grid"]["boundaries"][0]
+        #     y_bounds = self.settings_vis["grid"]["boundaries"][1]
+        #     nx = self.settings_vis["grid"]["resolution"][0]
+        #     ny = self.settings_vis["grid"]["resolution"][1]
+
+        #     x_grid = np.linspace(x_bounds[0], x_bounds[1], nx)
+        #     y_grid = np.linspace(y_bounds[0], y_bounds[1], ny)
+
+        #     # Scale to meters if unit is 'D'
+        #     if self.settings_vis["grid"]["unit"][0] == 'D':
+        #         D = self.settings_vis["grid"]["diameter"][0]
+        #         x_grid = x_grid * D
+        #         y_grid = y_grid * D
+
+        #     # Ensure PyWake wake model is ready (set wind farm states via rotor-plane query)
+        #     _ = self._get_wind_speeds_rp(0, wind_farm)
+
+        #     # Compute flow map via PyWake adapter
+        #     fm = self.floris_wake.compute_wake_flow_map(x_grid, y_grid)
+
+        #     # Helper to bilinearly sample WS_eff from flow_map grid
+        #     def _sample_ws_from_flow_map(flow_map, gx, gy, xs, ys):
+        #         Zgrid = np.asarray(flow_map.WS_eff.values)
+        #         Zgrid = np.squeeze(Zgrid)
+        #         # Normalize grid orientation to (len(gy), len(gx))
+        #         if Zgrid.ndim != 2:
+        #             raise ValueError("FlowMap WS_eff returned array with unexpected shape")
+        #         if Zgrid.shape == (len(gx), len(gy)):
+        #             Zgrid = Zgrid.T
+        #         elif Zgrid.shape != (len(gy), len(gx)):
+        #             raise ValueError("FlowMap WS_eff grid shape mismatch")
+
+        #         x_flat = np.array(xs, dtype=float).reshape(-1)
+        #         y_flat = np.array(ys, dtype=float).reshape(-1)
+        #         nx = len(gx)
+        #         ny = len(gy)
+        #         ix = np.clip(np.searchsorted(gx, x_flat) - 1, 0, nx - 2)
+        #         iy = np.clip(np.searchsorted(gy, y_flat) - 1, 0, ny - 2)
+        #         x0 = gx[ix]
+        #         x1 = gx[ix + 1]
+        #         y0 = gy[iy]
+        #         y1 = gy[iy + 1]
+        #         denom_x = x1 - x0
+        #         denom_y = y1 - y0
+        #         tx = np.divide(x_flat - x0, denom_x, out=np.zeros_like(denom_x, dtype=float), where=denom_x != 0)
+        #         ty = np.divide(y_flat - y0, denom_y, out=np.zeros_like(denom_y, dtype=float), where=denom_y != 0)
+        #         f00 = Zgrid[iy, ix]
+        #         f10 = Zgrid[iy, ix + 1]
+        #         f01 = Zgrid[iy + 1, ix]
+        #         f11 = Zgrid[iy + 1, ix + 1]
+        #         return (1 - tx) * (1 - ty) * f00 + tx * (1 - ty) * f10 + (1 - tx) * ty * f01 + tx * ty * f11
+
+        #     # Plot
+        #     fig2, ax2 = plt.subplots()
+        #     fm.plot_wake_map(ax=ax2)
+
+        #     # Overlay OP lines (center points already computed)
+        #     # Draw thin lines along each OP mountain line for context
+        #     for i in range(0, data_x.shape[0]):
+        #         ax2.plot(data_x[i, :], data_y[i, :], color='#ec6842', linewidth=0.8, alpha=0.9)
+
+        #     # Note: data_u and data_v already contain accurate point-sampled wake velocities from vis_tile()
+        #     # No need to resample from coarse flow_map grid - the point sampling is more accurate
+
+        #     # Overlay yawed turbines
+        #     for i_t, tur in enumerate(wind_farm.turbines):
+        #         x = tur.base_location[0]
+        #         y = tur.base_location[1]
+        #         yaw = ot.ot_deg2rad(tur.get_yaw_orientation())
+        #         ax2.plot([x - 0.5 * tur.diameter * np.sin(yaw), x + 0.5 * tur.diameter * np.sin(yaw)],
+        #                  [y + 0.5 * tur.diameter * np.cos(yaw), y - 0.5 * tur.diameter * np.cos(yaw)],
+        #                  color='black', linewidth=1.5)
+        #         ax2.plot([x, x + 0.2 * tur.diameter * np.cos(yaw)],
+        #                  [y, y + 0.2 * tur.diameter * np.sin(yaw)],
+        #                  color='black', linewidth=1.5)
+
+        #     ax2.set_aspect('equal')
+        #     ax2.set_title('WS_eff contour with OP lines')
+        #     ax2.set_xlabel('x (m)')
+        #     ax2.set_ylabel('y (m)')
+        #     scale_grid = 1 if self.settings_vis["grid"]["unit"][0] != 'D' else self.settings_vis["grid"]["diameter"][0]
+        #     ax2.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid,
+        #                  self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
+        #     ax2.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid,
+        #                  self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
+        #     plt.savefig(sim_dir + "/wake_map_at_" + str(int(t)).zfill(6) + "s.png")
+        #     plt.close(fig2)
+        # except Exception:
+        #     lg.exception("Failed to generate WS_eff contour map; continuing with mountain plot only")
+
         
         # Don't plot if the 3d data has been collected
         if self.settings_vis["flow_field_plots"]["mountains_3d"]:
@@ -508,8 +601,11 @@ class TWFSolver(WakeSolver):
             self.floris_wake = wm.Floris4Wake(settings_wke, np.array([]), np.array([]), np.array([]))
         elif settings_sol["wake_model"] == "PythonGaussianWake":
             self.floris_wake = wm.PythonGaussianWake(settings_wke, np.array([]), np.array([]), np.array([]))
+        elif settings_sol["wake_model"].startswith("PyWake"):
+            self.floris_wake = wm.PyWakeModel(settings_wke, np.array([]), np.array([]), np.array([]))
+            lg.info(f'PyWake model initialized: {settings_wke.get("deficit_model", "default")}')
         else:
-            raise ImportError('Wake model unknown!')
+            raise ImportError(f'Wake model unknown: {settings_sol["wake_model"]}!')
 
     def get_measurements(self, i_t: int, wind_farm: wfm.WindFarm) -> tuple:
         """

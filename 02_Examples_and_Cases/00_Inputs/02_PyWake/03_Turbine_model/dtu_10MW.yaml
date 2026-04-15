@@ -1,0 +1,125 @@
+# DTU 10MW adapted to FLORIS v4 turbine library
+#  Based on https://github.com/NREL/turbine-models/blob/master/Offshore/DTU_10MW_178_RWT_v1.csv
+turbine_type: 'dtu_10MW'
+hub_height: 119.0
+rotor_diameter: 178.4
+TSR: 8.0
+operation_model: cosine-loss
+power_thrust_table:
+  ref_air_density: 1.225
+  ref_tilt: 6.0 # Copy from IEA 10MW
+  cosine_loss_exponent_yaw: 1.88
+  cosine_loss_exponent_tilt: 1.88 # Copy from IEA 10MW
+  helix_a: 1.719            # Copy from IEA 10MW
+  helix_power_b: 4.823e-03  # Copy from IEA 10MW
+  helix_power_c: 2.314e-10  # Copy from IEA 10MW
+  helix_thrust_b: 1.157e-03 # Copy from IEA 10MW
+  helix_thrust_c: 1.167e-04 # Copy from IEA 10MW
+  power: # in kW
+    - 0.0     # 0.0
+    - 0.0     # 3.99
+    - 280.2   # 4.0
+    - 799.1   # 5.0
+    - 1532.7
+    - 2506.1
+    - 3730.7
+    - 5311.8
+    - 7286.5  # 10.0
+    - 9698.3
+    - 10639.1
+    - 10648.5
+    - 10639.3
+    - 10683.7 # 15.0
+    - 10642
+    - 10640
+    - 10639.9
+    - 10652.8
+    - 10646.2 # 20.0
+    - 10644
+    - 10641.2
+    - 10639.5
+    - 10643.6
+    - 10635.7 # 25.0
+    - 0.0     # 25.01
+    - 0.0     # 50.0
+  cp:
+    - 0.0
+    - 0.0
+    - 0.286
+    - 0.418 #  5.0
+    - 0.464
+    - 0.478
+    - 0.476
+    - 0.476
+    - 0.476 # 10.0
+    - 0.476
+    - 0.402
+    - 0.317
+    - 0.253
+    - 0.207 # 15.0
+    - 0.17
+    - 0.142
+    - 0.119
+    - 0.102
+    - 0.087 # 20.0
+    - 0.075
+    - 0.065
+    - 0.057
+    - 0.05
+    - 0.044 # 25.0
+    - 0.0
+    - 0.0
+  thrust_coefficient:
+    - 0.0
+    - 0.0
+    - 0.923
+    - 0.919 #  5.0
+    - 0.904
+    - 0.858
+    - 0.814
+    - 0.814
+    - 0.814 # 10.0
+    - 0.814
+    - 0.577
+    - 0.419
+    - 0.323
+    - 0.259 # 15.0
+    - 0.211
+    - 0.175
+    - 0.148
+    - 0.126
+    - 0.109 # 20.0
+    - 0.095
+    - 0.084
+    - 0.074
+    - 0.066
+    - 0.059 # 25.0
+    - 0.0
+    - 0.0
+  wind_speed:
+    - 0.0000
+    - 3.99
+    - 4.0
+    - 5.0
+    - 6.0
+    - 7.0
+    - 8.0
+    - 9.0
+    - 10.0
+    - 11.0
+    - 12.0
+    - 13.0
+    - 14.0
+    - 15.0
+    - 16.0
+    - 17.0
+    - 18.0
+    - 19.0
+    - 20.0
+    - 21.0
+    - 22.0
+    - 23.0
+    - 24.0
+    - 25.0
+    - 25.01
+    - 50.0

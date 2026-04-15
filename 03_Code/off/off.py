@@ -56,11 +56,12 @@ class OFF:
         settings_wke['sim_dir'] = self.root_dir
 
         # =========== FLORIS ===========
-        # Move the FLORIS.yaml file to the simulation directory.
+        # Move the FLORIS.yaml file to the simulation directory (only if using FLORIS)
         # tmp path is updated for reinitialization of the simulation, as a result, the yaml file is only available in the latest simulation folder.
-        settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
-        shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
-        settings_wke['tmp_yaml_path'] = settings_wke['yaml_path']
+        if settings_sol["wake_model"].startswith("FLORIS") or settings_sol["wake_model"] == "PythonGaussianWake":
+            settings_wke['yaml_path'] = self.sim_dir + '/FLORIS.yaml'
+            shutil.move(settings_wke['tmp_yaml_path'], settings_wke['yaml_path'])
+            settings_wke['tmp_yaml_path'] = settings_wke['yaml_path']
 
         # =========== Solver ===========
         # self.wake_solver = ws.FLORIDynTWFWakeSolver(settings_wke, settings_sol)
@@ -389,7 +390,7 @@ class OFF:
         return self.sim_dir
     
     # Print iterations progress
-    def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    def _print_progress_bar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '=', printEnd = "\r"):
         """
         Call in a loop to create terminal progress bar
         @params:

@@ -373,6 +373,7 @@ class YawSteeringPrescribedMotionController(Controller):
         elif settings['input_method'] == "yaml":
             self.lut = np.array(settings['orientation_deg'])
             self.t   = settings['orientation_t']
+            # Debug logging removed
         else:
             raise Warning("Orientation-input %s is undefined!" % settings['path_to_angles_and_directions_csv'])
         
@@ -401,6 +402,7 @@ class YawSteeringPrescribedMotionController(Controller):
         ori = np.interp(time_step, self.t, self.lut[:, i_t])
         wind_dir = turbine.ambient_states.get_wind_dir_ind(0)
 
+        # Debug logging removed
         turbine.set_orientation_yaw(ori, wind_dir)
 
     def get_applied_settings(self, turbine: tur, i_t: int, time_step: float):

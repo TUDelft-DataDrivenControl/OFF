@@ -44,7 +44,7 @@ sim:
   sim:
     time step: 4.0
     time start: 0.0
-    time end: 2000.0
+    time end: 1200.0
       
   # The logging is split in two, one for the console and one for a file. The level can be set to DEBUG, INFO, WARNING, ERROR, CRITICAL
   #   The console logging has a feature where the log messages are colored based on their origin.
@@ -76,21 +76,13 @@ wind_farm:
     layout_x:
       - 0.0
       - 5.0
-      - 10.0
-      - 15.0
     layout_y:
-      - 0.0
-      - 0.0
-      - 0.0
+      - -0.5
       - 0.0
     layout_z:
       - 0.0
       - 0.0
-      - 0.0
-      - 0.0
     turbine_type:
-      - iea_10MW
-      - iea_10MW
       - iea_10MW
       - iea_10MW
     unit:
@@ -99,7 +91,7 @@ wind_farm:
       - 198.0
     boundaries_xyz:
       - -2.0
-      - 20.0
+      - 12.0
       - -4.0
       - 4.0
       - 0.0
@@ -233,12 +225,12 @@ controller:
    orientation: False      # Checks if the data is given as orientation or, if false, as yaw angles
    path_to_orientation_csv: "/_.csv"
    orientation_deg:        # in deg
-     - [270, 270, 270, 270]
-     - [270, 270, 270, 270]
-     - [240, 270, 240, 270]
-     - [240, 270, 240, 270]
-     - [270, 270, 270, 270]
-     - [270, 270, 270, 270]
+     - [270, 270]
+     - [270, 270]
+     - [240, 270]
+     - [240, 270]
+     - [270, 270]
+     - [270, 270]
    orientation_t:          # in s
      - 0.0
      - 600.0
@@ -573,7 +565,7 @@ vis:
     # Mountains wandering through the farm, i.e. the mountains are not static but move with the wind
     mountains_wandering: False
     # 3D mountains
-    mountains_3d: False
+    mountains_3d: True
     # Triggers a debug plot, which creates a voronoi "prism" with the TWF models
     effective_wf_tile: False 
     # Generates the tiled landscape in a 5 color scheme
