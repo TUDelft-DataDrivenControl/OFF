@@ -1,3 +1,12 @@
+### MacOS ###
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Default ignored files ###
+/shelf/
+/workspace.xml
+
 # Python
 __pycache__/
 *.py[cod]
@@ -58,10 +67,16 @@ OFF/03_Code/runs/
 # Figures
 Figures/
 
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
-
 # Documentation builds
 OFF/01_Docs/build/
+
+### onwards files ###
+.runid
+off_run_*
+*.m
+*.asv
+wind_farm_3d_layout.svg
+*.obj
+*.db
+*.pickle
+*.doctree

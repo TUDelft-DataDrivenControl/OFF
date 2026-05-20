@@ -132,9 +132,14 @@ class OFF:
 
         run_id = self.__get_runid__()
 
-        # Use the module's OFF_PATH variable, not os.environ
-        root_dir = data_dir or f'{OFF_PATH}/runs/'
-        lg.info('Root runs directory: ' + root_dir)
+        try:
+            root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
+            lg.info('Root runs directory: ' + root_dir)
+        except KeyError:
+            if os.environ["PWD"].endswith("03_Code"):
+                root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
+            else:
+                root_dir = data_dir or f'{os.environ["PWD"]}/runs/'
 
         self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
         self.root_dir = root_dir[:-len("runs/")]
