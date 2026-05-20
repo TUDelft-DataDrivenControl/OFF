@@ -518,7 +518,6 @@ class WakeSolver(ABC):
         max_u = np.max(data_u)
         max_v = np.max(data_v)
         amplification_factor = 10.0 #m/(m/s)
-        #ax.plot(data_x.flatten(), data_y.flatten(), 'o', markersize=2, color='lightgrey')
         for i in range(0,data_x.shape[0]):
             ax.fill(np.hstack((data_x[i, :] + (max_u - data_u[i, :]) * amplification_factor, data_x[i, ::-1])),
                     np.hstack((data_y[i, :] + (max_v - data_v[i, :]) * amplification_factor, data_y[i, ::-1])), 
@@ -543,10 +542,6 @@ class WakeSolver(ABC):
                     [y, y + 0.2 * tur.diameter * np.sin(yaw)],
                     color='black', linewidth=1.5)
         
-        #ax.tricontourf(data_x.flatten(), 
-        #              data_y.flatten(), 
-        #              np.sqrt(data_u.flatten()**2 + data_v.flatten()**2), 
-        #              levels=np.linspace(0, 9, 10))
         
         ax.set_aspect('equal')
         ax.set_title('Wind speed along OPs')
@@ -555,27 +550,7 @@ class WakeSolver(ABC):
         ax.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid, self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
         ax.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid, self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
         plt.savefig(sim_dir + "/mountain_plot_at_" + str(int(t)).zfill(6) + "s.png")
-        #plt.show()
         plt.close()
-        #print("Plot done!")
-
-
-        """
-        fig, ax = plt.subplots()
-        for i in range(data_x.shape[0]):
-            ax.plot(data_x[i, :] + (8-data_u), data_y[i, :] + (8-data_v), color='blue', alpha=0.5)
-        
-        ax.set_aspect('equal')
-        ax.set_title('Wind speed along OPs')
-        ax.set_xlabel('x (m)')
-        ax.set_ylabel('y (m)')
-        ax.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid, self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
-        ax.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid, self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
-        plt.savefig(sim_dir + "/mountain_plot_at_" + str(int(t)).zfill(6) + "s.png")
-        plt.show()
-
-        print("Plot done!")
-        """
 
 
 class TWFSolver(WakeSolver):
