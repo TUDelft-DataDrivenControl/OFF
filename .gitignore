@@ -1,22 +1,74 @@
 ### MacOS ###
 .DS_Store
+Thumbs.db
+Desktop.ini
 
 # Default ignored files ###
 /shelf/
 /workspace.xml
 
-### Python ###
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-### C extensions ###
 *.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-### Docs ###
-*.doctree
-*.pickle
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Simulation outputs and temporary files
+simulation_output*.txt
+temp_output.txt
+**/simulation_output*.txt
+**/temp_output.txt
+
+# Generated figures
+Figures/
+
+# Development notes
+DEV_NOTES/
+
+# Run outputs
+runs/*/
+!runs/Processing/
+OFF/03_Code/runs/
+
+# Figures
+Figures/
+
+# Documentation builds
+OFF/01_Docs/build/
 
 ### onwards files ###
 .runid
@@ -26,6 +78,5 @@ off_run_*
 wind_farm_3d_layout.svg
 *.obj
 *.db
-
-### directories ###
-.vscode/
+*.pickle
+*.doctree
