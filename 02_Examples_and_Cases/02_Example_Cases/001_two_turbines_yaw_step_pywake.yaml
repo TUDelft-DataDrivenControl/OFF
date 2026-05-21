@@ -91,7 +91,7 @@ wind_farm:
       - 284.0
     boundaries_xyz:
       - -2.0
-      - 16.0
+      - 20.0
       - -4.0
       - 4.0
       - 0.0
@@ -107,22 +107,14 @@ ambient:
 
   flow_field: # This struct is passed on to the AmbientCorrector to feed in the new flow properties
     air_density: 1.225
-    reference_wind_height: 119.0 # Needs to be defined as FLORIS expects different turbine types (-1 might still work)
+    reference_wind_height: 284.0 # Needs to be defined as FLORIS expects different turbine types (-1 might still work)
     turbulence_intensities:
       - 0.03
     wind_directions: # a single value indicates constant conditions, multiple lead to linear interpolation
       - 270.0
-      - 260.0
-      - 265.0
-      - 275.0
-      - 285.0 
       - 270.0
     wind_directions_t:
       - 0.0
-      - 200.0
-      - 250.0
-      - 600.0
-      - 800.0
       - 1200.0
     wind_shear: 0.12
     wind_speeds: # a single value indicates constant conditions, multiple lead to linear interpolation
@@ -240,18 +232,18 @@ controller:
    path_to_orientation_csv: "/_.csv"
    orientation_deg:        # in deg
      - [270, 270]
-     - [260, 260]
-     - [265, 265]
-     - [275, 275]
-     - [285, 285]
+     - [270, 270]
+     - [240, 270]
+     - [240, 270]
+     - [270, 270]
      - [270, 270] 
    orientation_t:          # in s
       - 0.0
-      - 200.0
-      - 250.0
       - 600.0
+      - 700.0
       - 800.0
-      - 1200.0
+      - 900.0
+      - 90000.0
 
 # Turbine information
 #  When using PyWake's turbine library (use_pywake_turbine_library: true), specify the PyWake class name

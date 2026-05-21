@@ -818,8 +818,8 @@ vis:
     generate: False  # Master-switch to generate & store flow field data
     # As OFF isn't grid based, the flow field plots need a grid to be generated.
     boundaries:
-      - [ -2, 20]                 # x in D or m
-      - [ -4, 4]                 # y in D or m
+      - [ -4, 75]                 # x in D or m
+      - [ -4, 84]                 # y in D or m
       - [ 0, 3]                   # z in D or m
     unit:
       - D

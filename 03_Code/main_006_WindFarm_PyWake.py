@@ -49,11 +49,7 @@ def main():
     
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
-    # Example case with FLORIS v4
-    oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "001_two_turbines_yaw_step_floris.yaml" )
-    
-    # Example case with PyWake
-    #oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "001_two_turbines_yaw_step_pywake.yaml")
+    oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "006_HKN_pywake.yaml")
     
     # Run the simulation
     oi.run_sim()
