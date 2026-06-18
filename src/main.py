@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from atmospheric_model import DummyAmbientCorrector, DummyAtmosphericModel
+from atmospheric_model import (
+	AtmosphericModel,
+	DummyAmbientCorrector,
+	HomogeneousFlow,
+	unsteadyBackgroundFlow,
+)
 from farm_controller import DummyFarmController
 from turbine_model import DummyTurbineModel
 from turbine_model.turbine_controller import (
@@ -15,15 +20,24 @@ from wake_model import DummyWakeSolver, DummyWindFarm
 class OFFOrchestrator:
 	"""Minimal simulation orchestrator wiring all dummy module components."""
 
-	def __init__(self) -> None:
+	def __init__(self, atmospheric_model_version: str = "HomogeneousFlow") -> None:
 		self.clock = SimulationClock()
 		self.wind_farm = DummyWindFarm(n_turbines=1)
-		self.atmospheric_model = DummyAtmosphericModel()
+		self.atmospheric_model = self._build_atmospheric_model(atmospheric_model_version)
 		self.ambient_corrector = DummyAmbientCorrector()
 		self.wake_solver = DummyWakeSolver()
 		self.farm_controller = DummyFarmController()
 		self.turbine_controller = DummyTurbineController()
 		self.turbine_model = DummyTurbineModel()
+
+	def _build_atmospheric_model(self, version: str) -> AtmosphericModel:
+		if version == "HomogeneousFlow":
+			return HomogeneousFlow()
+		if version == "unsteadyBackgroundFlow":
+			return unsteadyBackgroundFlow()
+		raise ValueError(
+			"Unknown atmospheric_model_version. Use 'HomogeneousFlow' or 'unsteadyBackgroundFlow'."
+		)
 
 	def step(self) -> None:
 		t = self.clock.t_s
@@ -51,11 +65,13 @@ class OFFOrchestrator:
 		self.clock.t_s += dt
 
 
-def create_default_simulation() -> OFFOrchestrator:
+def create_default_simulation(
+	atmospheric_model_version: str = "HomogeneousFlow",
+) -> OFFOrchestrator:
 	"""Create a default dummy simulation instance."""
-	return OFFOrchestrator()
+	return OFFOrchestrator(atmospheric_model_version=atmospheric_model_version)
 
 
 if __name__ == "__main__":
-	sim = create_default_simulation()
+	sim = create_default_simulation(atmospheric_model_version="HomogeneousFlow")
 	sim.step()

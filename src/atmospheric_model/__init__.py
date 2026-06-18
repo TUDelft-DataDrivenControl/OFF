@@ -7,6 +7,8 @@ from atmospheric_model.base import (
     DummyObservationPoints,
     ObservationPoints,
 )
+from atmospheric_model.homogeneous_flow import HomogeneousFlow
+from atmospheric_model.unsteady_background_flow import unsteadyBackgroundFlow
 
 __all__ = [
     "AmbientState",
@@ -16,4 +18,6 @@ __all__ = [
     "DummyAtmosphericModel",
     "DummyObservationPoints",
     "DummyAmbientCorrector",
+    "HomogeneousFlow",
+    "unsteadyBackgroundFlow",
 ]
