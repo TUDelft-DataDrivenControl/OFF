@@ -193,6 +193,36 @@ class FLORIDynOPs4(ObservationPoints):
         self.states[1:, 1] = self.states[:-1, 1] + self.op_propagation_speed[:-1, 1] * time_step
         self.states[1:, 3] = self.states[:-1, 3] + np.sqrt(self.op_propagation_speed[:-1, 0]**2 +
                                                            self.op_propagation_speed[:-1, 1]**2) * time_step
+        
+    def store_or_append_ops(self, path_to_file: str, dim: int, time = -1):
+        """
+        Stores one spacial dimension ofthe OPs in a .csv file. 
+        If the file already exists, the OPs are appended to the existing file
+
+        Parameters
+        ----------
+        path_to_file : str
+            path to the .csv file where the OPs should be stored
+        dim : int
+            index of the dimension that should be stored
+        """
+        # store the states in self.states[:, dim] in a .csv file, if the file already exists, append the states to the existing file
+        if time == -1:
+            try:
+                existing_data = np.loadtxt(path_to_file, delimiter=',')
+                new_data = np.concatenate((existing_data, self.states[:, dim]), axis=0)
+                np.savetxt(path_to_file, new_data, delimiter=',')
+            except OSError:
+                np.savetxt(path_to_file, self.states[:, dim], delimiter=',')
+        else:
+            # add timestep as first entry in the row, and then the OP states
+            data_to_store = np.concatenate(([time], self.states[:, dim]), axis=0)
+            try:
+                existing_data = np.loadtxt(path_to_file, delimiter=',')
+                new_data = np.vstack((existing_data, data_to_store))
+                np.savetxt(path_to_file, new_data, delimiter=',')
+            except OSError:
+                np.savetxt(path_to_file, data_to_store, delimiter=',')
 
 
 class FLORIDynOPs6(ObservationPoints):

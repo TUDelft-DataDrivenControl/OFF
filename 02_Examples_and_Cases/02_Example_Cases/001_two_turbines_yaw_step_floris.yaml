@@ -570,6 +570,8 @@ vis:
     effective_wf_tile: False 
     # Generates the tiled landscape in a 5 color scheme
     effective_wf_tile_5color: False 
+    # Store all OPs x,y locations
+    store_op_xy: True
     
 
 

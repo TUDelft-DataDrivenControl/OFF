@@ -311,6 +311,20 @@ class OFF:
                     self.settings_vis["flow_field_plots"]["mountains_offset"] = np.mod(
                         self.settings_vis["flow_field_plots"]["mountains_offset"],
                         self.settings_vis["flow_field_plots"]["mountains_stride"])
+                    
+            if (self.settings_vis["flow_field_plots"]["plot"] and 
+                self.settings_vis["flow_field_plots"]["store_op_xy"]):
+                for idx, tur in enumerate(self.wind_farm.turbines):
+                    tur.observation_points.store_or_append_ops(
+                        self.sim_dir + f"/T{idx}_op_pos_x.csv", # File to store in
+                        0,  # x Dimension
+                        t   # Time step
+                    )
+                    tur.observation_points.store_or_append_ops(
+                        self.sim_dir + f"/T{idx}_op_pos_y.csv", # File to store in
+                        1,  # y Dimension
+                        t   # Time step
+                    )
 
 
             # ///////////////////// PROPAGATE /////////////////////
@@ -335,6 +349,8 @@ class OFF:
             if (self.settings_vis["debug"]["effective_wf_tile"] and
                         t in self.settings_vis["debug"]["time"]):
                 self.visualizer_ff.vis_save_flow_field(self.sim_dir + '/flow_field_' + str(t))
+
+            
 
             lg.info('Ending time step: %s s.' % t)
             self._print_progress_bar(iteration, self.iterations_total, prefix = 'Simulation progress:', suffix = 'Complete', length = 50)
