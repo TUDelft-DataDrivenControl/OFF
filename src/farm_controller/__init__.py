@@ -1,3 +1,3 @@
-from farm_controller.base import DummyFarmController, FarmControlCommand, FarmController
+from farm_controller.base import FarmController_Dummy, FarmControlCommand, FarmController_Base
 
-__all__ = ["FarmControlCommand", "FarmController", "DummyFarmController"]
+__all__ = ["FarmControlCommand", "FarmController_Base", "FarmController_Dummy"]
