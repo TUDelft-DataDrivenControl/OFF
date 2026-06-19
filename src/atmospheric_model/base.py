@@ -12,7 +12,7 @@ class AmbientState:
     turbulence_intensity: float = 0.0
 
 
-class AtmosphericModel(ABC):
+class AtmosphericModel_Base(ABC):
     """Base interface for atmospheric state providers."""
 
     @abstractmethod
@@ -27,19 +27,6 @@ class AtmosphericModel(ABC):
     def reset(self) -> None:
         raise NotImplementedError
 
-
-class ObservationPoints(ABC):
-    """Base interface for wake observation point chains."""
-
-    @abstractmethod
-    def init_all_states(self, turbine: Any, ambient: AtmosphericModel) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def propagate_ops(self, dt: float) -> None:
-        raise NotImplementedError
-
-
 class AmbientCorrector(ABC):
     """Base interface for ambient correction / filtering."""
 
@@ -52,7 +39,7 @@ class AmbientCorrector(ABC):
         raise NotImplementedError
 
 
-class DummyAtmosphericModel(AtmosphericModel):
+class AtmosphericModel_Dummy(AtmosphericModel_Base):
     """Minimal atmospheric model for integration scaffolding."""
 
     def __init__(self) -> None:
@@ -66,16 +53,6 @@ class DummyAtmosphericModel(AtmosphericModel):
 
     def reset(self) -> None:
         self._state = AmbientState()
-
-
-class DummyObservationPoints(ObservationPoints):
-    """Minimal observation point implementation."""
-
-    def init_all_states(self, turbine: Any, ambient: AtmosphericModel) -> None:
-        return None
-
-    def propagate_ops(self, dt: float) -> None:
-        return None
 
 
 class DummyAmbientCorrector(AmbientCorrector):

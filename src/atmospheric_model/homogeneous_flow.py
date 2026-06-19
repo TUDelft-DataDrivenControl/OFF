@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from atmospheric_model.base import AmbientState, AtmosphericModel
+from atmospheric_model.base import AmbientState, AtmosphericModel_Base
 
 
-class HomogeneousFlow(AtmosphericModel):
+class AtmosphericModel_HomogeneousFlow(AtmosphericModel_Base):
     """Steady and spatially uniform atmospheric model."""
 
     def __init__(

@@ -9,7 +9,7 @@ class FarmControlCommand:
     yaw_target_deg: float | None = None
 
 
-class FarmController(ABC):
+class FarmController_Base(ABC):
     """Base interface for farm-level controllers."""
 
     @abstractmethod
@@ -17,7 +17,7 @@ class FarmController(ABC):
         raise NotImplementedError
 
 
-class DummyFarmController(FarmController):
+class FarmController_Dummy(FarmController_Base):
     """Minimal farm-level controller for scaffolding."""
 
     def compute_command_for_turbine(self, turbine_id: int, t: float, dt: float) -> FarmControlCommand:

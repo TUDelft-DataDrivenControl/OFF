@@ -1,0 +1,264 @@
+OFF Refactor UML (Text)
+Source: src/*/TODO.md
+Date: 2026-06-18
+
+====================================================================
+1) COMPONENT UML (Mermaid text)
+====================================================================
+
+```mermaid
+flowchart LR
+    Orchestrator[Orchestrator / OFFSimulation\nsrc/main.py]
+    API[Public API\ncreate run stop reset\nget_state set_state export]
+
+    Atm[Atmospheric Model\nsrc/atmospheric_model]
+    Corr[Ambient Corrector\nFilter Chain]
+    OP[Observation Points]
+
+    WakeSolver[Wake Solver\nsrc/wake_model/solver.py]
+    WakeModel[Wake Model\nGaussian / FLORIS / PyWake / Custom]
+    WindFarm[WindFarm\nlayout dependencies]
+
+    FarmCtrl[Farm Controller\nsrc/farm_controller]
+    TurbCtrl[Turbine Controller\nsrc/turbine_model/turbine_controller]
+    TurbModel[Turbine Model\nsrc/turbine_model]
+
+    Utils[Shared Utils\ncoordinates states io logging typing]
+
+    API --> Orchestrator
+    Orchestrator --> Atm
+    Orchestrator --> Corr
+    Orchestrator --> OP
+    Orchestrator --> WakeSolver
+    Orchestrator --> FarmCtrl
+    Orchestrator --> TurbCtrl
+    Orchestrator --> TurbModel
+    Orchestrator --> WindFarm
+
+    Atm --> WakeSolver
+    WakeSolver --> Atm
+    WakeSolver --> TurbModel
+    WakeSolver --> WakeModel
+
+    FarmCtrl --> TurbCtrl
+    TurbCtrl --> TurbModel
+    TurbModel --> WakeModel
+
+    Atm --> Corr
+    Corr --> Atm
+
+    Atm -. uses .-> Utils
+    WakeSolver -. uses .-> Utils
+    WakeModel -. uses .-> Utils
+    TurbModel -. uses .-> Utils
+    FarmCtrl -. uses .-> Utils
+    TurbCtrl -. uses .-> Utils
+    Orchestrator -. uses .-> Utils
+```
+
+====================================================================
+2) CLASS UML (Mermaid text)
+====================================================================
+
+```mermaid
+classDiagram
+
+class OFFOrchestrator {
+  +create()
+  +run()
+  +stop()
+  +reset()
+  +get_state()
+  +set_state(state)
+  +export(fmt)
+}
+
+class AtmosphericModel {
+  <<abstract>>
+  +get_wind_speed(location)
+  +get_wind_speed_abs(location)
+  +get_wind_dir(location)
+  +get_turbulence_intensity(location)
+  +get_state_at_turbine(turbine_id)
+  +create_interpolated_state(s1,s2,w)
+  +iterate()
+  +reset()
+  +describe()
+}
+
+class HomogeneousFlow
+class unsteadyBackgroundFlow
+AtmosphericModel <|-- HomogeneousFlow
+AtmosphericModel <|-- unsteadyBackgroundFlow
+
+class AmbientCorrector {
+  +update(t)
+  +__call__(raw_state)
+}
+
+class AbstractFilter {
+  <<abstract>>
+  +update(t)
+  +__call__(state)
+}
+
+class Consensus
+class ExponentialMovingAverage
+AbstractFilter <|-- Consensus
+AbstractFilter <|-- ExponentialMovingAverage
+AmbientCorrector o-- AbstractFilter : filter chain
+
+class ObservationPoints {
+  <<abstract>>
+  +get_world_coord()
+  +get_vec_op_to_turbine()
+  +init_all_states(turbine,ambient)
+  +propagate_ops(dt)
+  +reset()
+}
+
+class FLORIDynOPs4
+class FLORIDynOPs6
+ObservationPoints <|-- FLORIDynOPs4
+ObservationPoints <|-- FLORIDynOPs6
+
+class WakeSolver {
+  <<abstract>>
+  +get_measurements(turbine_id)
+  +set_wind_farm(wf)
+  +get_wind_speeds_location(locations)
+  +reset()
+}
+
+class WakeModel {
+  <<abstract>>
+  +get_measurements(turbine_id,rotor_points,ambient,turbine_states)
+  +set_wind_farm(layout,turbine_states,ambient_states)
+  +reset()
+  +describe()
+}
+
+class PythonGaussianWake
+class FLORISWakeAdapter
+class PyWakeAdapter
+WakeModel <|-- PythonGaussianWake
+WakeModel <|-- FLORISWakeAdapter
+WakeModel <|-- PyWakeAdapter
+
+class WindFarm {
+  +get_layout()
+  +get_dependencies()
+  +add_turbine(t)
+  +remove_turbine(i)
+  +get_op_world_coordinates()
+}
+
+class TurbineModel {
+  <<abstract>>
+  +calc_power(wind_speed,yaw,density)
+  +get_cp(wind_speed,yaw)
+  +get_ct(wind_speed,yaw)
+  +get_rotor_pos()
+  +set_yaw(yaw_deg)
+  +set_tilt(tilt_deg)
+  +calc_yaw_misalignment(wind_dir_deg)
+  +step(dt,effective_wind_speed)
+  +reset()
+  +describe()
+}
+
+class HAWT_ADM
+TurbineModel <|-- HAWT_ADM
+
+class TurbineStates {
+  <<abstract>>
+  +get_current_yaw()
+  +get_current_ax_ind()
+  +get_current_cp()
+  +get_current_ct()
+  +set_yaw(yaw_deg)
+  +set_ax_ind(a)
+  +iterate()
+  +reset()
+}
+
+class TurbineStatesFLORIDyn
+TurbineStates <|-- TurbineStatesFLORIDyn
+TurbineModel o-- TurbineStates
+
+class FarmController {
+  <<abstract>>
+  +__call__(turbines,ambient,t)
+  +update(t)
+  +get_applied_settings()
+  +reset()
+  +describe()
+}
+
+class IdealGreedyBaselineController
+class RealisticGreedyBaselineController
+class YawSteeringLUTController
+class YawSteeringPrescribedMotionController
+class YawSteeringFilteredPrescribedMotionController
+class OverrideController
+
+FarmController <|-- IdealGreedyBaselineController
+FarmController <|-- RealisticGreedyBaselineController
+FarmController <|-- YawSteeringLUTController
+FarmController <|-- YawSteeringPrescribedMotionController
+FarmController <|-- YawSteeringFilteredPrescribedMotionController
+FarmController <|-- OverrideController
+
+class TurbineController {
+  <<abstract>>
+  +update_from_farm_command(cmd)
+  +observe(measurement)
+  +compute_setpoints(t,dt)
+  +reset()
+  +describe()
+}
+
+class GreedyYawTurbineController
+class PassThroughTurbineController
+TurbineController <|-- GreedyYawTurbineController
+TurbineController <|-- PassThroughTurbineController
+
+class FarmCommand
+class TurbineMeasurement
+class TurbineSetpoints
+TurbineController ..> FarmCommand
+TurbineController ..> TurbineMeasurement
+TurbineController ..> TurbineSetpoints
+
+class TurbineOutput
+class WakeMeasurement
+class AmbientState
+class ControlOutput
+
+OFFOrchestrator --> AtmosphericModel
+OFFOrchestrator --> AmbientCorrector
+OFFOrchestrator --> ObservationPoints
+OFFOrchestrator --> WakeSolver
+OFFOrchestrator --> FarmController
+OFFOrchestrator --> TurbineController
+OFFOrchestrator --> TurbineModel
+OFFOrchestrator --> WindFarm
+
+WakeSolver --> WakeModel
+WakeSolver --> AtmosphericModel
+WakeSolver --> TurbineModel
+FarmController --> TurbineController
+TurbineController --> TurbineModel
+TurbineModel --> WakeModel
+```
+
+====================================================================
+3) QUICK LEGEND
+====================================================================
+
+- OFFOrchestrator is the central time/causality manager.
+- FarmController issues high-level commands per turbine.
+- TurbineController converts high-level command + local measurements into actuator setpoints.
+- WakeSolver is the bridge between orchestrator and selected WakeModel implementation.
+- AtmosphericModel variants are interchangeable (currently: HomogeneousFlow, unsteadyBackgroundFlow).
+- Utils is a shared service layer (types, states, coordinates, io, logging).
