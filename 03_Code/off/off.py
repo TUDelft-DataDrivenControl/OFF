@@ -17,6 +17,7 @@
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from pathlib import Path
 
 import logging
 lg = logging.getLogger('off')
@@ -133,19 +134,20 @@ class OFF:
         run_id = self.__get_runid__()
 
         try:
-            root_dir = data_dir or f'{os.environ["OFF_PATH"]}/runs/'
-            lg.info('Root runs directory: ' + root_dir)
+            root_path = Path(data_dir) if data_dir else Path(os.environ["OFF_PATH"]) / "runs"
+            lg.info('Root runs directory: ' + str(root_path))
         except KeyError:
-            if os.environ["PWD"].endswith("03_Code"):
-                root_dir = data_dir or f'{os.environ["PWD"][:-len("03_Code")]}/runs/'
+            cwd = Path.cwd()
+            if cwd.name == "03_Code":
+                root_path = Path(data_dir) if data_dir else cwd.parent / "runs"
             else:
-                root_dir = data_dir or f'{os.environ["PWD"]}/runs/'
+                root_path = Path(data_dir) if data_dir else cwd / "runs"
 
-        self.sim_dir = f'{root_dir}/off_run_{run_id}' if sim_dir is None else sim_dir
-        self.root_dir = root_dir[:-len("runs/")]
+        self.sim_dir = str(root_path / f'off_run_{run_id}') if sim_dir is None else sim_dir
+        self.root_dir = str(root_path.parent)
 
-        if not os.path.exists(self.sim_dir):
-            os.makedirs(self.sim_dir)
+        if not Path(self.sim_dir).exists():
+            Path(self.sim_dir).mkdir(parents=True, exist_ok=True)
             lg.info('Created simulation directory at ' + self.sim_dir)
 
     def __logger_init__(self, settings_sim: dict):
