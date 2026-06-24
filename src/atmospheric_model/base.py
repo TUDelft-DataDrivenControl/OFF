@@ -1,65 +1,36 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any
-
-
-@dataclass
-class AmbientState:
-    wind_speed_abs_mps: float = 0.0
-    wind_dir_deg: float = 270.0
-    turbulence_intensity: float = 0.0
-
+import numpy as np
 
 class AtmosphericModel_Base(ABC):
     """Base interface for atmospheric state providers."""
 
     @abstractmethod
-    def get_state_at_turbine(self, turbine_id: int) -> AmbientState:
-        raise NotImplementedError
-
-    @abstractmethod
     def step(self, dt: float) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def reset(self) -> None:
         raise NotImplementedError
-
-class AmbientCorrector(ABC):
-    """Base interface for ambient correction / filtering."""
-
+    
     @abstractmethod
-    def update(self, t: float) -> None:
+    def get_u_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
         raise NotImplementedError
-
+    
     @abstractmethod
-    def __call__(self, state: AmbientState) -> AmbientState:
+    def get_v_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
         raise NotImplementedError
-
-
-class AtmosphericModel_Dummy(AtmosphericModel_Base):
-    """Minimal atmospheric model for integration scaffolding."""
-
-    def __init__(self) -> None:
-        self._state = AmbientState()
-
-    def get_state_at_turbine(self, turbine_id: int) -> AmbientState:
-        return self._state
-
-    def step(self, dt: float) -> None:
-        return None
-
-    def reset(self) -> None:
-        self._state = AmbientState()
-
-
-class DummyAmbientCorrector(AmbientCorrector):
-    """No-op ambient corrector."""
-
-    def update(self, t: float) -> None:
-        return None
-
-    def __call__(self, state: AmbientState) -> AmbientState:
-        return state
+    
+    def get_w_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+        """
+        Default implementation of get_w() returns zero vertical velocity.
+        Override this method in derived classes if vertical velocity is non-negligible.
+        """
+        assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
+        return np.zeros_like(x)
+    
+    @abstractmethod
+    def get_horizontal_wind_dir_deg(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+        raise NotImplementedError
