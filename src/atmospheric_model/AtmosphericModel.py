@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 import numpy as np
 
-class AtmosphericModel_Base(ABC):
+class AtmosphericModel(ABC):
     """Base interface for atmospheric state providers."""
 
     @abstractmethod
@@ -15,7 +15,6 @@ class AtmosphericModel_Base(ABC):
     def reset(self) -> None:
         raise NotImplementedError
     
-
     """ 
     ---------------------------------------
     Observables 

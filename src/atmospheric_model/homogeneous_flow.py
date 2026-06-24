@@ -1,10 +1,10 @@
 from __future__ import annotations
 import numpy as np
 
-from atmospheric_model.base import AtmosphericModel_Base
+from atmospheric_model.AtmosphericModel import AtmosphericModel
 
 
-class AtmosphericModel_HomogeneousFlow(AtmosphericModel_Base):
+class AtmosphericModel_HomogeneousFlow(AtmosphericModel):
     """Steady and spatially uniform atmospheric model."""
 
     wind_speed_abs_mps: float

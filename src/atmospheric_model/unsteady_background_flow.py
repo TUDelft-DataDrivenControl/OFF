@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import math
 
-from atmospheric_model.base import AmbientState, AtmosphericModel_Base
+from atmospheric_model.AtmosphericModel import AmbientState, AtmosphericModel
 
 
-class AtmosphericModel_UnsteadyBackgroundFlow(AtmosphericModel_Base):
+class AtmosphericModel_UnsteadyBackgroundFlow(AtmosphericModel):
     """Simple time-varying background flow model."""
 
     def __init__(

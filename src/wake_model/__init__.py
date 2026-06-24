@@ -1,19 +1,9 @@
-from wake_model.base import (
-    DummyWakeModel,
-    DummyWakeSolver,
-    DummyWindFarm,
-    WakeMeasurement,
+from wake_model.WakeModel import (
     WakeModel,
-    WakeSolver,
-    WindFarm,
+    PassthroughWakeModel
 )
 
 __all__ = [
-    "WakeMeasurement",
     "WakeModel",
-    "WakeSolver",
-    "WindFarm",
-    "DummyWakeModel",
-    "DummyWakeSolver",
-    "DummyWindFarm",
+    "PassthroughWakeModel",
 ]
