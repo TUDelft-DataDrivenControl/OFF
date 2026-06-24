@@ -1,4 +1,4 @@
-from turbine_model.TurbineModel import (
+from TurbineModel.TurbineModel import (
     TurbineModel,
 )
 

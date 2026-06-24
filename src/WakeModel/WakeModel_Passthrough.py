@@ -1,9 +1,9 @@
 import numpy as np
 
-from atmospheric_model import AtmosphericModel
-from wake_model.WakeModel import WakeModel
+from AtmosphericModel import AtmosphericModel
+from WakeModel.WakeModel import WakeModel
 
-class PassthroughWakeModel(WakeModel):
+class WakeModel_Passthrough(WakeModel):
     """
     A wake model that simply passes through the input flow field without any modifications.
     This model is useful for testing and validation purposes.

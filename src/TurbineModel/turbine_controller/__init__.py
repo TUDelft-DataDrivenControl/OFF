@@ -1,4 +1,4 @@
-from turbine_model.turbine_controller.controller import (
+from TurbineModel.turbine_controller.controller import (
     DummyTurbineController,
     FarmCommand,
     TurbineController,

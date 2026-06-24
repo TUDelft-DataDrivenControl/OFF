@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from atmospheric_model import (
+from AtmosphericModel import (
 	AtmosphericModel,
 	DummyAmbientCorrector,
 	HomogeneousFlow,
 	unsteadyBackgroundFlow,
 )
-from farm_controller import DummyFarmController
-from turbine_model import DummyTurbineModel
-from turbine_model.turbine_controller import (
+from FarmController import DummyFarmController
+from TurbineModel import DummyTurbineModel
+from TurbineModel.turbine_controller import (
 	DummyTurbineController,
 	FarmCommand,
 	TurbineMeasurement,
 )
 from utils import SimulationClock
-from wake_model import DummyWakeSolver, DummyWindFarm
+from WakeModel import DummyWakeSolver, DummyWindFarm
 
 
 class OFFOrchestrator:
