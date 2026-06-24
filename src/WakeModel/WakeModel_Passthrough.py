@@ -1,7 +1,7 @@
 import numpy as np
 
 from AtmosphericModel import AtmosphericModel
-from WakeModel.WakeModel import WakeModel
+from .WakeModel import WakeModel
 
 class WakeModel_Passthrough(WakeModel):
     """
