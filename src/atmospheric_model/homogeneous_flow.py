@@ -32,16 +32,24 @@ class AtmosphericModel_HomogeneousFlow(AtmosphericModel_Base):
         self.wind_dir_deg = self._initial_state_wind_dir_deg
         self.turbulence_intensity_percent = self._initial_state_turbulence_intensity_percent
 
-    def get_u_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+    def obs_u_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
         assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
         u = self.wind_speed_abs_mps * np.cos(np.radians(self.wind_dir_deg))
         return np.full_like(x, u)
 
-    def get_v_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+    def obs_v_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
         assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
         v = self.wind_speed_abs_mps * np.sin(np.radians(self.wind_dir_deg))
         return np.full_like(x, v)
 
-    def get_horizontal_wind_dir_deg(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+    def obs_horizontal_wind_dir_deg(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
         assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
         return np.full_like(x, self.wind_dir_deg)
+    
+    def obs_horizontal_wind_speed_mps(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+        assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
+        return np.full_like(x, self.wind_speed_abs_mps)
+
+    def obs_turbulence_intensity_percent(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: float) -> np.ndarray:
+        assert x.shape == y.shape == z.shape, "x, y, z must have the same shape"
+        return np.full_like(x, self.turbulence_intensity_percent)
