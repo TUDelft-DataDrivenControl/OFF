@@ -49,7 +49,7 @@ def main():
     
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
-    oi.init_simulation_by_path( Path("/Volumes/staff-umbrella/Confidential data HKN/Yaw_Steering_Experiments/2026_06_18_LUTs_Phase_One/OFF_HKN_Wake_Steering_Test_Phase_One.yaml") )
+    oi.init_simulation_by_path( Path("/Volumes/staff-umbrella/Confidential data HKN/Yaw_Steering_Experiments/2026_06_18_LUTs_Phase_One/OFF_HKN_Wake_Steering_Test_Phase_One_FLORIS_GCH.yaml") )
     
     # Run the simulation
     oi.run_sim()
