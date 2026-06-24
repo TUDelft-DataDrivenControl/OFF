@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 
-from AtmosphericModel.AtmosphericModel import AtmosphericModel
+from .AtmosphericModel import AtmosphericModel
 
 
 class AtmosphericModel_HomogeneousFlow(AtmosphericModel):

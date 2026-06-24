@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from AtmosphericModel.AtmosphericModel import AmbientState, AtmosphericModel
+from .AtmosphericModel import  AtmosphericModel
 
 
 class AtmosphericModel_UnsteadyBackgroundFlow(AtmosphericModel):
@@ -26,31 +26,31 @@ class AtmosphericModel_UnsteadyBackgroundFlow(AtmosphericModel):
         self._dir_amplitude_deg = dir_amplitude_deg
         self._dir_period_s = max(dir_period_s, 1e-9)
         self._turbulence_intensity = turbulence_intensity
-        self._state = AmbientState(
-            wind_speed_abs_mps=base_wind_speed_abs_mps,
-            wind_dir_deg=base_wind_dir_deg,
-            turbulence_intensity=turbulence_intensity,
-        )
+        # self._state = AmbientState(
+        #     wind_speed_abs_mps=base_wind_speed_abs_mps,
+        #     wind_dir_deg=base_wind_dir_deg,
+        #     turbulence_intensity=turbulence_intensity,
+        # )
 
-    def get_state_at_turbine(self, turbine_id: int) -> AmbientState:
-        return self._state
+    # def get_state_at_turbine(self, turbine_id: int) -> AmbientState:
+    #     return self._state
 
     def step(self, dt: float) -> None:
         self._t_s += dt
         speed_phase = 2.0 * math.pi * self._t_s / self._speed_period_s
         dir_phase = 2.0 * math.pi * self._t_s / self._dir_period_s
 
-        self._state = AmbientState(
-            wind_speed_abs_mps=self._base_wind_speed_abs_mps
-            + self._speed_amplitude_mps * math.sin(speed_phase),
-            wind_dir_deg=self._base_wind_dir_deg + self._dir_amplitude_deg * math.sin(dir_phase),
-            turbulence_intensity=self._turbulence_intensity,
-        )
+        # self._state = AmbientState(
+        #     wind_speed_abs_mps=self._base_wind_speed_abs_mps
+        #     + self._speed_amplitude_mps * math.sin(speed_phase),
+        #     wind_dir_deg=self._base_wind_dir_deg + self._dir_amplitude_deg * math.sin(dir_phase),
+        #     turbulence_intensity=self._turbulence_intensity,
+        # )
 
     def reset(self) -> None:
         self._t_s = 0.0
-        self._state = AmbientState(
-            wind_speed_abs_mps=self._base_wind_speed_abs_mps,
-            wind_dir_deg=self._base_wind_dir_deg,
-            turbulence_intensity=self._turbulence_intensity,
-        )
+        # self._state = AmbientState(
+        #     wind_speed_abs_mps=self._base_wind_speed_abs_mps,
+        #     wind_dir_deg=self._base_wind_dir_deg,
+        #     turbulence_intensity=self._turbulence_intensity,
+        # )
