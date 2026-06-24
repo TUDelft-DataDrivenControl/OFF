@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import numpy as np
 
-from atmospheric_model import AtmosphericModel
+from AtmosphericModel import AtmosphericModel
 
 class WakeModel(ABC):
     """

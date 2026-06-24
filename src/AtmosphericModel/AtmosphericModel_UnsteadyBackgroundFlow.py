@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from atmospheric_model.AtmosphericModel import AmbientState, AtmosphericModel
+from AtmosphericModel.AtmosphericModel import AmbientState, AtmosphericModel
 
 
 class AtmosphericModel_UnsteadyBackgroundFlow(AtmosphericModel):
