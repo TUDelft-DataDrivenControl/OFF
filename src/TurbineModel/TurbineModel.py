@@ -12,3 +12,11 @@ class TurbineModel(ABC):
     @abstractmethod
     def set_yaw(self, yaw_deg: float) -> None:
         raise NotImplementedError
+    
+    def get_citation(self) -> str:
+        """ Returns a citation string for the turbine model. Default implementation returns a generic citation.
+
+        Returns:
+            str: Citation string for the turbine model.
+        """
+        return "No specific Turbine Model citation available."

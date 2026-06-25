@@ -207,3 +207,11 @@ class AtmosphericModel(ABC):
             np.ndarray: Array of shape (N,) where N is the number of positions. Each element contains the atmospheric boundary layer height at the corresponding position (m).
         """
         return 1000 * np.ones_like(x)  # Default to 1000 m boundary layer height
+    
+    def get_citation(self) -> str:
+        """ Returns a citation string for the atmospheric model. Default implementation returns a generic citation.
+
+        Returns:
+            str: Citation string for the atmospheric model.
+        """
+        return "No specific Atmospheric Model citation available."
