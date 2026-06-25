@@ -35,7 +35,7 @@ class TurbineModel(ABC):
     """
     @abstractmethod
     def obs_generator_power_w(self) -> float:
-        """ Abstract method to observe the current generator power output of the turbine.
+        """ Observes the current generator power output of the turbine.
 
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
@@ -46,14 +46,41 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_rotor_power_w(self) -> float:
-        """ Abstract method to observe the current rotor power output of the turbine.
+    def obs_aerodynamic_power_w(self) -> float:
+        """ Observes the current aerodynamic power of the turbine.
+        The aerodynamic power is the power extracted from the wind by the rotor, which is then converted to electrical power by the generator, coupled by a potential gearbox.
 
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
 
         Returns:
-            float: Current rotor power output of the turbine (W).
+            float: Current aerodynamic power of the turbine (W).
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def obs_available_power_w(self) -> float:
+        """ Observes the current available power of the turbine.
+        The available power is the power that would be generated if the turbine were operating at its optimal conditions, given the current wind speed and direction.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            float: Current available power of the turbine (W).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_power_coefficient(self) -> float:
+        """ Observes the current power coefficient of the turbine.
+        The power coefficient is a dimensionless number that represents the efficiency of the turbine in converting the kinetic energy of the wind into electrical energy.
+
+        Returns:
+            float: Current power coefficient of the turbine (dimensionless).
+            
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
         """
         raise NotImplementedError
 
@@ -204,11 +231,31 @@ class TurbineModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def obs_rotor_center_location_m(self) -> np.ndarray:
+        """ Observes the location of the rotor center of the turbine.
+        This measurement includes the hub height of the turbine and the nacelle dimensions.
+
+        Returns:
+            np.ndarray: Location of the rotor center of the turbine (x, y, z) in meters.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def obs_rotor_hub_height_m(self) -> float:
         """ Observes the hub height of the turbine.
 
         Returns:
             float: Hub height of the turbine (m).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_rotor_overhang_m(self) -> float:
+        """ Observes the rotor overhang of the turbine.
+        The rotor overhang is the distance from the rotor center to the tower centerline.
+
+        Returns:
+            float: Rotor overhang of the turbine (m).
         """
         raise NotImplementedError
     
