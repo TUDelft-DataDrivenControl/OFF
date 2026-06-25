@@ -23,6 +23,14 @@ class WakeModel(ABC):
     @abstractmethod
     def reset(self) -> None:
         raise NotImplementedError
+    
+    def get_citation(self) -> str:
+        """ Returns a citation string for the wake model. Default implementation returns a generic citation.
+
+        Returns:
+            str: Citation string for the wake model.
+        """
+        return "No specific Wake Model citation available."
 
     """ 
     ---------------------------------------

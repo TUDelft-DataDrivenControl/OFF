@@ -39,6 +39,14 @@ class TurbineController(ABC):
     @abstractmethod
     def compute_setpoints(self, t: float, dt: float) -> TurbineSetpoints:
         raise NotImplementedError
+    
+    def get_citation(self) -> str:
+        """ Returns a citation string for the turbine controller. Default implementation returns a generic citation.
+
+        Returns:
+            str: Citation string for the turbine controller.
+        """
+        return "No specific Turbine Controller citation available."
 
 
 class DummyTurbineController(TurbineController):
@@ -58,3 +66,5 @@ class DummyTurbineController(TurbineController):
         if self._cmd and self._cmd.yaw_target_deg is not None:
             return TurbineSetpoints(yaw_setpoint_deg=self._cmd.yaw_target_deg)
         return TurbineSetpoints(yaw_setpoint_deg=self._meas.yaw_deg)
+    
+
