@@ -8,7 +8,7 @@ class TurbineModel(ABC):
     """Base interface for turbine aerodynamics/dynamics."""
 
     @abstractmethod
-    def step(self, dt: float, effective_wind_speed_mps: float) -> TurbineOutput:
+    def step(self, dt: float, effective_wind_speed_mps: float) -> None:
         raise NotImplementedError
 
     @abstractmethod
