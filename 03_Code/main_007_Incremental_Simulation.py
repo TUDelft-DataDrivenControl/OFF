@@ -75,7 +75,7 @@ def main():
     # ======================================================= #
     start_time = time.time()
 
-    Delta_t = 200.0 # seconds
+    Delta_t = 400.0 # seconds
     # Create an interface object
     oi_inc = offi.OFFInterface()
     
