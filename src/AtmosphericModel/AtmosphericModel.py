@@ -29,8 +29,8 @@ class AtmosphericModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_u_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
-        """ Abstract method to observe the u-component of the flow field at given positions.
+    def obs_uvw_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
+        """ Abstract method to observe the wind velocity components (u, v, w) at given positions.
 
         Args:
             x_m (np.ndarray): Positions in the x-direction (m)
@@ -42,13 +42,13 @@ class AtmosphericModel(ABC):
             NotImplementedError: Abstract Method, must be implemented in derived classes.
 
         Returns:
-            np.ndarray: Array of shape (N,) where N is the number of positions. Each element contains the u-component of the flow field at the corresponding position (m/s).
+            np.ndarray: Array of shape (3, N) where N is the number of positions. Each row contains the wind velocity components (u, v, w) at the corresponding position (m/s).
         """
         raise NotImplementedError
-    
+
     @abstractmethod
-    def obs_v_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
-        """ Abstract method to observe the v-component of the flow field at given positions.
+    def obs_uv_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
+        """ Abstract method to observe the wind velocity components (u, v) at given positions.
 
         Args:
             x_m (np.ndarray): Positions in the x-direction (m)
@@ -60,24 +60,9 @@ class AtmosphericModel(ABC):
             NotImplementedError: Abstract Method, must be implemented in derived classes.
 
         Returns:
-            np.ndarray: Array of shape (N,) where N is the number of positions. Each element contains the v-component of the flow field at the corresponding position (m/s).
+            np.ndarray: Array of shape (2, N) where N is the number of positions. Each row contains the wind velocity components (u, v) at the corresponding position (m/s).
         """
         raise NotImplementedError
-
-    def obs_w_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
-        """ Observes the w-component of the flow field (vertical wind speed) at specified locations. Default implementation returns zeros.
-
-        Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
-            t_s (float): Time (s)
-
-        Returns:
-            np.ndarray: Array of shape (N,) where N is the number of positions. Each element contains the w-component of the flow field at the corresponding position (m/s).
-        """
-        assert x_m.shape == y_m.shape == z_m.shape, "x_m, y_m, z_m must have the same shape"
-        return np.zeros_like(x_m)
 
     def obs_horizontal_wind_speed_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
         """ Returns the horizontal wind speed at given positions.
@@ -92,7 +77,7 @@ class AtmosphericModel(ABC):
         Returns:
             np.ndarray: Horizontal wind speed at the given positions (m/s)
         """
-        return np.sqrt(self.obs_u_mps(x_m, y_m, z_m, t_s)**2 + self.obs_v_mps(x_m, y_m, z_m, t_s)**2)
+        return np.sqrt(np.sum(self.obs_uv_mps(x_m, y_m, z_m, t_s)**2, axis=1))
 
     def obs_horizontal_wind_dir_deg(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
         """ Returns the horizontal wind direction at given positions. Default implementation calculates from internal (u,v) values.
@@ -106,7 +91,23 @@ class AtmosphericModel(ABC):
         Returns:
             np.ndarray: Horizontal wind direction at the given positions (degrees)
         """
-        return 270 - np.degrees(np.arctan2(self.obs_v_mps(x_m, y_m, z_m, t_s), self.obs_u_mps(x_m, y_m, z_m, t_s)))
+        uv = self.obs_uv_mps(x_m, y_m, z_m, t_s)
+        return 270 - np.degrees(np.arctan2(uv[:,1], uv[:,0]))
+    
+    def obs_horizontal_wind_speed_and_dir_mps_deg(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: float) -> np.ndarray:
+        """ Returns the horizontal wind speed and direction at given positions. Default implementation calculates from internal (u,v) values.
+
+        Args:
+            x_m (np.ndarray): Positions in the x-direction (m)
+            y_m (np.ndarray): Positions in the y-direction (m)
+            z_m (np.ndarray): Positions in the z-direction (m)
+            t_s (float): Time (s)
+
+        Returns:
+            np.ndarray: Array of shape (N, 2) where N is the number of positions. Each row contains [wind_speed, wind_direction] for the corresponding position.
+        """
+        uv = self.obs_uv_mps(x_m, y_m, z_m, t_s)
+        return np.column_stack((np.sqrt(np.sum(uv**2, axis=1)), 270 - np.degrees(np.arctan2(uv[:,1], uv[:,0]))))
     
     def obs_wind_shear_coefficient(self, t_s: float) -> float:
         """ Returns the wind shear coefficient $\alpha$, used in the equation $v = v_0 \times \left(\frac{h}{h_0}\right)^\alpha$ to calculate the wind speed at height $h$ given 
