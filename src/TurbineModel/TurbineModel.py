@@ -34,8 +34,11 @@ class TurbineModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_generator_power_w(self) -> float:
+    def obs_generator_power_w(self, t_s: np.float64) -> float:
         """ Observes the current generator power output of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
@@ -46,9 +49,12 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_aerodynamic_power_w(self) -> float:
+    def obs_aerodynamic_power_w(self, t_s: np.float64) -> float:
         """ Observes the current aerodynamic power of the turbine.
         The aerodynamic power is the power extracted from the wind by the rotor, which is then converted to electrical power by the generator, coupled by a potential gearbox.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
@@ -59,9 +65,12 @@ class TurbineModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def obs_available_power_w(self) -> float:
+    def obs_available_power_w(self, t_s: np.float64) -> float:
         """ Observes the current available power of the turbine.
         The available power is the power that would be generated if the turbine were operating at its optimal conditions, given the current wind speed and direction.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
@@ -72,9 +81,12 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_power_coefficient(self) -> float:
+    def obs_power_coefficient(self, t_s: np.float64) -> float:
         """ Observes the current power coefficient of the turbine.
         The power coefficient is a dimensionless number that represents the efficiency of the turbine in converting the kinetic energy of the wind into electrical energy.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current power coefficient of the turbine (dimensionless).
@@ -89,8 +101,11 @@ class TurbineModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_thrust_coefficient(self) -> float:
+    def obs_thrust_coefficient(self, t_s: np.float64) -> float:
         """ Observes the current thrust coefficient of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current thrust coefficient of the turbine (dimensionless).
@@ -98,8 +113,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_thrust_force_n(self) -> float:
+    def obs_thrust_force_n(self, t_s: np.float64) -> float:
         """ Observes the current thrust force of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current thrust force of the turbine (N).
@@ -112,46 +130,61 @@ class TurbineModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_aerodynamic_torque_nm(self) -> float:
+    def obs_aerodynamic_torque_nm(self, t_s: np.float64) -> float:
         """ Observes the current aerodynamic torque of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current aerodynamic torque of the turbine (Nm).
         """
         raise NotImplementedError
     
-    def obs_generator_torque_nm(self) -> float:
+    def obs_generator_torque_nm(self, t_s: np.float64) -> float:
         """ Observes the current generator torque of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current generator torque of the turbine (Nm).
         """
-        return -self.obs_aerodynamic_torque_nm()
+        return -self.obs_aerodynamic_torque_nm(t_s)
 
     """ 
     Operating Point 
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_rotor_speed_radps(self) -> float:
+    def obs_rotor_speed_radps(self, t_s: np.float64) -> float:
         """ Observes the current rotor speed of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current rotor speed of the turbine (rad/s).
         """
         raise NotImplementedError
     
-    def obs_rotor_speed_rpm(self) -> float:
+    def obs_rotor_speed_rpm(self, t_s: np.float64) -> float:
         """ Observes the current rotor speed of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current rotor speed of the turbine (RPM).
         """
-        return self.obs_rotor_speed_radps() * 60.0 / (2.0 * 3.141592653589793)
-    
+        return self.obs_rotor_speed_radps(t_s) * 60.0 / (2.0 * 3.141592653589793)
+
     @abstractmethod
-    def obs_collective_pitch_angle_deg(self) -> float:
+    def obs_collective_pitch_angle_deg(self, t_s: np.float64) -> float:
         """ Observes the current collective pitch angle of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current collective pitch angle of the turbine (degrees).
@@ -164,8 +197,11 @@ class TurbineModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_measured_rotor_averaged_wind_speed_mps(self) -> float:
+    def obs_measured_rotor_averaged_wind_speed_mps(self, t_s: np.float64) -> float:
         """ Observes the current rotor-averaged wind speed of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current rotor-averaged wind speed of the turbine (m/s).
@@ -173,8 +209,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_measured_rotor_averaged_wind_dir_deg(self) -> float:
+    def obs_measured_rotor_averaged_wind_dir_deg(self, t_s: np.float64) -> float:
         """ Observes the current rotor-averaged wind direction of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current rotor-averaged wind direction of the turbine (degrees).
@@ -182,8 +221,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_measured_turbulence_intensity_percent(self) -> float:
+    def obs_measured_turbulence_intensity_percent(self, t_s: np.float64) -> float:
         """ Observes the current turbulence intensity of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current turbulence intensity of the turbine (%).
@@ -191,8 +233,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_measured_nacelle_wind_speed_mps(self) -> float:
+    def obs_measured_nacelle_wind_speed_mps(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured wind speed of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current nacelle-measured wind speed of the turbine (m/s).
@@ -200,8 +245,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_measured_nacelle_wind_dir_deg(self) -> float:
+    def obs_measured_nacelle_wind_dir_deg(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured wind direction of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current nacelle-measured wind direction of the turbine (degrees).
@@ -209,8 +257,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_measured_rotor_yaw_orientation_deg(self) -> float:
+    def obs_measured_rotor_yaw_orientation_deg(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured yaw orientation of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current nacelle-measured yaw orientation of the turbine (degrees).
@@ -222,8 +273,12 @@ class TurbineModel(ABC):
     --------------------------------------- 
     """
     @abstractmethod
-    def obs_turbine_base_location_m(self) -> np.ndarray:
+    def obs_turbine_base_location_m(self, t_s: np.float64 = 0.0) -> np.ndarray:
         """ Observes the location of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+                                This measurement is only relevant for floating or airborne turbines, where the turbine base location may change over time due to platform motion.
 
         Returns:
             np.ndarray: Location of the turbine (x, y, z) in meters.
@@ -231,9 +286,13 @@ class TurbineModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def obs_rotor_center_location_m(self) -> np.ndarray:
+    def obs_rotor_center_location_m(self, t_s: np.float64 = 0.0) -> np.ndarray:
         """ Observes the location of the rotor center of the turbine.
         This measurement includes the hub height of the turbine and the nacelle dimensions.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+                                Only relevant for floating or airborne turbines, where the rotor center location may change over time due to platform motion.
 
         Returns:
             np.ndarray: Location of the rotor center of the turbine (x, y, z) in meters.
@@ -241,8 +300,12 @@ class TurbineModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def obs_rotor_hub_height_m(self) -> float:
+    def obs_rotor_hub_height_m(self, t_s: np.float64 = 0.0) -> float:
         """ Observes the hub height of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+                                Only relevant for floating or airborne turbines, where the hub height may change over time due to platform motion.
 
         Returns:
             float: Hub height of the turbine (m).
@@ -278,8 +341,11 @@ class TurbineModel(ABC):
         return self.obs_rotor_diameter_m() / 2.0
     
     @abstractmethod
-    def obs_rotor_tilt_deg(self) -> float:
+    def obs_rotor_tilt_deg(self, t_s: np.float64 = 0.0) -> float:
         """ Observes the rotor tilt of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Rotor tilt of the turbine (degrees).
@@ -287,8 +353,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_rotor_yaw_orientation_deg(self) -> float:
+    def obs_rotor_yaw_orientation_deg(self, t_s: np.float64) -> float:
         """ Observes the current yaw orientation of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current yaw orientation of the turbine (degrees).
@@ -296,8 +365,11 @@ class TurbineModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_rotor_yaw_misalignment_deg(self) -> float:
+    def obs_rotor_yaw_misalignment_deg(self, t_s: np.float64) -> float:
         """ Observes the current yaw misalignment of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
 
         Returns:
             float: Current yaw misalignment of the turbine (degrees).
