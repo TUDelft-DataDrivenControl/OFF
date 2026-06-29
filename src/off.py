@@ -66,20 +66,27 @@ class OFFOrchestrator:
 
 
 		def get_citation(self) -> dict[str, str]:
-			""" Returns a dictionary of citation strings for each component of the simulation.
+			""" Returns a collection of citation strings used in the simulation.
 
 			Returns:
 				dict[str, str]: Dictionary containing citation strings for each component.
 			"""
-			return {
-				"Atmospheric Model": self.atmospheric_model.get_citation(),
-				"Ambient Corrector": self.ambient_corrector.get_citation(),
-				"Wake Solver": self.wake_solver.get_citation(),
-				"Wind Farm": self.wind_farm.get_citation(),
-				"Farm Controller": self.farm_controller.get_citation(),
-				"Turbine Controller": self.turbine_controller.get_citation(),
-				"Turbine Model": self.turbine_model.get_citation(),
-			}
+
+			# Create an array of all citation strings
+			citation_strings = [
+				self.atmospheric_model.get_citation(),
+				self.ambient_corrector.get_citation(),
+				self.wake_solver.get_citation(),
+				self.wind_farm.get_citation(),
+				self.farm_controller.get_citation(),
+				self.turbine_controller.get_citation(),
+				self.turbine_model.get_citation(),
+			]
+
+			# Remove duplicates by converting to a set and back to a list
+			unique_citations = list(set(citation_strings))
+
+			return unique_citations
 
 
 def create_default_simulation(
