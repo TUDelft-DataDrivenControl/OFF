@@ -1,3 +1,4 @@
+import numpy as np
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -36,4 +37,135 @@ class FarmController_Base(ABC):
             "  doi          = {10.5194/wes-10-1055-2025}\n"
             "}"
         )
+    
+    """
+    ---------------------------------------
+    Observables
+    ---------------------------------------
+    """
+    @abstractmethod
+    def obs_turbine_power_setpoint_w(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current power setpoint of a specific turbine.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the power setpoint.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current power setpoint of the specified turbine (W).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_turbine_yaw_setpoint_deg(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current yaw setpoint of a specific turbine.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the yaw setpoint.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current yaw setpoint of the specified turbine (degrees).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_curtailment_setpoint_percent(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current curtailment setpoint of a specific turbine.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the curtailment setpoint.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current curtailment setpoint of the specified turbine (percent).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_curtailment_setpoint_W(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current curtailment setpoint of a specific turbine in Watts.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the curtailment setpoint.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current curtailment setpoint of the specified turbine (W).
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def obs_farm_wind_direction_deg(self, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind direction at the farm level.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current wind direction at the farm level (degrees).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_farm_wind_direction_deg(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind direction at the farm level.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the wind direction.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current wind direction at the farm level (degrees).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_farm_wind_speed_mps(self, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind speed at the farm level.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current wind speed at the farm level (m/s).
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def obs_farm_wind_speed_mps(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind speed at the farm level.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the wind speed.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current wind speed at the farm level (m/s).
+        """
+        raise NotImplementedError
 
