@@ -17,7 +17,7 @@
 # along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 import logging
 lg = logging.getLogger('off')
@@ -230,6 +230,38 @@ class OFF:
 
         iteration = 0
 
+        run_in_parallel = False
+
+        def _predict_turbine(idx_tur):
+            idx, tur = idx_tur
+
+            # Plotting flags
+            if (self.settings_vis["debug"]["effective_wf_layout"] and
+                    t in self.settings_vis["debug"]["time"] and
+                    idx in self.settings_vis["debug"]["iT"]):
+                self.wake_solver.raise_flag_plot_wakes()
+
+            if (self.settings_vis["debug"]["effective_wf_tile"] and
+                    t in self.settings_vis["debug"]["time"]):
+                grid_points_iT = self.visualizer_ff.vis_get_grid_points_iT(idx)
+                self.wake_solver.raise_flag_plot_tile(
+                    grid_points_iT[:, 0], grid_points_iT[:, 1],
+                    np.array(self.settings_vis["grid"]["slice_2d_xy"]))
+
+            uv_r_loc, uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
+            pow_loc = tur.calc_power(util.ot_uv2abs(uv_r_loc[0], uv_r_loc[1]))
+            m_tmp['power_OFF'] = pow_loc
+            m_tmp.t_idx = idx
+            m_tmp['time'] = t
+            c_tmp = self.controller.get_applied_settings(tur, idx, t)
+
+            tile_values = None
+            if (self.settings_vis["debug"]["effective_wf_tile"] and
+                    t in self.settings_vis["debug"]["time"]):
+                tile_values = self.wake_solver.get_tile_u().flatten()
+
+            return idx, uv_r_loc, pow_loc, uv_op, m_tmp, c_tmp, tile_values
+
         for t in np.arange(self.settings_sim['time start'],
                            self.settings_sim['time end'] + self.settings_sim['time step'],
                            self.settings_sim['time step']):
@@ -237,50 +269,30 @@ class OFF:
 
             # ///////////////////// PREDICT ///////////////////////
             # Get wind speeds at the rotor plane and to propagate the OPs
-            for idx, tur in enumerate(self.wind_farm.turbines):
-                # Plotting flags
-                if (self.settings_vis["debug"]["effective_wf_layout"] and
-                        t in self.settings_vis["debug"]["time"] and
-                        idx in self.settings_vis["debug"]["iT"]):
-                    # Plots the wind farm as simulated in the steady state model
-                    self.wake_solver.raise_flag_plot_wakes()
+            turbine_items = list(enumerate(self.wind_farm.turbines))
+            if run_in_parallel and len(turbine_items) > 1:
+                print(f"Running prediction for {len(turbine_items)} turbines in parallel using {min(os.cpu_count() or 1, len(turbine_items))} threads.")
+                with ThreadPoolExecutor(max_workers=min(os.cpu_count() or 1, len(turbine_items))) as executor:
+                    results = list(executor.map(_predict_turbine, turbine_items))
+            else:
+                results = [_predict_turbine(item) for item in turbine_items]
 
-                if (self.settings_vis["debug"]["effective_wf_tile"] and
-                        t in self.settings_vis["debug"]["time"]):
-                    # Set flag to calculate wind speed in wake model at grid points belonging to turbine iT
-                    grid_points_iT = self.visualizer_ff.vis_get_grid_points_iT(idx)
-                    self.wake_solver.raise_flag_plot_tile(
-                        grid_points_iT[:,0], grid_points_iT[:,1],
-                        np.array(self.settings_vis["grid"]["slice_2d_xy"]))
-                
-                
-
-                # for turbine 'tur': Run wake solver and retrieve measurements from the wake model
-                uv_r[idx, :], uv_op, m_tmp = self.wake_solver.get_measurements(idx, self.wind_farm)
-
-                # Calculate the power generated
-                pow_t[idx, :] = tur.calc_power(util.ot_uv2abs(uv_r[idx, 0], uv_r[idx, 1]))
-                m_tmp['power_OFF'] = pow_t[idx, :]
-
-                # Add turbine index & timestamp to data
-                m_tmp.t_idx = idx
-                m_tmp['time'] = t
+            for idx, uv_r_loc, pow_loc, uv_op, m_tmp, c_tmp, tile_values in results:
+                uv_r[idx, :] = uv_r_loc
+                pow_t[idx, :] = pow_loc
 
                 # Append turbine measurements to general measurement data
                 measurements = pd.concat([measurements, m_tmp], ignore_index=True)
 
                 # Set propagation speed of the OPs of the turbine 'tur'
-                tur.observation_points.set_op_propagation_speed(uv_op)
+                self.wind_farm.turbines[idx].observation_points.set_op_propagation_speed(uv_op)
 
                 # Store turbine state applied in controller
-                c_tmp = self.controller.get_applied_settings(tur, idx, t)
                 control_applied = pd.concat([control_applied, c_tmp], ignore_index=True)
 
                 # Store flow field points
-                if (self.settings_vis["debug"]["effective_wf_tile"] and
-                        t in self.settings_vis["debug"]["time"]):
-                    self.visualizer_ff.vis_store_u_values(
-                        self.wake_solver.get_tile_u().flatten(), idx)
+                if tile_values is not None:
+                    self.visualizer_ff.vis_store_u_values(tile_values, idx)
                     
 
             lg.info('Rotor wind speed of all turbines:')

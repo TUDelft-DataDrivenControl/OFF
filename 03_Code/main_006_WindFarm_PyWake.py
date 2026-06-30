@@ -49,12 +49,13 @@ def main():
     
     # Tell the simulation what to run
     #   The run file needs to contain everything, the wake model, the ambient conditions etc.
-    oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "006_HKN_pywake.yaml")
+    oi.init_simulation_by_path( OFF_PATH / "02_Examples_and_Cases" / "02_Example_Cases" / "006_HKN_SW_Corner_pywake.yaml")
     
     # Run the simulation
     oi.run_sim()
 
-    print("\n---OFF Simulation took %s seconds ---" % (time.time() - start_time))
+    print("\n--- OFF Simulation took %.2f seconds for %.2f seconds of simulation ---" % (time.time() - start_time, oi.settings_sim['time end'] - oi.settings_sim['time start']))
+    print(f"--- Real time factor: {((oi.settings_sim['time end'] - oi.settings_sim['time start']) / (time.time() - start_time)):.2f} ---")
 
     # Store output
     oi.store_measurements()
