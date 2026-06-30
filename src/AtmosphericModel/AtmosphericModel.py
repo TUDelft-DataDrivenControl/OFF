@@ -4,11 +4,18 @@ from abc import ABC, abstractmethod
 from typing import Any
 import numpy as np
 
+from Utils import *
+
 class AtmosphericModel(ABC):
     """Base interface for atmospheric state providers."""
 
     @abstractmethod
-    def step(self, dt: float) -> None:
+    def step(self, it: int) -> None:
+        """ Advances the atmospheric model by a given number of iterations.
+
+        Args:
+            it (int): Current iteration of the simulation. The current real time since simulation start is it * dt, where dt is the global time step.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -41,6 +48,40 @@ class AtmosphericModel(ABC):
             "}"
         )
     
+    def req_describe(self) -> dict[str, SupportType]:
+        """ Returns a dictionary describing the atmospheric model. Default implementation returns an empty dictionary.
+
+        Returns:
+            dict[str, Any]: Dictionary describing the atmospheric model.
+        """
+        return {
+            "obs uwv mps":                                  SupportType.NOT_SUPPORTED,
+            "obs uv mps":                                   SupportType.NOT_SUPPORTED,
+            "obs horizontal wind speed mps":                SupportType.OPTIONALLY_SUPPORTED,
+            "obs horizontal wind dir deg":                  SupportType.OPTIONALLY_SUPPORTED,
+            "obs horizontal wind speed and dir mps deg":    SupportType.OPTIONALLY_SUPPORTED,
+            "obs wind shear coefficient":                   SupportType.FULLY_SUPPORTED,
+            "obs wind shear loglaw tuple m mps":            SupportType.FULLY_SUPPORTED,
+            "obs wind veer factor degpm":                   SupportType.FULLY_SUPPORTED,
+            "obs temperature K":                            SupportType.FULLY_SUPPORTED,
+            "obs air density kgpm3":                        SupportType.FULLY_SUPPORTED,
+            "obs turbulence intensity percent":             SupportType.FULLY_SUPPORTED,
+            "obs pressure Pa":                              SupportType.FULLY_SUPPORTED,
+            "obs atmospheric boundary layer height m":      SupportType.FULLY_SUPPORTED,
+        }
+    
+    def req_check_component(self, component) -> bool:
+        """ Checks if the given component is compatible with the atmospheric model. Default implementation returns False.
+
+        Args:
+            component: Component to check for compatibility.
+
+        Returns:
+            bool: True if the component is compatible, False otherwise.
+        """
+        return False
+
+
     """ 
     ---------------------------------------
     Observables 
