@@ -106,7 +106,7 @@ class OFF:
         current_time = datetime.datetime.now()
         # integer = int(current_time.strftime("%Y%m%d%H%M%S%f"))
 
-        return current_time.strftime("%Y_%m_%d-%H:%M:%S.%f")
+        return current_time.strftime("%Y_%m_%d-%H_%M_%S.%f")
 
     def __dir_init__(self, settings_sim: dict):
         """ Initialize the simulation folder and set the data path.
