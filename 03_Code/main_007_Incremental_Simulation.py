@@ -111,32 +111,48 @@ def main():
     fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
     axs[0].plot(measurements_long[(measurements_long['t_idx'] == 0)]['time'],
                  measurements_long[(measurements_long['t_idx'] == 0)]['Power_PyWake']/1e6, 
-                 label='Continuous Simulation', color='blue')
+                 label='T1 Continuous Simulation', color='blue')
     axs[0].plot(measurements_inc[(measurements_inc['t_idx'] == 0)]['time'],
                  measurements_inc[(measurements_inc['t_idx'] == 0)]['Power_PyWake']/1e6, 
-                 color='orange', linestyle='--', label='Incremental Simulation')
+                 color='orange', linestyle='--', label='T1 Incremental Simulation')
     axs[0].vlines(np.arange(0, sim_end_time, Delta_t),
                 color='gray', linestyle=':', alpha=0.5,
                 ymin=0, ymax=1.1*np.max(measurements_long['Power_PyWake'])/1e6,
                 label='Incremental Simulation Steps')
+    axs[0].plot(measurements_long[(measurements_long['t_idx'] == 1)]['time'],
+                 measurements_long[(measurements_long['t_idx'] == 1)]['Power_PyWake']/1e6, 
+                 label='T2 Continuous Simulation', color='blue')
+    axs[0].plot(measurements_inc[(measurements_inc['t_idx'] == 1)]['time'],
+                 measurements_inc[(measurements_inc['t_idx'] == 1)]['Power_PyWake']/1e6, 
+                 color='orange', linestyle='--', label='T2 Incremental Simulation')
     axs[0].set_ylim(0, 1.05*np.max(measurements_long['Power_PyWake'])/1e6)
     axs[0].set_ylabel('Power (MW)')
-    axs[0].set_title('Turbine 0 Power Comparison')
+    axs[0].set_title('Turbine 0 & Turbine 1 Power Comparison')
     axs[0].legend()
+    
 
-    axs[1].plot(measurements_long[(measurements_long['t_idx'] == 1)]['time'],
-                 measurements_long[(measurements_long['t_idx'] == 1)]['Power_PyWake']/1e6, 
-                 label='Continuous Simulation', color='blue')
-    axs[1].plot(measurements_inc[(measurements_inc['t_idx'] == 1)]['time'],
-                 measurements_inc[(measurements_inc['t_idx'] == 1)]['Power_PyWake']/1e6, 
-                 color='orange', linestyle='--', label='Incremental Simulation')
+    # Plot Yaw comparison
+    axs[1].plot(control_long[(control_long['t_idx'] == 0)]['time'],
+                 control_long[(control_long['t_idx'] == 0)]['yaw'], 
+                 label='T1 Continuous Simulation', color='blue')
+    axs[1].plot(control_inc[(control_inc['t_idx'] == 0)]['time'],
+                 control_inc[(control_inc['t_idx'] == 0)]['yaw'], 
+                 color='orange', linestyle='--', label='T1 Incremental Simulation')
+    axs[1].plot(control_long[(control_long['t_idx'] == 1)]['time'],
+                 control_long[(control_long['t_idx'] == 1)]['yaw'], 
+                 label='T2 Continuous Simulation', color='blue')
+    axs[1].plot(control_inc[(control_inc['t_idx'] == 1)]['time'],
+                 control_inc[(control_inc['t_idx'] == 1)]['yaw'], 
+                 color='orange', linestyle='--', label='T2 Incremental Simulation')
     axs[1].vlines(np.arange(0, sim_end_time, Delta_t),
                 color='gray', linestyle=':', alpha=0.5,
-                ymin=0, ymax=1.1*np.max(measurements_long['Power_PyWake'])/1e6,
+                ymin=-32.5, ymax=32.5,
                 label='Incremental Simulation Steps')
-    axs[1].set_ylim(0, 1.05*np.max(measurements_long['Power_PyWake'])/1e6)
-    axs[1].set_ylabel('Power (MW)')
-    axs[1].set_title('Turbine 1 Power Comparison')
+
+
+    axs[1].set_ylim(-32.5, 32.5)
+    axs[1].set_ylabel('Yaw (deg)')
+    axs[1].set_title('Turbine 0 & Turbine 1 Yaw Comparison')
     axs[1].set_xlabel('Time (s)')
     axs[1].legend()
     plt.tight_layout()
