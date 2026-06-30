@@ -4,15 +4,21 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from Utils import *
 class TurbineModel(ABC):
     """Base interface for turbine aerodynamics/dynamics."""
 
     @abstractmethod
-    def step(self, dt: float, effective_wind_speed_mps: float) -> None:
+    def step(self, it: int) -> None:
+        """ Advances the Turbine model by a given number of iterations.
+
+        Args:
+            it (int): Current iteration of the simulation. The current real time since simulation start is it * dt, where dt is the global time step.
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def set_yaw(self, yaw_deg: float) -> None:
+    def reset(self) -> None:
         raise NotImplementedError
     
     def get_citation(self) -> str:
@@ -40,6 +46,27 @@ class TurbineModel(ABC):
             "  doi          = {10.5194/wes-10-1055-2025}\n"
             "}"
         )
+    
+    def req_describe(self) -> dict[str, SupportType]:
+        """ Returns a dictionary describing the atmospheric model. Default implementation returns an empty dictionary.
+
+        Returns:
+            dict[str, Any]: Dictionary describing the atmospheric model.
+        """
+        return {
+            "obs_generator_power_w": SupportType.NOT_SUPPORTED,
+        }
+    
+    def req_check_component(self, component) -> bool:
+        """ Checks if the given component is compatible with the turbine controller. Default implementation returns False.
+
+        Args:
+            component: Component to check for compatibility.
+
+        Returns:
+            bool: True if the component is compatible, False otherwise.
+        """
+        return False
 
     """ 
     ---------------------------------------
@@ -66,7 +93,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_aerodynamic_power_w(self, t_s: np.float64) -> float:
         """ Observes the current aerodynamic power of the turbine.
         The aerodynamic power is the power extracted from the wind by the rotor, which is then converted to electrical power by the generator, coupled by a potential gearbox.
@@ -82,7 +108,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def obs_available_power_w(self, t_s: np.float64) -> float:
         """ Observes the current available power of the turbine.
         The available power is the power that would be generated if the turbine were operating at its optimal conditions, given the current wind speed and direction.
@@ -98,7 +123,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_power_coefficient(self, t_s: np.float64) -> float:
         """ Observes the current power coefficient of the turbine.
         The power coefficient is a dimensionless number that represents the efficiency of the turbine in converting the kinetic energy of the wind into electrical energy.
@@ -109,6 +133,21 @@ class TurbineModel(ABC):
         Returns:
             float: Current power coefficient of the turbine (dimensionless).
             
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+        """
+        raise NotImplementedError
+    
+    def obs_power_curve(self, t_s: np.float64) -> np.ndarray:
+        """ Observes the current power curve of the turbine.
+        The power curve is a function that describes the relationship between the wind speed and the power output of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+        
+        Returns:
+            np.ndarray: Current power curve of the turbine (W) as a function of wind speed (m/s).
+
         Raises:
             NotImplementedError: Abstract Method, must be implemented in derived classes.
         """
@@ -130,7 +169,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_thrust_force_n(self, t_s: np.float64) -> float:
         """ Observes the current thrust force of the turbine.
 
@@ -142,12 +180,22 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
+    def obs_thrust_curve(self, t_s: np.float64) -> np.ndarray:
+        """ Observes the current thrust curve of the turbine.
+        The thrust curve is a function that describes the relationship between the wind speed and the thrust force of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+
+        Returns:
+            np.ndarray: Current thrust curve of the turbine (N) as a function of wind speed (m/s).
+        """
+        raise NotImplementedError
 
     """ 
     Torque
     --------------------------------------- 
     """
-    @abstractmethod
     def obs_aerodynamic_torque_nm(self, t_s: np.float64) -> float:
         """ Observes the current aerodynamic torque of the turbine.
 
@@ -174,7 +222,6 @@ class TurbineModel(ABC):
     Operating Point 
     --------------------------------------- 
     """
-    @abstractmethod
     def obs_rotor_speed_radps(self, t_s: np.float64) -> float:
         """ Observes the current rotor speed of the turbine.
 
@@ -197,7 +244,6 @@ class TurbineModel(ABC):
         """
         return self.obs_rotor_speed_radps(t_s) * 60.0 / (2.0 * 3.141592653589793)
 
-    @abstractmethod
     def obs_collective_pitch_angle_deg(self, t_s: np.float64) -> float:
         """ Observes the current collective pitch angle of the turbine.
 
@@ -209,12 +255,21 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
+    def obs_individual_pitch_angles_deg(self, t_s: np.float64) -> np.ndarray:
+        """ Observes the current individual pitch angles of the turbine.
+
+        Args:
+            t_s (np.float64): Current simulation time in seconds.
+
+        Returns:
+            np.ndarray: Current individual pitch angles of the turbine (degrees).
+        """
+        return np.full(self.obs_num_blades(), self.obs_collective_pitch_angle_deg(t_s)) # TODO
 
     """ 
     Measurements & Sensors 
     --------------------------------------- 
     """
-    @abstractmethod
     def obs_measured_rotor_averaged_wind_speed_mps(self, t_s: np.float64) -> float:
         """ Observes the current rotor-averaged wind speed of the turbine.
 
@@ -226,7 +281,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_measured_rotor_averaged_wind_dir_deg(self, t_s: np.float64) -> float:
         """ Observes the current rotor-averaged wind direction of the turbine.
 
@@ -238,7 +292,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_measured_turbulence_intensity_percent(self, t_s: np.float64) -> float:
         """ Observes the current turbulence intensity of the turbine.
 
@@ -250,7 +303,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_measured_nacelle_wind_speed_mps(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured wind speed of the turbine.
 
@@ -262,7 +314,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_measured_nacelle_wind_dir_deg(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured wind direction of the turbine.
 
@@ -274,8 +325,7 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def obs_measured_rotor_yaw_orientation_deg(self, t_s: np.float64) -> float:
+    def obs_measured_yaw_orientation_deg(self, t_s: np.float64) -> float:
         """ Observes the current nacelle-measured yaw orientation of the turbine.
 
         Args:
@@ -330,7 +380,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_rotor_overhang_m(self) -> float:
         """ Observes the rotor overhang of the turbine.
         The rotor overhang is the distance from the rotor center to the tower centerline.
@@ -349,7 +398,6 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def obs_rotor_radius_m(self) -> float:
         """ Observes the rotor radius of the turbine.
 
@@ -358,7 +406,6 @@ class TurbineModel(ABC):
         """
         return self.obs_rotor_diameter_m() / 2.0
     
-    @abstractmethod
     def obs_rotor_tilt_deg(self, t_s: np.float64 = 0.0) -> float:
         """ Observes the rotor tilt of the turbine.
 
@@ -382,18 +429,13 @@ class TurbineModel(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def obs_rotor_yaw_misalignment_deg(self, t_s: np.float64) -> float:
-        """ Observes the current yaw misalignment of the turbine.
-
-        Args:
-            t_s (np.float64): Current simulation time in seconds.
+    def obs_num_blades(self) -> np.uint8:
+        """ Observes the number of blades of the turbine.
 
         Returns:
-            float: Current yaw misalignment of the turbine (degrees).
+            np.uint8: Number of blades of the turbine.
         """
-        raise NotImplementedError
-
+        return np.uint8(3)  # Default implementation assumes a 3-bladed turbine. Override in derived classes if different.
 
     
     
