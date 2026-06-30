@@ -10,7 +10,7 @@ class TurbineController(ABC):
     
     @abstractmethod
     def step(self, it: int) -> None:
-        """ Advances the atmospheric model by a given number of iterations.
+        """ Advances the Turbine controller by a given number of iterations.
 
         Args:
             it (int): Current iteration of the simulation. The current real time since simulation start is it * dt, where dt is the global time step.
