@@ -67,6 +67,17 @@ class FarmController_Base(ABC):
             "obs_farm_wind_speed_at_turbine_mps": SupportType.NOT_SUPPORTED
         }
     
+    def req_check_component(self, component) -> bool:
+        """ Checks if the given component is compatible with the farm controller. Default implementation returns False.
+
+        Args:
+            component: Component to check for compatibility.
+
+        Returns:
+            bool: True if the component is compatible, False otherwise.
+        """
+        return False
+    
     """
     ---------------------------------------
     Observables
