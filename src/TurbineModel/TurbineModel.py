@@ -55,6 +55,34 @@ class TurbineModel(ABC):
         """
         return {
             "obs_generator_power_w": SupportType.NOT_SUPPORTED,
+            "obs_aerodynamic_power_w": SupportType.NOT_SUPPORTED,
+            "obs_available_power_w": SupportType.NOT_SUPPORTED,
+            "obs_power_coefficient": SupportType.NOT_SUPPORTED,
+            "obs_power_curve": SupportType.NOT_SUPPORTED,
+            "obs_thrust_coefficient": SupportType.NOT_SUPPORTED,
+            "obs_thrust_force_n": SupportType.NOT_SUPPORTED,
+            "obs_thrust_curve": SupportType.NOT_SUPPORTED,
+            "obs_aerodynamic_torque_nm": SupportType.NOT_SUPPORTED,
+            "obs_generator_torque_nm": SupportType.NOT_SUPPORTED,
+            "obs_rotor_speed_radps": SupportType.NOT_SUPPORTED,
+            "obs_rotor_speed_rpm": SupportType.NOT_SUPPORTED,
+            "obs_collective_pitch_angle_deg": SupportType.NOT_SUPPORTED,
+            "obs_individual_pitch_angles_deg": SupportType.NOT_SUPPORTED,
+            "obs_measured_rotor_averaged_wind_speed_mps": SupportType.NOT_SUPPORTED,
+            "obs_measured_rotor_averaged_wind_dir_deg": SupportType.NOT_SUPPORTED,
+            "obs_measured_turbulence_intensity_percent": SupportType.NOT_SUPPORTED,
+            "obs_measured_nacelle_wind_speed_mps": SupportType.NOT_SUPPORTED,
+            "obs_measured_nacelle_wind_dir_deg": SupportType.NOT_SUPPORTED,
+            "obs_measured_yaw_orientation_deg": SupportType.NOT_SUPPORTED,
+            "obs_turbine_base_location_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_center_location_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_hub_height_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_overhang_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_diameter_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_radius_m": SupportType.NOT_SUPPORTED,
+            "obs_rotor_tilt_deg": SupportType.NOT_SUPPORTED,
+            "obs_rotor_yaw_orientation_deg": SupportType.NOT_SUPPORTED,
+            "obs_num_blades": SupportType.NOT_SUPPORTED
         }
     
     def req_check_component(self, component) -> bool:
