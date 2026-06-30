@@ -2,12 +2,24 @@ import numpy as np
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
+from Utils import *
 
 class FarmController_Base(ABC):
     """Base interface for farm-level controllers."""
 
+    @abstractmethod
+    def step(self, it: int) -> None:
+        """ Advances the atmospheric model by a given number of iterations.
+
+        Args:
+            it (int): Current iteration of the simulation. The current real time since simulation start is it * dt, where dt is the global time step.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def reset(self) -> None:
+        raise NotImplementedError
 
     def get_citation(self) -> str:
         """ Returns a citation string for the farm controller.
@@ -38,26 +50,28 @@ class FarmController_Base(ABC):
             "}"
         )
     
+    def req_describe(self) -> dict[str, SupportType]:
+        """ Returns a dictionary describing the atmospheric model. Default implementation returns an empty dictionary.
+
+        Returns:
+            dict[str, Any]: Dictionary describing the atmospheric model.
+        """
+        return {
+            "obs_turbine_yaw_setpoint_deg": SupportType.NOT_SUPPORTED,
+            "obs_turbine_power_setpoint_w": SupportType.NOT_SUPPORTED,
+            "obs_curtailment_setpoint_percent": SupportType.NOT_SUPPORTED,
+            "obs_curtailment_setpoint_W": SupportType.NOT_SUPPORTED,
+            "obs_farm_wind_direction_deg": SupportType.NOT_SUPPORTED,
+            "obs_farm_wind_direction_at_turbine_deg": SupportType.NOT_SUPPORTED,
+            "obs_farm_wind_speed_mps": SupportType.NOT_SUPPORTED,
+            "obs_farm_wind_speed_at_turbine_mps": SupportType.NOT_SUPPORTED
+        }
+    
     """
     ---------------------------------------
     Observables
     ---------------------------------------
     """
-    @abstractmethod
-    def obs_turbine_power_setpoint_w(self, turbine_id: int, t_s: np.float64) -> np.float64:
-        """ Abstract method to observe the current power setpoint of a specific turbine.
-
-        Args:
-            turbine_id (int): ID of the turbine for which to observe the power setpoint.
-            t_s (np.float64): Current simulation time in seconds.
-
-        Raises:
-            NotImplementedError: Abstract Method, must be implemented in derived classes.
-
-        Returns:
-            np.float64: Current power setpoint of the specified turbine (W).
-        """
-        raise NotImplementedError
     
     @abstractmethod
     def obs_turbine_yaw_setpoint_deg(self, turbine_id: int, t_s: np.float64) -> np.float64:
@@ -75,7 +89,21 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
+    def obs_turbine_power_setpoint_w(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current power setpoint of a specific turbine.
+
+        Args:
+            turbine_id (int): ID of the turbine for which to observe the power setpoint.
+            t_s (np.float64): Current simulation time in seconds.
+
+        Raises:
+            NotImplementedError: Abstract Method, must be implemented in derived classes.
+
+        Returns:
+            np.float64: Current power setpoint of the specified turbine (W).
+        """
+        raise NotImplementedError
+
     def obs_curtailment_setpoint_percent(self, turbine_id: int, t_s: np.float64) -> np.float64:
         """ Abstract method to observe the current curtailment setpoint of a specific turbine.
 
@@ -91,7 +119,6 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_curtailment_setpoint_W(self, turbine_id: int, t_s: np.float64) -> np.float64:
         """ Abstract method to observe the current curtailment setpoint of a specific turbine in Watts.
 
@@ -107,7 +134,6 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def obs_farm_wind_direction_deg(self, t_s: np.float64) -> np.float64:
         """ Abstract method to observe the current wind direction at the farm level.
 
@@ -122,9 +148,8 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def obs_farm_wind_direction_deg(self, turbine_id: int, t_s: np.float64) -> np.float64:
-        """ Abstract method to observe the current wind direction at the farm level.
+    def obs_farm_wind_direction_at_turbine_deg(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind direction at the farm level, localized to a specific turbine.
 
         Args:
             turbine_id (int): ID of the turbine for which to observe the wind direction.
@@ -138,7 +163,6 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
     def obs_farm_wind_speed_mps(self, t_s: np.float64) -> np.float64:
         """ Abstract method to observe the current wind speed at the farm level.
 
@@ -153,9 +177,8 @@ class FarmController_Base(ABC):
         """
         raise NotImplementedError
     
-    @abstractmethod
-    def obs_farm_wind_speed_mps(self, turbine_id: int, t_s: np.float64) -> np.float64:
-        """ Abstract method to observe the current wind speed at the farm level.
+    def obs_farm_wind_speed_at_turbine_mps(self, turbine_id: int, t_s: np.float64) -> np.float64:
+        """ Abstract method to observe the current wind speed at the farm level, localized to a specific turbine.
 
         Args:
             turbine_id (int): ID of the turbine for which to observe the wind speed.
