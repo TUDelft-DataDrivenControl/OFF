@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from AtmosphericModel import AtmosphericModel
+from Utils import *
 
 class WakeModel(ABC):
     """
@@ -17,16 +18,50 @@ class WakeModel(ABC):
 
 
     @abstractmethod
-    def step(self, dt_s: np.float64) -> None:
-        """ Advances the wake model by a time step of dt_s seconds. 
-        This method should update the internal state of the wake model based on the current atmospheric conditions and turbine states.
-        
+    def step(self, it: int) -> None:
+        """ Advances the wake model by a given number of iterations.
+
+        Args:
+            it (int): Current iteration of the simulation. The current real time since simulation start is it * dt, where dt is the global time step.
         """
         raise NotImplementedError
 
     @abstractmethod
     def reset(self) -> None:
         raise NotImplementedError
+    
+    def req_describe(self) -> dict[str, SupportType]:
+        """ Returns a dictionary describing the wake model. Default implementation returns an empty dictionary.
+
+        Returns:
+            dict[str, Any]: Dictionary describing the wake model.
+        """
+        return {
+            "obs uwv mps":                                  SupportType.NOT_SUPPORTED,
+            "obs uv mps":                                   SupportType.NOT_SUPPORTED,
+            "obs horizontal wind speed mps":                SupportType.NOT_SUPPORTED,
+            "obs horizontal wind direction deg":            SupportType.NOT_SUPPORTED,
+            "obs horizontal wind speed and direction mps deg": SupportType.NOT_SUPPORTED,
+            "obs rotor-averaged wind speed mps":            SupportType.NOT_SUPPORTED,
+            "obs rotor-averaged wind direction deg":        SupportType.NOT_SUPPORTED,
+            "obs rotor-averaged uvw mps":                   SupportType.NOT_SUPPORTED,
+            "obs rotor-averaged uv mps":                    SupportType.NOT_SUPPORTED,
+            "obs blades uvw wind speed mps":                SupportType.NOT_SUPPORTED,
+            "obs rotor averaged wind dir deg":              SupportType.NOT_SUPPORTED,
+            "obs rotor averaged uvw mps":                   SupportType.NOT_SUPPORTED,
+            "obs rotor averaged uv mps":                    SupportType.NOT_SUPPORTED,
+        }
+    
+    def req_check_component(self, component) -> bool:
+        """ Checks if the given component is compatible with the wake model. Default implementation returns False.
+
+        Args:
+            component: Component to check for compatibility.
+
+        Returns:
+            bool: True if the component is compatible, False otherwise.
+        """
+        return False
     
     def get_citation(self) -> str:
         """ Returns a citation string for the wake model. Default implementation returns a generic citation.
@@ -61,13 +96,11 @@ class WakeModel(ABC):
     """
 
     @abstractmethod
-    def obs_uvw_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: np.float64) -> np.ndarray:
+    def obs_uvw_mps(self, xyz: np.ndarray, t_s: np.float64) -> np.ndarray:
         """ Abstract method to observe the u-, v-, and w-components of the flow field at given positions.
 
         Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
+            xyz (np.ndarray): Positions in Cartesian coordinates (m) with shape (3, N) and columns [x, y, z].
             t_s (np.float64): Time (s)
 
         Raises:
@@ -79,13 +112,11 @@ class WakeModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def obs_uv_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: np.float64) -> np.ndarray:
+    def obs_uv_mps(self, xyz: np.ndarray, t_s: np.float64) -> np.ndarray:
         """ Abstract method to observe the u- and v-components of the flow field at given positions.
 
         Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
+            xyz (np.ndarray): Positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             t_s (np.float64): Time (s)
 
         Raises:
@@ -96,58 +127,50 @@ class WakeModel(ABC):
         """
         raise NotImplementedError
 
-    def obs_horizontal_wind_speed_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: np.float64) -> np.ndarray:
+    def obs_horizontal_wind_speed_mps(self, xyz: np.ndarray, t_s: np.float64) -> np.ndarray:
         """ Observes the horizontal wind speed at given positions. Default implementation calculates from internal (u,v) values. 
 
         Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
+            xyz (np.ndarray): Positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             t_s (np.float64): Time (s)
 
         Returns:
             np.ndarray: Horizontal wind speed at the given positions (m/s)
         """
         
-        return np.sqrt(np.sum(self.obs_uv_mps(x_m, y_m, z_m, t_s)**2, axis=1))
+        return np.sqrt(np.sum(self.obs_uv_mps(xyz, t_s)**2, axis=1))
 
-    def obs_horizontal_wind_dir_deg(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: np.float64) -> np.ndarray:
+    def obs_horizontal_wind_dir_deg(self, xyz: np.ndarray, t_s: np.float64) -> np.ndarray:
         """ Observes the horizontal wind direction at given positions. Default implementation calculates from internal (u,v) values.
 
         Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
+            xyz (np.ndarray): Positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             t_s (np.float64): Time (s)
 
         Returns:
             np.ndarray: Horizontal wind direction at the given positions (degrees)
         """
-        uv = self.obs_uv_mps(x_m, y_m, z_m, t_s)
-        return 270 - np.degrees(np.arctan2(uv[:,1], uv[:,0]))
+        uv = self.obs_uv_mps(xyz, t_s)
+        return 270 - np.degrees(np.arctan2(uv[1,:], uv[0,:]))
 
-    def obs_horizontal_wind_speed_and_dir_mps_deg(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, t_s: np.float64) -> np.ndarray:
+    def obs_horizontal_wind_speed_and_dir_mps_deg(self, xyz: np.ndarray, t_s: np.float64) -> np.ndarray:
         """ Observes the horizontal wind speed and direction at given positions. Default implementation calculates from internal (u,v) values.
 
         Args:
-            x_m (np.ndarray): Positions in the x-direction (m)
-            y_m (np.ndarray): Positions in the y-direction (m)
-            z_m (np.ndarray): Positions in the z-direction (m)
+            xyz (np.ndarray): Positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             t_s (np.float64): Time (s)
 
         Returns:
             np.ndarray: Array of shape (2, N) where N is the number of positions. The first row contains the horizontal wind speed at the corresponding position (m/s), and the second row contains the horizontal wind direction at the corresponding position (degrees).
         """
-        uv = self.obs_uv_mps(x_m, y_m, z_m, t_s)
-        return np.vstack((np.sqrt(np.sum(uv**2, axis=1)), 270 - np.degrees(np.arctan2(uv[:,1], uv[:,0]))))
+        uv = self.obs_uv_mps(xyz, t_s)
+        return np.vstack((np.sqrt(np.sum(uv**2, axis=1)), 270 - np.degrees(np.arctan2(uv[1,:], uv[0,:]))))
 
-    def obs_rotor_averaged_wind_speed_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
+    def obs_rotor_averaged_wind_speed_mps(self, xyz: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
         """ Observes the rotor-averaged wind speed at given positions. Default implementation calculates from internal ws values.
 
         Args:
-            x_m (np.ndarray): Rotor center position in the x-direction (m)
-            y_m (np.ndarray): Rotor center position in the y-direction (m)
-            z_m (np.ndarray): Rotor center position in the z-direction (m)
+            xyz (np.ndarray): Rotor center positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             R_m (np.float64): Rotor radius (m)
             yaw_orientation_deg (np.float64): Yaw orientation (degrees)
             t_s (np.float64): Time (s)
@@ -159,13 +182,11 @@ class WakeModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def obs_blades_uvw_wind_speed_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, R_m: np.ndarray, azimuth_deg: np.ndarray, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0, n_blades: int = 3) -> np.ndarray:
+    def obs_blades_uvw_wind_speed_mps(self, xyz: np.ndarray, R_m: np.ndarray, azimuth_deg: np.ndarray, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0, n_blades: int = 3) -> np.ndarray:
         """ Observes the wind speed at the blades at given positions. Default implementation calculates from internal ws values.
 
         Args:
-            x_m (np.ndarray): Rotor center position in the x-direction (m)
-            y_m (np.ndarray): Rotor center position in the y-direction (m)
-            z_m (np.ndarray): Rotor center position in the z-direction (m)
+            xyz (np.ndarray): Rotor center positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             R_m (np.ndarray): Rotor radii to calculate uvw for (m)
             azimuth_deg (np.ndarray): Azimuth angle of the blades at each position (degrees)
             yaw_orientation_deg (np.float64): Yaw orientation (degrees)
@@ -181,15 +202,11 @@ class WakeModel(ABC):
         # Tilt is defined as the angle between the rotor plane and the horizontal plane, with 0 degrees meaning that the rotor plane is horizontal, >0 degrees meaning that the rotor plane is tilted backwards.
         raise NotImplementedError
         
-    
-
-    def obs_rotor_averaged_wind_dir_deg(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, R_m: np.ndarray, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
+    def obs_rotor_averaged_wind_dir_deg(self, xyz: np.ndarray, R_m: np.ndarray, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
         """ Observes the rotor-averaged wind direction at given positions. Default implementation calculates from internal wd values.
 
         Args:
-            x_m (np.ndarray): Rotor center position in the x-direction (m)
-            y_m (np.ndarray): Rotor center position in the y-direction (m)
-            z_m (np.ndarray): Rotor center position in the z-direction (m)
+            xyz (np.ndarray): Rotor center positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             R_m (np.ndarray): Rotor radius at each position (m)
             yaw_orientation_deg (np.float64): Yaw orientation (degrees)
             t_s (np.float64): Time (s)
@@ -198,15 +215,13 @@ class WakeModel(ABC):
         Returns:
             np.ndarray: Rotor-averaged wind direction at the given positions (degrees)
         """
-        return self.obs_horizontal_wind_dir_deg(x_m, y_m, z_m, t_s)
+        return self.obs_horizontal_wind_dir_deg(xyz, t_s)
 
-    def obs_rotor_averaged_uvw_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
+    def obs_rotor_averaged_uvw_mps(self, xyz: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
         """ Observes the rotor-averaged u, v, and w components of the flow field at the given positions. Default implementation calculates from internal u, v, and w values.
 
         Args:
-            x_m (np.ndarray): Rotor center position in the x-direction (m)
-            y_m (np.ndarray): Rotor center position in the y-direction (m)
-            z_m (np.ndarray): Rotor center position in the z-direction (m)
+            xyz (np.ndarray): Rotor center positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             R_m (np.float64): Rotor radius (m)
             yaw_orientation_deg (np.float64): Yaw orientation (degrees)
             t_s (np.float64): Time (s)
@@ -215,15 +230,13 @@ class WakeModel(ABC):
         Returns:
             np.ndarray: Rotor-averaged u, v, and w components of the flow field at the given positions (m/s)
         """
-        return self.obs_uvw_mps(x_m, y_m, z_m, t_s)
+        return self.obs_uvw_mps(xyz, t_s)
 
-    def obs_rotor_averaged_uv_mps(self, x_m: np.ndarray, y_m: np.ndarray, z_m: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
+    def obs_rotor_averaged_uv_mps(self, xyz: np.ndarray, R_m: np.float64, yaw_orientation_deg: np.float64, t_s: np.float64, tilt_deg: np.float64 = 0.0) -> np.ndarray:
         """ Observes the rotor-averaged u and v components of the flow field at the given positions. Default implementation calculates from internal u and v values.
 
         Args:
-            x_m (np.ndarray): Rotor center position in the x-direction (m)
-            y_m (np.ndarray): Rotor center position in the y-direction (m)
-            z_m (np.ndarray): Rotor center position in the z-direction (m)
+            xyz (np.ndarray): Rotor center positions in Cartesian coordinates (m) with shape (3, N) and rows [x, y, z].
             R_m (np.float64): Rotor radius (m)
             yaw_orientation_deg (np.float64): Yaw orientation (degrees)
             t_s (np.float64): Time (s)
@@ -232,5 +245,5 @@ class WakeModel(ABC):
         Returns:
             np.ndarray: Rotor-averaged u and v components of the flow field at the given positions (m/s)
         """
-        return self.obs_uv_mps(x_m, y_m, z_m, t_s)
+        return self.obs_uv_mps(xyz, t_s)
     
