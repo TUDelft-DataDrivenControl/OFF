@@ -139,7 +139,8 @@ class OFFInterface:
                                  settings_wke: dict = None, 
                                  settings_cor: dict = None, 
                                  settings_ctr: dict = None,
-                                 wind_farm: wfm.WindFarm = None):
+                                 wind_farm: wfm.WindFarm = None,
+                                 re_init_sim: bool = True):
         """
         Initialize the simulation using dictionaries
 
@@ -157,6 +158,8 @@ class OFFInterface:
             Controller settings
         wind_farm: wfm.WindFarm
             Wind farm object
+        re_init_sim: bool
+            If True, forces a re-initialization of the OFF simulation object. Skip if you are running an incremental simulation and want to keep the previous state.
         """
         # Change root directory to previous simulation folder
         if settings_sim is not None:
@@ -171,9 +174,9 @@ class OFFInterface:
         self.settings_ctr = settings_ctr if settings_ctr is not None else self.settings_ctr
         self.wind_farm = wind_farm if wind_farm is not None else self.wind_farm
 
-        # Create OFF simulation object
-        #self.create_off_simulation()
-        self.ready_to_run = False
+        # Force reinitialization of the OFF simulation object if requested
+        if re_init_sim:
+            self.ready_to_run = False
 
     def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
         """
