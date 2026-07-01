@@ -139,8 +139,7 @@ class OFFInterface:
                                  settings_wke: dict = None, 
                                  settings_cor: dict = None, 
                                  settings_ctr: dict = None,
-                                 wind_farm: wfm.WindFarm = None,
-                                 re_init_sim: bool = True):
+                                 wind_farm: wfm.WindFarm = None):
         """
         Initialize the simulation using dictionaries
 
@@ -158,8 +157,6 @@ class OFFInterface:
             Controller settings
         wind_farm: wfm.WindFarm
             Wind farm object
-        re_init_sim: bool
-            If True, forces a re-initialization of the OFF simulation object. Skip if you are running an incremental simulation and want to keep the previous state.
         """
         # Change root directory to previous simulation folder
         if settings_sim is not None:
@@ -174,9 +171,9 @@ class OFFInterface:
         self.settings_ctr = settings_ctr if settings_ctr is not None else self.settings_ctr
         self.wind_farm = wind_farm if wind_farm is not None else self.wind_farm
 
-        # Force reinitialization of the OFF simulation object if requested
-        if re_init_sim:
-            self.ready_to_run = False
+        # Force reinitialization of the OFF simulation object as the settings have changed. 
+        # This is necessary to apply the settings to the actual simulation object. 
+        self.ready_to_run = False
 
     def create_off_simulation(self, yaw: float = 0.0, axind: float = 1/3):
         """
@@ -215,7 +212,7 @@ class OFFInterface:
             self.measurements, self.control_applied = self.off_sim.run_sim()
         else:
             # Throw an error or warning that the simulation is not ready to run yet, possibly it has not yet been initialized
-            logging.error('The simulation is not ready to run yet. Possibly it has not yet been initialized.')
+            logging.error('The simulation is not ready to run yet. Possibly it has not yet been initialized - run create_off_simulation() first.')
             
     def increment_sim(self, dt: float, start_time: float = None):
         """
