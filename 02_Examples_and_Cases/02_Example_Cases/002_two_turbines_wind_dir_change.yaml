@@ -564,7 +564,7 @@ vis:
     # Steps between the OPs -> 1 every OP, 5 -> every 5th OP
     mountains_stride: 2
     # Offset in OPs, e.g. 0 -> first OP, 1 -> second OP, etc. Is treated as variable if mountain wandering is True
-    mountains_offset: 5
+    mountains_offset: 1
     # Mountains wandering through the farm, i.e. the mountains are not static but move with the wind
     mountains_wandering: False
     # 3D mountains

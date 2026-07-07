@@ -21,16 +21,6 @@ files = os.listdir(path_to_data)
 mountain_plot_x_files = sorted([f for f in files if f.startswith('mountain_plot_x_') and f.endswith('.csv')])
 
 
-# # Load the csv data
-# data_x = np.loadtxt(f'{path_to_data}/mountain_plot_x_000656s.csv', delimiter=',')
-# data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_000656s.csv', delimiter=',')
-# data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_000656s.csv', delimiter=',')
-# data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_000656s.csv', delimiter=',')
-# # find the largest value in the data_u and data_v arrays
-# max_u = np.max(data_u[:, 1:])
-# max_v = np.max(data_v[:, 1:])
-
-
 def line_interpolation(x, y, u, v, X, Y) -> np.ndarray:
     """
     Interpolates the wind speed data onto a regular grid.
@@ -225,24 +215,3 @@ for i, file in enumerate(mountain_plot_x_files):
     plt.tight_layout()
     plt.savefig(path_to_data + f"/interpolated_mountain_plot_{file.split('_')[-1].replace('.csv', '')}.png")
     plt.show()
-
-# import time
-# start_time = time.time()
-# plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
-#                                  np.linspace(np.min(data_x), np.max(data_x), 100), 
-#                                  np.linspace(np.min(data_y), np.max(data_y), 40))
-# print(f"Calculation took {time.time() - start_time:.2f} seconds")
-
-
-# fig, ax = plt.subplots( 1, 1, figsize=(12, 3), sharex=True)
-
-
-
-# ax.plot(data_x[:,(data_x.shape[1]-1)//2],
-#                 data_y[:,(data_x.shape[1]-1)//2], 'o', markersize=1, color="#FFFFFF")
-
-# plt.title('Interpolated Wind Speed')
-# plt.xlabel('x (m)')
-# plt.ylabel('y (m)')
-# plt.savefig(path_to_data + "/interpolated_mountain_plot.png")
-# plt.show()
