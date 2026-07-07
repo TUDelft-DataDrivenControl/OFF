@@ -5,7 +5,7 @@ import numpy as np
 
 from off.OFFModule import *
 
-class TurbineController(ABC):
+class TurbineController(OFFModule):
     """Base interface for local (per-turbine) controller."""
     
     MODULE_TYPE = "TurbineController"
