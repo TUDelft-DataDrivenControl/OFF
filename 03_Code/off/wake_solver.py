@@ -360,18 +360,18 @@ class WakeSolver(ABC):
                     uv_mesh = ot.ot_abs2uv(self._mountain_u_abs[0], tur.ambient_states.get_wind_dir_ind(i))
 
                     if data_x.size == 0:
-                        data_x = mesh_x[np.newaxis, :]
-                        data_y = mesh_y[np.newaxis, :]
-                        data_z = mesh_z[np.newaxis, :]
-                        data_u = uv_mesh[0, :]
-                        data_v = uv_mesh[1, :]
+                        data_x = np.hstack((i_t, mesh_x))[np.newaxis, :]
+                        data_y = np.hstack((i_t, mesh_y))[np.newaxis, :]
+                        data_z = np.hstack((i_t, mesh_z))[np.newaxis, :]
+                        data_u = np.hstack((i_t, uv_mesh[0, :]))
+                        data_v = np.hstack((i_t, uv_mesh[1, :]))
                     else:
                         # Concatenate the data
-                        data_x = np.vstack((data_x, mesh_x))
-                        data_y = np.vstack((data_y, mesh_y))
-                        data_z = np.vstack((data_z, mesh_z))
-                        data_u = np.vstack((data_u, uv_mesh[0, :]))
-                        data_v = np.vstack((data_v, uv_mesh[1, :]))
+                        data_x = np.vstack((data_x, np.hstack((i_t, mesh_x))))
+                        data_y = np.vstack((data_y, np.hstack((i_t, mesh_y))))
+                        data_z = np.vstack((data_z, np.hstack((i_t, mesh_z))))
+                        data_u = np.vstack((data_u, np.hstack((i_t, uv_mesh[0, :]))))
+                        data_v = np.vstack((data_v, np.hstack((i_t, uv_mesh[1, :]))))
                     
                                     
                 else:
@@ -391,16 +391,16 @@ class WakeSolver(ABC):
                 
                     # Attach the data to the list
                     if data_x.size == 0:
-                        data_x = line_x[np.newaxis, :]
-                        data_y = line_y[np.newaxis, :]
-                        data_u = uv_line[0, :]
-                        data_v = uv_line[1, :]
+                        data_x = np.hstack((i_t, line_x))[np.newaxis, :]
+                        data_y = np.hstack((i_t, line_y))[np.newaxis, :]  
+                        data_u = np.hstack((i_t, uv_line[0, :]))
+                        data_v = np.hstack((i_t, uv_line[1, :]))
                     else:
                         # Concatenate the data
-                        data_x = np.vstack((data_x, line_x))
-                        data_y = np.vstack((data_y, line_y))
-                        data_u = np.vstack((data_u, uv_line[0, :]))
-                        data_v = np.vstack((data_v, uv_line[1, :]))
+                        data_x = np.vstack((data_x, np.hstack((i_t, line_x))))
+                        data_y = np.vstack((data_y, np.hstack((i_t, line_y))))
+                        data_u = np.vstack((data_u, np.hstack((i_t, uv_line[0, :]))))
+                        data_v = np.vstack((data_v, np.hstack((i_t, uv_line[1, :]))))
 
         # Store the data in a csv file
         np.savetxt(sim_dir + "/mountain_plot_x_" + str(int(t)).zfill(6) + "s.csv",
@@ -515,15 +515,16 @@ class WakeSolver(ABC):
         # Plot data as line plot
         fig, ax = plt.subplots()
 
-        max_u = np.max(data_u)
-        max_v = np.max(data_v)
+        max_u = np.max(data_u[:, 1:])
+        max_v = np.max(data_v[:, 1:])
         amplification_factor = 10.0 #m/(m/s)
         for i in range(0,data_x.shape[0]):
-            ax.fill(np.hstack((data_x[i, :] + (max_u - data_u[i, :]) * amplification_factor, data_x[i, ::-1])),
-                    np.hstack((data_y[i, :] + (max_v - data_v[i, :]) * amplification_factor, data_y[i, ::-1])), 
+            ax.fill(np.hstack((data_x[i, 1:] + (max_u - data_u[i, 1:]) * amplification_factor, data_x[i, 1::-1])),
+                    np.hstack((data_y[i, 1:] + (max_v - data_v[i, 1:]) * amplification_factor, data_y[i, 1::-1])), 
                     color='#0c2340', alpha=0.5, edgecolor='none')#'#0c2340')
             
-        ax.plot(data_x[:,data_x.shape[1]//2], data_y[:,data_x.shape[1]//2], 'o', markersize=2, color='#ec6842')
+        ax.plot(data_x[:,(data_x.shape[1]-1)//2],
+                data_y[:,(data_x.shape[1]-1)//2], 'o', markersize=2, color='#ec6842')
 
         # Plot yawed turbines
         for i_t, tur in enumerate(wind_farm.turbines):
