@@ -9,17 +9,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
-# Path to data
-path_to_data = '/Users/marcusbecker/Documents/01_Research/01_FLORIDyn/06_FLORIDynCollab/OFF/runs/off_run_2026_07_06-14_32_01.225390'
+D = 200.0
+res_grid = D/10.0
 
-# Load the csv data
-data_x = np.loadtxt(f'{path_to_data}/mountain_plot_x_000656s.csv', delimiter=',')
-data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_000656s.csv', delimiter=',')
-data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_000656s.csv', delimiter=',')
-data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_000656s.csv', delimiter=',')
-# find the largest value in the data_u and data_v arrays
-max_u = np.max(data_u[:, 1:])
-max_v = np.max(data_v[:, 1:])
+# Path to data
+path_to_data = '/Users/marcusbecker/Documents/01_Research/01_FLORIDyn/06_FLORIDynCollab/OFF/runs/off_run_2026_07_07-10_42_12.661434'
+
+# Find unique mountain_plot_x_ files in the directory
+import os
+files = os.listdir(path_to_data)
+mountain_plot_x_files = sorted([f for f in files if f.startswith('mountain_plot_x_') and f.endswith('.csv')])
+
+
+# # Load the csv data
+# data_x = np.loadtxt(f'{path_to_data}/mountain_plot_x_000656s.csv', delimiter=',')
+# data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_000656s.csv', delimiter=',')
+# data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_000656s.csv', delimiter=',')
+# data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_000656s.csv', delimiter=',')
+# # find the largest value in the data_u and data_v arrays
+# max_u = np.max(data_u[:, 1:])
+# max_v = np.max(data_v[:, 1:])
 
 
 def line_interpolation(x, y, u, v, X, Y) -> np.ndarray:
@@ -43,106 +52,98 @@ def line_interpolation(x, y, u, v, X, Y) -> np.ndarray:
     V = np.full(X.shape, np.nan)
 
     # Create a mask to find out if the X,Y grid point is part of the convex hull of the data points
-    points  = np.column_stack((x.flatten(), y.flatten()))
-    tri     = Delaunay(points)
-    mask    = tri.find_simplex(np.column_stack((X.flatten(), Y.flatten()))) >= 0
-    mask    = mask.reshape(X.shape)
+    points = np.column_stack((x.flatten(), y.flatten()))
+    tri = Delaunay(points)
+    mask = tri.find_simplex(np.column_stack((X.flatten(), Y.flatten()))) >= 0
 
-    # Build segments from the data points based on starting point and vector to the next point
-    segments = np.array([])
-    for i in range(x.shape[0] - 1):
-        for j in range(x.shape[1]):
-            if segments.size == 0:
-                segments = np.array([x[i, j], y[i, j], x[i + 1, j] - x[i, j], y[i + 1, j] - y[i, j], u[i, j], v[i, j], u[i + 1, j], v[i + 1, j]])
-            else:
-                segments = np.vstack([segments, [x[i, j], y[i, j], x[i + 1, j] - x[i, j], y[i + 1, j] - y[i, j], u[i, j], v[i, j], u[i + 1, j], v[i + 1, j]]])
+    # Build segment arrays in one shot: each segment connects row i to i+1 (same column)
+    x0 = x[:-1, :].ravel()
+    y0 = y[:-1, :].ravel()
+    seg_dx = (x[1:, :] - x[:-1, :]).ravel()
+    seg_dy = (y[1:, :] - y[:-1, :]).ravel()
+    u0 = u[:-1, :].ravel()
+    v0 = v[:-1, :].ravel()
+    du = (u[1:, :] - u[:-1, :]).ravel()
+    dv = (v[1:, :] - v[:-1, :]).ravel()
 
-    for j in range(X.shape[0]):
-        for k in range(X.shape[1]):
-            if mask[j, k]:
-                # Calculate the downstream, cross-stream distance from the grid point to each segment
-                downstream_distance         = np.zeros(segments.shape[0])
-                cross_stream_distance       = np.zeros(segments.shape[0])
-                percentage_along_segment    = np.zeros(segments.shape[0])
-                angle_to_segment            = np.zeros(segments.shape[0])
+    seg_len_sq = seg_dx**2 + seg_dy**2
+    seg_angle = np.arctan2(seg_dy, seg_dx)
+    valid_seg = seg_len_sq > 0.0
 
-                for i in range(segments.shape[0]):
-                    # Vector from segment start to grid point
-                    dx = X[j, k] - segments[i, 0]
-                    dy = Y[j, k] - segments[i, 1]
+    # Interpolate only inside convex hull; process points in chunks for low memory overhead.
+    Xf = X.ravel()
+    Yf = Y.ravel()
+    U_flat = U.ravel()
+    V_flat = V.ravel()
+    grid_idx = np.flatnonzero(mask)
+    if grid_idx.size == 0:
+        return U, V
 
-                    # Segment vector
-                    seg_dx = segments[i, 2]
-                    seg_dy = segments[i, 3]
+    batch_size = 256
+    for i0 in range(0, grid_idx.size, batch_size):
+        idx = grid_idx[i0:i0 + batch_size]
+        xp = Xf[idx]
+        yp = Yf[idx]
 
-                    # Calculate the projection of the point onto the segment by dot product
-                    seg_length_squared = seg_dx**2 + seg_dy**2
-                    t = (dx * seg_dx + dy * seg_dy) / seg_length_squared
+        dx = xp[:, None] - x0[None, :]
+        dy = yp[:, None] - y0[None, :]
 
-                    # Calculate angle between segment and point vector
-                    angle = np.arctan2(dy, dx) - np.arctan2(seg_dy, seg_dx)
-                    angle = (angle + np.pi) % (2 *np.pi) - np.pi  # Normalize angle to [-pi, pi]
-                    angle_to_segment[i] = angle
-                    # 
+        with np.errstate(divide='ignore', invalid='ignore'):
+            t = (dx * seg_dx[None, :] + dy * seg_dy[None, :]) / seg_len_sq[None, :]
 
-                    if t < 0:
-                        # the grid point is before the segment start -> ignore
-                        downstream_distance[i] = np.nan
-                        cross_stream_distance[i] = np.nan
-                        continue
-                    elif t > 1:
-                        # the grid point is after the segment end -> ignore
-                        downstream_distance[i] = np.nan
-                        cross_stream_distance[i] = np.nan
-                        continue
+        valid = valid_seg[None, :] & (t >= 0.0) & (t <= 1.0)
 
-                    percentage_along_segment[i] = t
+        closest_x = x0[None, :] + t * seg_dx[None, :]
+        closest_y = y0[None, :] + t * seg_dy[None, :]
+        rx = xp[:, None] - closest_x
+        ry = yp[:, None] - closest_y
+        dist = np.sqrt(rx**2 + ry**2)
 
-                    # Closest point on the segment
-                    closest_x = segments[i, 0] + t * seg_dx
-                    closest_y = segments[i, 1] + t * seg_dy
-                    
-                    # This needs to be the distance from the grid point to the closest point on the segment, projected onto the segment direction for downstream and perpendicular for cross-stream
-                    dx = X[j, k] - closest_x
-                    dy = Y[j, k] - closest_y
-                    
-                    downstream_distance[i]      = np.cos(angle) * np.sqrt(dx**2 + dy**2)
-                    cross_stream_distance[i]    = np.sin(angle) * np.sqrt(dx**2 + dy**2)
+        angle = np.arctan2(dy, dx) - seg_angle[None, :]
+        angle = (angle + np.pi) % (2 * np.pi) - np.pi
 
-                # Find the index of the two closest cross-stream segments
-                closest_segment_idxs = np.argsort(np.abs(cross_stream_distance))[0:2]
+        cross = np.where(valid, np.sin(angle) * dist, np.nan)
+        abs_cross = np.abs(cross)
+        abs_cross = np.where(np.isfinite(abs_cross), abs_cross, np.inf)
 
-                frac_closest_seg = np.abs(cross_stream_distance[closest_segment_idxs[0]]) / (np.abs(cross_stream_distance[closest_segment_idxs[0]]) + np.abs(cross_stream_distance[closest_segment_idxs[1]]))
+        # Need at least two valid segments for cross-stream blending.
+        valid_counts = np.sum(np.isfinite(cross), axis=1)
+        can_interp = valid_counts >= 2
+        if not np.any(can_interp):
+            continue
 
-                # same blending as for V: linear along each segment, then cross-stream blend
-                denom = np.abs(cross_stream_distance[closest_segment_idxs[0]]) + np.abs(cross_stream_distance[closest_segment_idxs[1]])
-                if denom == 0:
-                    frac_closest_seg = 0.5  # exactly centered between both segments
-                else:
-                    frac_closest_seg = np.abs(cross_stream_distance[closest_segment_idxs[0]]) / denom
+        t_sel = t[can_interp]
+        abs_cross_sel = abs_cross[can_interp]
+        pair_idx = np.argpartition(abs_cross_sel, kth=1, axis=1)[:, :2]
 
-                U[j, k] = (1 - frac_closest_seg) * (
-                    segments[closest_segment_idxs[0], 4]
-                    + percentage_along_segment[closest_segment_idxs[0]]
-                    * (segments[closest_segment_idxs[0], 6] - segments[closest_segment_idxs[0], 4])
-                ) + frac_closest_seg * (
-                    segments[closest_segment_idxs[1], 4]
-                    + percentage_along_segment[closest_segment_idxs[1]]
-                    * (segments[closest_segment_idxs[1], 6] - segments[closest_segment_idxs[1], 4])
-                )
-                V[j,k] = (1 - frac_closest_seg) * (
-                    segments[closest_segment_idxs[0], 5] 
-                    + percentage_along_segment[closest_segment_idxs[0]] 
-                    * (segments[closest_segment_idxs[0], 7] - segments[closest_segment_idxs[0], 5])
-                ) + (frac_closest_seg) * (
-                    segments[closest_segment_idxs[1], 5] 
-                    + percentage_along_segment[closest_segment_idxs[1]] 
-                    * (segments[closest_segment_idxs[1], 7] - segments[closest_segment_idxs[1], 5]))
+        rows = np.arange(pair_idx.shape[0])
+        s0 = pair_idx[:, 0]
+        s1 = pair_idx[:, 1]
+
+        c0 = abs_cross_sel[rows, s0]
+        c1 = abs_cross_sel[rows, s1]
+        denom = c0 + c1
+        frac = np.where(denom == 0.0, 0.5, c0 / denom)
+
+        t0 = t_sel[rows, s0]
+        t1 = t_sel[rows, s1]
+
+        u_interp0 = u0[s0] + t0 * du[s0]
+        u_interp1 = u0[s1] + t1 * du[s1]
+        v_interp0 = v0[s0] + t0 * dv[s0]
+        v_interp1 = v0[s1] + t1 * dv[s1]
+
+        out_u = (1.0 - frac) * u_interp0 + frac * u_interp1
+        out_v = (1.0 - frac) * v_interp0 + frac * v_interp1
+
+        idx_out = idx[can_interp]
+        U_flat[idx_out] = out_u
+        V_flat[idx_out] = out_v
 
     return U, V
 
 
-def plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, x_grid, y_grid):
+def plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, x_grid, y_grid, clims=None):
     """
     Plots the interpolated mountain range data.
 
@@ -154,6 +155,7 @@ def plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, x_grid,
     - data_v: 2D array of v-component of wind speed.
     - x_grid: 1D array of x-coordinates for interpolation grid.
     - y_grid: 1D array of y-coordinates for interpolation grid.
+    - clims: Tuple of (vmin, vmax) for color limits.
     """
     
     n_turbines = np.unique(data_x[:, 0])
@@ -182,23 +184,65 @@ def plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, x_grid,
 
     # Plot the interpolated wind speed magnitude
     speed_magnitude = np.sqrt(U**2 + V**2)
-    contour = ax.contourf(X, Y, speed_magnitude, levels=50, cmap='viridis')
-    plt.colorbar(contour, ax=ax, label='Wind Speed (m/s)')
+    if clims is not None:
+        vmin, vmax = clims
+        levels = np.linspace(vmin, vmax, 50)
+        contour = ax.contourf(
+            X,
+            Y,
+            speed_magnitude,
+            levels=levels,
+            cmap='Oranges',
+            vmin=vmin,
+            vmax=vmax,
+            extend='both',
+        )
+    else:
+        contour = ax.contourf(X, Y, speed_magnitude, levels=50, cmap='Oranges')
+
+    cbr = plt.colorbar(contour, ax=ax, label='Wind Speed (m/s)')
+    if clims is not None:
+        cbr.mappable.set_clim(vmin, vmax)
+        cbr.set_ticks(np.arange(vmin, vmax + 1, 2))
     ax.set_aspect('equal')
 
-    
 
-fig, ax = plt.subplots()
+for i, file in enumerate(mountain_plot_x_files):
+    # Load the csv data
+    data_x = np.loadtxt(f'{path_to_data}/{file}', delimiter=',')
+    data_y = np.loadtxt(f'{path_to_data}/mountain_plot_y_{file.split("_")[-1]}', delimiter=',')
+    data_u = np.loadtxt(f'{path_to_data}/mountain_plot_u_{file.split("_")[-1]}', delimiter=',')
+    data_v = np.loadtxt(f'{path_to_data}/mountain_plot_v_{file.split("_")[-1]}', delimiter=',')
 
-plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
-                                 np.linspace(np.min(data_x), np.max(data_x), 100), 
-                                 np.linspace(np.min(data_y), np.max(data_y), 20))
+    fig, ax = plt.subplots(1, 1, figsize=(12, 3), sharex=True)
+    plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
+                                     np.arange(np.min(data_x), np.max(data_x), res_grid), 
+                                     np.arange(np.min(data_y), np.max(data_y), res_grid),
+                                     clims=(2, 8))
+    plt.title(f'Interpolated Wind Speed at {file.split("_")[-1].replace(".csv", "")}')
+    plt.xlabel('x (m)')
+    plt.ylabel('y (m)')
+    plt.tight_layout()
+    plt.savefig(path_to_data + f"/interpolated_mountain_plot_{file.split('_')[-1].replace('.csv', '')}.png")
+    plt.show()
 
-ax.plot(data_x[:,(data_x.shape[1]-1)//2],
-                data_y[:,(data_x.shape[1]-1)//2], 'o', markersize=1, color="#FFFFFF")
+# import time
+# start_time = time.time()
+# plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
+#                                  np.linspace(np.min(data_x), np.max(data_x), 100), 
+#                                  np.linspace(np.min(data_y), np.max(data_y), 40))
+# print(f"Calculation took {time.time() - start_time:.2f} seconds")
 
-plt.title('Interpolated Wind Speed')
-plt.xlabel('x (m)')
-plt.ylabel('y (m)')
-plt.savefig(path_to_data + "/interpolated_mountain_plot.png")
-plt.show()
+
+# fig, ax = plt.subplots( 1, 1, figsize=(12, 3), sharex=True)
+
+
+
+# ax.plot(data_x[:,(data_x.shape[1]-1)//2],
+#                 data_y[:,(data_x.shape[1]-1)//2], 'o', markersize=1, color="#FFFFFF")
+
+# plt.title('Interpolated Wind Speed')
+# plt.xlabel('x (m)')
+# plt.ylabel('y (m)')
+# plt.savefig(path_to_data + "/interpolated_mountain_plot.png")
+# plt.show()
