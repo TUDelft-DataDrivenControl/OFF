@@ -33,4 +33,4 @@ class TurbineModelStatic(TurbineModel):
         Returns:
             np.float64: Current generator power of the turbine (W).
         """
-        return 0.5 * 2/3 * 1.225 * np.pi * self.radius**2 * self.obs_horizontal_wind_speed_mps(t_s)**3
+        return 10e6

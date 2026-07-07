@@ -15,7 +15,7 @@ class AtmosphericModel_HomogeneousFlow(AtmosphericModel):
     _initial_state_turbulence_intensity_percent: float       
 
     def __init__(self, wind_speed_abs_mps: float = 8.0, wind_dir_deg: float = 270.0, turbulence_intensity_percent: float = 6.0) -> None:
-        super(AtmosphericModel, self).__init__(self)
+        super().__init__()
         self.wind_speed_abs_mps = wind_speed_abs_mps
         self.wind_dir_deg = wind_dir_deg
         self.turbulence_intensity_percent = turbulence_intensity_percent
