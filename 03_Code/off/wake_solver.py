@@ -26,6 +26,7 @@ import copy
 from os import path
 import logging
 import matplotlib.pyplot as plt
+from scipy.spatial import Delaunay
 
 lg = logging.getLogger(__name__)
 
@@ -412,100 +413,6 @@ class WakeSolver(ABC):
         np.savetxt(sim_dir + "/mountain_plot_v_" + str(int(t)).zfill(6) + "s.csv",
                        data_v, delimiter=',')
         
-        # # Also create a WS_eff contour map at hub height with OP lines overlay
-        # try:
-        #     # Build grid from visualization settings
-        #     x_bounds = self.settings_vis["grid"]["boundaries"][0]
-        #     y_bounds = self.settings_vis["grid"]["boundaries"][1]
-        #     nx = self.settings_vis["grid"]["resolution"][0]
-        #     ny = self.settings_vis["grid"]["resolution"][1]
-
-        #     x_grid = np.linspace(x_bounds[0], x_bounds[1], nx)
-        #     y_grid = np.linspace(y_bounds[0], y_bounds[1], ny)
-
-        #     # Scale to meters if unit is 'D'
-        #     if self.settings_vis["grid"]["unit"][0] == 'D':
-        #         D = self.settings_vis["grid"]["diameter"][0]
-        #         x_grid = x_grid * D
-        #         y_grid = y_grid * D
-
-        #     # Ensure PyWake wake model is ready (set wind farm states via rotor-plane query)
-        #     _ = self._get_wind_speeds_rp(0, wind_farm)
-
-        #     # Compute flow map via PyWake adapter
-        #     fm = self.floris_wake.compute_wake_flow_map(x_grid, y_grid)
-
-        #     # Helper to bilinearly sample WS_eff from flow_map grid
-        #     def _sample_ws_from_flow_map(flow_map, gx, gy, xs, ys):
-        #         Zgrid = np.asarray(flow_map.WS_eff.values)
-        #         Zgrid = np.squeeze(Zgrid)
-        #         # Normalize grid orientation to (len(gy), len(gx))
-        #         if Zgrid.ndim != 2:
-        #             raise ValueError("FlowMap WS_eff returned array with unexpected shape")
-        #         if Zgrid.shape == (len(gx), len(gy)):
-        #             Zgrid = Zgrid.T
-        #         elif Zgrid.shape != (len(gy), len(gx)):
-        #             raise ValueError("FlowMap WS_eff grid shape mismatch")
-
-        #         x_flat = np.array(xs, dtype=float).reshape(-1)
-        #         y_flat = np.array(ys, dtype=float).reshape(-1)
-        #         nx = len(gx)
-        #         ny = len(gy)
-        #         ix = np.clip(np.searchsorted(gx, x_flat) - 1, 0, nx - 2)
-        #         iy = np.clip(np.searchsorted(gy, y_flat) - 1, 0, ny - 2)
-        #         x0 = gx[ix]
-        #         x1 = gx[ix + 1]
-        #         y0 = gy[iy]
-        #         y1 = gy[iy + 1]
-        #         denom_x = x1 - x0
-        #         denom_y = y1 - y0
-        #         tx = np.divide(x_flat - x0, denom_x, out=np.zeros_like(denom_x, dtype=float), where=denom_x != 0)
-        #         ty = np.divide(y_flat - y0, denom_y, out=np.zeros_like(denom_y, dtype=float), where=denom_y != 0)
-        #         f00 = Zgrid[iy, ix]
-        #         f10 = Zgrid[iy, ix + 1]
-        #         f01 = Zgrid[iy + 1, ix]
-        #         f11 = Zgrid[iy + 1, ix + 1]
-        #         return (1 - tx) * (1 - ty) * f00 + tx * (1 - ty) * f10 + (1 - tx) * ty * f01 + tx * ty * f11
-
-        #     # Plot
-        #     fig2, ax2 = plt.subplots()
-        #     fm.plot_wake_map(ax=ax2)
-
-        #     # Overlay OP lines (center points already computed)
-        #     # Draw thin lines along each OP mountain line for context
-        #     for i in range(0, data_x.shape[0]):
-        #         ax2.plot(data_x[i, :], data_y[i, :], color='#ec6842', linewidth=0.8, alpha=0.9)
-
-        #     # Note: data_u and data_v already contain accurate point-sampled wake velocities from vis_tile()
-        #     # No need to resample from coarse flow_map grid - the point sampling is more accurate
-
-        #     # Overlay yawed turbines
-        #     for i_t, tur in enumerate(wind_farm.turbines):
-        #         x = tur.base_location[0]
-        #         y = tur.base_location[1]
-        #         yaw = ot.ot_deg2rad(tur.get_yaw_orientation())
-        #         ax2.plot([x - 0.5 * tur.diameter * np.sin(yaw), x + 0.5 * tur.diameter * np.sin(yaw)],
-        #                  [y + 0.5 * tur.diameter * np.cos(yaw), y - 0.5 * tur.diameter * np.cos(yaw)],
-        #                  color='black', linewidth=1.5)
-        #         ax2.plot([x, x + 0.2 * tur.diameter * np.cos(yaw)],
-        #                  [y, y + 0.2 * tur.diameter * np.sin(yaw)],
-        #                  color='black', linewidth=1.5)
-
-        #     ax2.set_aspect('equal')
-        #     ax2.set_title('WS_eff contour with OP lines')
-        #     ax2.set_xlabel('x (m)')
-        #     ax2.set_ylabel('y (m)')
-        #     scale_grid = 1 if self.settings_vis["grid"]["unit"][0] != 'D' else self.settings_vis["grid"]["diameter"][0]
-        #     ax2.set_xlim(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid,
-        #                  self.settings_vis["grid"]["boundaries"][0][1] * scale_grid)
-        #     ax2.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid,
-        #                  self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
-        #     plt.savefig(sim_dir + "/wake_map_at_" + str(int(t)).zfill(6) + "s.png")
-        #     plt.close(fig2)
-        # except Exception:
-        #     lg.exception("Failed to generate WS_eff contour map; continuing with mountain plot only")
-
-        
         # Don't plot if the 3d data has been collected
         if self.settings_vis["flow_field_plots"]["mountains_3d"]:
             np.savetxt(sim_dir + "/mountain_plot_z_" + str(int(t)).zfill(6) + "s.csv",
@@ -513,15 +420,29 @@ class WakeSolver(ABC):
             return 
         
         # Plot data as line plot
-        fig, ax = plt.subplots()
+        figure_scale = (self.settings_vis["grid"]["boundaries"][1][1] - self.settings_vis["grid"]["boundaries"][1][0]) / (self.settings_vis["grid"]["boundaries"][0][1] - self.settings_vis["grid"]["boundaries"][0][0])
+        fig, ax = plt.subplots( figsize=(12, 12*figure_scale), sharex=True)
 
-        max_u = np.max(data_u[:, 1:])
-        max_v = np.max(data_v[:, 1:])
-        amplification_factor = 10.0 #m/(m/s)
-        for i in range(0,data_x.shape[0]):
-            ax.fill(np.hstack((data_x[i, 1:] + (max_u - data_u[i, 1:]) * amplification_factor, data_x[i, 1::-1])),
-                    np.hstack((data_y[i, 1:] + (max_v - data_v[i, 1:]) * amplification_factor, data_y[i, 1::-1])), 
-                    color='#0c2340', alpha=0.5, edgecolor='none')#'#0c2340')
+        x_grid = np.linspace(self.settings_vis["grid"]["boundaries"][0][0] * scale_grid,
+                            self.settings_vis["grid"]["boundaries"][0][1] * scale_grid,
+                            self.settings_vis["grid"]["resolution"][0])
+        y_grid = np.linspace(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid,
+                            self.settings_vis["grid"]["boundaries"][1][1] * scale_grid,
+                            self.settings_vis["grid"]["resolution"][1])
+
+        speed_abs = np.hypot(data_u[:, 1:], data_v[:, 1:])
+        max_u_abs = np.ceil(np.max(speed_abs)) + 1.0
+        min_u_abs = np.floor(np.min(speed_abs)) - 1.0
+
+        self._plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
+                                               x_grid, y_grid, clims=(min_u_abs, max_u_abs))
+
+        
+        # amplification_factor = 10.0 #m/(m/s)
+        # for i in range(0,data_x.shape[0]):
+        #     ax.fill(np.hstack((data_x[i, 1:] + (max_u - data_u[i, 1:]) * amplification_factor, data_x[i, 1::-1])),
+        #             np.hstack((data_y[i, 1:] + (max_v - data_v[i, 1:]) * amplification_factor, data_y[i, 1::-1])), 
+        #             color='#0c2340', alpha=0.5, edgecolor='none')#'#0c2340')
             
         ax.plot(data_x[:,(data_x.shape[1]-1)//2],
                 data_y[:,(data_x.shape[1]-1)//2], 'o', markersize=2, color='#ec6842')
@@ -552,6 +473,181 @@ class WakeSolver(ABC):
         ax.set_ylim(self.settings_vis["grid"]["boundaries"][1][0] * scale_grid, self.settings_vis["grid"]["boundaries"][1][1] * scale_grid)
         plt.savefig(sim_dir + "/mountain_plot_at_" + str(int(t)).zfill(6) + "s.png")
         plt.close()
+
+    def _line_interpolation(self, x, y, u, v, X, Y) -> np.ndarray:
+        """
+        Interpolates the wind speed data onto a regular grid.
+
+        Parameters:
+        - x: n_particles x n_values array of x-coordinates
+        - y: n_particles x n_values array of y-coordinates
+        - u: n_particles x n_values array of u-component of wind speed
+        - v: n_particles x n_values array of v-component of wind speed
+        - X: 2D np.ndarray of x-coordinates for interpolation grid
+        - Y: 2D np.ndarray of y-coordinates for interpolation grid
+
+        Returns:
+        - U: 2D np.ndarray of interpolated u-component of wind speed
+        - V: 2D np.ndarray of interpolated v-component of wind speed
+        """
+
+        U = np.full(X.shape, np.nan)
+        V = np.full(X.shape, np.nan)
+
+        # Create a mask to find out if the X,Y grid point is part of the convex hull of the data points
+        points = np.column_stack((x.flatten(), y.flatten()))
+        tri = Delaunay(points)
+        mask = tri.find_simplex(np.column_stack((X.flatten(), Y.flatten()))) >= 0
+
+        # Build segment arrays in one shot: each segment connects row i to i+1 (same column)
+        x0 = x[:-1, :].ravel()
+        y0 = y[:-1, :].ravel()
+        seg_dx = (x[1:, :] - x[:-1, :]).ravel()
+        seg_dy = (y[1:, :] - y[:-1, :]).ravel()
+        u0 = u[:-1, :].ravel()
+        v0 = v[:-1, :].ravel()
+        du = (u[1:, :] - u[:-1, :]).ravel()
+        dv = (v[1:, :] - v[:-1, :]).ravel()
+
+        seg_len_sq = seg_dx**2 + seg_dy**2
+        seg_angle = np.arctan2(seg_dy, seg_dx)
+        valid_seg = seg_len_sq > 0.0
+
+        # Interpolate only inside convex hull; process points in chunks for low memory overhead.
+        Xf = X.ravel()
+        Yf = Y.ravel()
+        U_flat = U.ravel()
+        V_flat = V.ravel()
+        grid_idx = np.flatnonzero(mask)
+        if grid_idx.size == 0:
+            return U, V
+
+        batch_size = 256
+        for i0 in range(0, grid_idx.size, batch_size):
+            idx = grid_idx[i0:i0 + batch_size]
+            xp = Xf[idx]
+            yp = Yf[idx]
+
+            dx = xp[:, None] - x0[None, :]
+            dy = yp[:, None] - y0[None, :]
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                t = (dx * seg_dx[None, :] + dy * seg_dy[None, :]) / seg_len_sq[None, :]
+
+            valid = valid_seg[None, :] & (t >= 0.0) & (t <= 1.0)
+
+            closest_x = x0[None, :] + t * seg_dx[None, :]
+            closest_y = y0[None, :] + t * seg_dy[None, :]
+            rx = xp[:, None] - closest_x
+            ry = yp[:, None] - closest_y
+            dist = np.sqrt(rx**2 + ry**2)
+
+            angle = np.arctan2(dy, dx) - seg_angle[None, :]
+            angle = (angle + np.pi) % (2 * np.pi) - np.pi
+
+            cross = np.where(valid, np.sin(angle) * dist, np.nan)
+            abs_cross = np.abs(cross)
+            abs_cross = np.where(np.isfinite(abs_cross), abs_cross, np.inf)
+
+            # Need at least two valid segments for cross-stream blending.
+            valid_counts = np.sum(np.isfinite(cross), axis=1)
+            can_interp = valid_counts >= 2
+            if not np.any(can_interp):
+                continue
+
+            t_sel = t[can_interp]
+            abs_cross_sel = abs_cross[can_interp]
+            pair_idx = np.argpartition(abs_cross_sel, kth=1, axis=1)[:, :2]
+
+            rows = np.arange(pair_idx.shape[0])
+            s0 = pair_idx[:, 0]
+            s1 = pair_idx[:, 1]
+
+            c0 = abs_cross_sel[rows, s0]
+            c1 = abs_cross_sel[rows, s1]
+            denom = c0 + c1
+            frac = np.where(denom == 0.0, 0.5, c0 / denom)
+
+            t0 = t_sel[rows, s0]
+            t1 = t_sel[rows, s1]
+
+            u_interp0 = u0[s0] + t0 * du[s0]
+            u_interp1 = u0[s1] + t1 * du[s1]
+            v_interp0 = v0[s0] + t0 * dv[s0]
+            v_interp1 = v0[s1] + t1 * dv[s1]
+
+            out_u = (1.0 - frac) * u_interp0 + frac * u_interp1
+            out_v = (1.0 - frac) * v_interp0 + frac * v_interp1
+
+            idx_out = idx[can_interp]
+            U_flat[idx_out] = out_u
+            V_flat[idx_out] = out_v
+
+        return U, V
+
+
+    def _plot_interpolated_mountain_range(self, ax, data_x, data_y, data_u, data_v, x_grid, y_grid, clims=None):
+        """
+        Plots the interpolated mountain range data.
+
+        Parameters:
+        - ax: Matplotlib axis object to plot on.
+        - data_x: 2D array of x-coordinates of the mountain range.
+        - data_y: 2D array of y-coordinates of the mountain range.
+        - data_u: 2D array of u-component of wind speed.
+        - data_v: 2D array of v-component of wind speed.
+        - x_grid: 1D array of x-coordinates for interpolation grid.
+        - y_grid: 1D array of y-coordinates for interpolation grid.
+        - clims: Tuple of (vmin, vmax) for color limits.
+        """
+        
+        n_turbines = np.unique(data_x[:, 0])
+
+        # Create a meshgrid for interpolation
+        X, Y = np.meshgrid(x_grid, y_grid)
+        # Create nan arrays for U and V to hold the interpolated values
+        U = np.full(X.shape, np.nan)
+        V = np.full(X.shape, np.nan)
+        
+        # Go through each turbine 
+        for i_t in n_turbines:
+            # Filter data for the current turbine
+            mask = data_x[:, 0] == i_t
+            x_turbine = data_x[mask][:, 1:]
+            y_turbine = data_y[mask][:, 1:]
+            u_turbine = data_u[mask][:, 1:]
+            v_turbine = data_v[mask][:, 1:]
+
+            # Interpolate the wind speed data onto the grid
+            U_turbine, V_turbine = self._line_interpolation(x_turbine, y_turbine, u_turbine, v_turbine, X, Y)
+
+            # Assign the interpolated values to the overall U and V arrays if they are smaller / not nan
+            U = np.where(np.isnan(U) | (np.abs(U_turbine) < np.abs(U)), U_turbine, U)
+            V = np.where(np.isnan(V) | (np.abs(V_turbine) < np.abs(V)), V_turbine, V)
+
+        # Plot the interpolated wind speed magnitude
+        speed_magnitude = np.sqrt(U**2 + V**2)
+        if clims is not None:
+            vmin, vmax = clims
+            levels = np.linspace(vmin, vmax, 50)
+            contour = ax.contourf(
+                X,
+                Y,
+                speed_magnitude,
+                levels=levels,
+                cmap='bone',
+                vmin=vmin,
+                vmax=vmax,
+                extend='both',
+            )
+        else:
+            contour = ax.contourf(X, Y, speed_magnitude, levels=50, cmap='bone')
+
+        cbr = plt.colorbar(contour, ax=ax, label='Wind Speed (m/s)')
+        if clims is not None:
+            cbr.mappable.set_clim(vmin, vmax)
+            cbr.set_ticks(np.arange(vmin, vmax + 1, 2))
+        ax.set_aspect('equal')
 
 
 class TWFSolver(WakeSolver):
