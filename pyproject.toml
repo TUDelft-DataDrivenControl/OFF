@@ -7,5 +7,9 @@ name = "off"
 version = "0.0.1"
 dependencies = ["numpy"]
 
+[tool.setuptools.package-dir]
+"" = "src"
+
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["off*"]
