@@ -433,6 +433,7 @@ class WakeSolver(ABC):
         speed_abs = np.hypot(data_u[:, 1:], data_v[:, 1:])
         max_u_abs = np.ceil(np.max(speed_abs)) + 1.0
         min_u_abs = np.floor(np.min(speed_abs)) - 1.0
+        min_u_abs = max(min_u_abs, 0.0)
 
         self._plot_interpolated_mountain_range(ax, data_x, data_y, data_u, data_v, 
                                                x_grid, y_grid, clims=(min_u_abs, max_u_abs))
