@@ -10,7 +10,7 @@ wake:
 
     ###
     # Wind farm model to use (PropagateDownwind, PropagateDownWindIterative, or All2AllIterative)
-    wind_farm_model: PropagateDownwind
+    wind_farm_model: PropagateDownwindNoSelfInduction
 
     ### 
     # Deficit model to use (IEA37SimpleBastankhahGaussian, BastankhahGaussian, NOJDeficit, TurboNOJDeficit, GCLDeficit)
@@ -22,7 +22,7 @@ wake:
 
     ###
     # Optional turbulence model (CrespoHernandez, STF2017TurbulenceModel, or null)
-    turbulence_model: CrespoHernandez
+    turbulence_model: STF2017TurbulenceModel
 
     ###
     # Select superposition model for multiple wakes(LinearSum, SquaredSum, MaxSum, WeightedSum, SqMaxSum)
@@ -78,7 +78,7 @@ wake:
   # models that are not enabled, but the enabled model
   # must have a corresponding parameter block.
   wake_turbulence_parameters:
-    crespo_hernandez:
+    stf2017:
       initial: 0.1
       constant: 0.5
       ai: 0.8

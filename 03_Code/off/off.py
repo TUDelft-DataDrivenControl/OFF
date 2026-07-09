@@ -266,6 +266,13 @@ class OFF:
                 m_tmp.t_idx = idx
                 m_tmp['time'] = t
 
+                # Reorder columns: sector inflow after power_OFF, WS before TI
+                cols = m_tmp.columns.tolist()
+                ws_sec = [c for c in cols if c.startswith('WS_sec_')]
+                ti_sec = [c for c in cols if c.startswith('TI_sec_')]
+                other  = [c for c in cols if not c.startswith('WS_sec_') and not c.startswith('TI_sec_')]
+                m_tmp = m_tmp[other + ws_sec + ti_sec]
+
                 # Append turbine measurements to general measurement data
                 measurements = pd.concat([measurements, m_tmp], ignore_index=True)
 
@@ -282,6 +289,8 @@ class OFF:
                     self.visualizer_ff.vis_store_u_values(
                         self.wake_solver.get_tile_u().flatten(), idx)
                     
+
+            # Calc SA DELs
 
             lg.info('Rotor wind speed of all turbines:')
             lg.info(uv_r)

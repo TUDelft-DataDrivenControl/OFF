@@ -32,7 +32,6 @@ from .turbine import TurbineStates, AmbientStates
 
 lg = logging.getLogger(__name__)
 
-
 class WakeModel(ABC):
     settings : dict
     wind_farm_layout : np.ndarray
@@ -527,6 +526,31 @@ class Floris4Wake(WakeModel):
             columns=['t_idx', 'u_abs_eff_FLORIS', 'Ct_FLORIS', 'AI_FLORIS', 'TI_FLORIS','Power_FLORIS']
         )
 
+        # Sector-averaged inflow quantities for load surrogate
+        sa_cfg = self.settings.get('sector_average', {})
+        if sa_cfg.get('enabled', False):
+            try:
+                from wind_farm_loads.tool_agnostic import compute_sector_average
+                n_radius = sa_cfg.get('n_radius', 5)
+                n_azimuth = sa_cfg.get('n_azimuth_per_sector', 5)
+                sa = compute_sector_average(
+                    self.fmodel,
+                    radius=n_radius,
+                    n_azimuth_per_sector=n_azimuth,
+                    align_in_yaw=False,
+                    align_in_tilt=False,
+                )
+                # sa shape: [wt, wd=1, ws=1, sector=4, quantity=2]; extract turbine i_t
+                sa_t = sa.isel(wt=i_t, wd=0, ws=0)
+                for sector in ['up', 'right', 'down', 'left']:
+                    measurements[f'WS_sec_{sector}_FLORIS'] = float(
+                        sa_t.sel(sector=sector, quantity='WS_eff').values)
+                for sector in ['up', 'right', 'down', 'left']:
+                    measurements[f'TI_sec_{sector}_FLORIS'] = float(
+                        sa_t.sel(sector=sector, quantity='TI_eff').values)
+            except Exception:
+                lg.warning('Sector-average extraction failed for FLORIS; skipping.', exc_info=True)
+
         # Return the effective wind speed and the measurements
         return avg_vel.flatten()[i_t], measurements
 
@@ -721,7 +745,7 @@ class PyWakeModel(WakeModel):
             'deflection': ['py_wake.deflection_models'],
             'turbulence': ['py_wake.turbulence_models'],
             'superposition': ['py_wake.superposition_models'],
-            'wind_farm': ['py_wake.wind_farm_models'],
+            'wind_farm': ['py_wake.wind_farm_models', 'wind_farm_loads.py_wake'],
             'site': ['py_wake.site._site', 'py_wake.site']
         }
         
@@ -1013,7 +1037,32 @@ class PyWakeModel(WakeModel):
             ]],
             columns=['t_idx', 'u_abs_eff_PyWake', 'Ct_PyWake', 'AI_PyWake', 'TI_PyWake', 'Power_PyWake']
         )
-        
+
+        # Sector-averaged inflow quantities for load surrogate
+        sa_cfg = self.settings.get('sector_average', {})
+        if sa_cfg.get('enabled', False):
+            try:
+                from wind_farm_loads.tool_agnostic import compute_sector_average
+                n_radius = sa_cfg.get('n_radius', 5)
+                n_azimuth = sa_cfg.get('n_azimuth_per_sector', 5)
+                sa = compute_sector_average(
+                    sim_res,
+                    radius=n_radius,
+                    n_azimuth_per_sector=n_azimuth,
+                    align_in_yaw=False,
+                    align_in_tilt=False,
+                )
+                # sa shape: [wt, wd=1, ws=1, sector=4, quantity=2]; extract turbine i_t
+                sa_t = sa.isel(wt=i_t, wd=0, ws=0)
+                for sector in ['up', 'right', 'down', 'left']:
+                    measurements[f'WS_sec_{sector}_PyWake'] = float(
+                        sa_t.sel(sector=sector, quantity='WS_eff').values)
+                for sector in ['up', 'right', 'down', 'left']:
+                    measurements[f'TI_sec_{sector}_PyWake'] = float(
+                        sa_t.sel(sector=sector, quantity='TI_eff').values)
+            except Exception:
+                lg.warning('Sector-average extraction failed for PyWake; skipping.', exc_info=True)
+
         return WS_eff, measurements
 
     def vis_flow_field(self):
