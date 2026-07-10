@@ -73,9 +73,3 @@ class AtmosphericModel_HomogeneousFlow(AtmosphericModel):
     def obs_turbulence_intensity_percent(self, xyz_m: np.ndarray, t_s: float) -> np.ndarray:
         assert xyz_m.shape[0] == 3, "xyz_m must have shape (3, N)"
         return np.full(xyz_m.shape[1], self.turbulence_intensity_percent)
-    
-if __name__ == '__main__':
-    # Example usage and compatibility check
-    print(AtmosphericModel_HomogeneousFlow.compatibility)
-
-    AtmosphericModel_HomogeneousFlow.describe_compatibility()
