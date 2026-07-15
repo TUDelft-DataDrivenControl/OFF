@@ -220,8 +220,58 @@ def test_compat_overwrite_missing_components_V2() -> None:
         ('AtmosphericModel', 'SecondModel', 'obs_2', CompatibilityLevel.FULL, CompatibilityLevel.NONE),
     }
 
+
+@pytest.mark.compatibility
+def test_all_modules_of_required_type_must_meet_requirement() -> None:
+    class ExampleConsumer(OFFModule):
+        MODULE_TYPE = "ExampleConsumer"
+        REQUIRES = {
+            "ExampleModule": {
+                "obs_overwite_full_to_optional": CompatibilityLevel.FULL,
+            }
+        }
+
+    ret = check_compatibility([ExampleConsumer, ExampleModule, ExampleChild])
+
+    assert ret == [
+        (
+            "ExampleConsumer",
+            "ExampleModule",
+            "obs_overwite_full_to_optional",
+            CompatibilityLevel.FULL,
+            CompatibilityLevel.OPTIONAL,
+        )
+    ]
+
+
+@pytest.mark.compatibility
+def test_missing_observable_on_one_module_counts_as_none() -> None:
+    class ExampleConsumer(OFFModule):
+        MODULE_TYPE = "ExampleConsumer"
+        REQUIRES = {"ExampleModule": {"obs_full": CompatibilityLevel.FULL}}
+
+    class ExampleWithoutFullObservable(ExampleModule):
+        obs_full = None
+
+    ret = check_compatibility(
+        [ExampleConsumer, ExampleModule, ExampleWithoutFullObservable]
+    )
+
+    assert ret == [
+        (
+            "ExampleConsumer",
+            "ExampleModule",
+            "obs_full",
+            CompatibilityLevel.FULL,
+            CompatibilityLevel.NONE,
+        )
+    ]
+
+
 @pytest.mark.compatibility
 def test_3_compatible_modules_return_non() -> None:
+    print(ExampleAtmosphericModelMatcher.compatibility)
+    print(AtmosphericModel.compatibility)
     ret = check_compatibility([AtmosphericModel, ExampleModule, ExampleAtmosphericModelMatcher])
     assert ret == []
 
@@ -231,4 +281,3 @@ def test_3_mismatched_modules_missing_components() -> None:
     assert set(ret) == {
         ('AtmosphericModel', 'SecondModel', 'obs_2', CompatibilityLevel.FULL, CompatibilityLevel.OPTIONAL),
     }
-
