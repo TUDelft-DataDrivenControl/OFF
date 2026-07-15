@@ -7,9 +7,21 @@ name = "off"
 version = "0.0.1"
 dependencies = ["numpy"]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+]
+
 [tool.setuptools.package-dir]
 "" = "src"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["off*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-config --strict-markers"
+markers = [
+    "compatibility: tests for automatic OFF module compatibility checking",
+]
