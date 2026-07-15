@@ -1,0 +1,18 @@
+name: Atmospheric Model Homogeneous Flow
+description: The homogeneous background flow model provides a simplified representation of atmospheric flow, assuming uniform, time invariant flow properties.
+air_density_kgpm3: 1.225  # kg/m^3, standard air density at sea level
+reference_height_m: 115.0  # reference height in meters (for e.g., wind shear calculations)
+wind_speed_mps: # wind speed in meters per second
+  - 10.0
+wind_direction_degrees: # wind direction in degrees (0° = Southward, 90° = Westward)
+  - 260.0
+turbulence_intensities_percent: # percentage of turbulence intensity
+  - 5.0
+wind_shear_exponent: # wind shear exponent (0.143 for neutral stability)
+  - 0.143  
+wind_veer_factors_degpm: # wind veer factors in degrees per meter
+  - 0.0
+atmospheric_stability_L_m: # atmospheric stability parameter (Monin-Obukhov length) in meters
+  - 600.0
+surface_pressure_Pa: # surface pressure in Pascals
+  - 101325.0
