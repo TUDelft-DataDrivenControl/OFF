@@ -281,3 +281,73 @@ def test_3_mismatched_modules_missing_components() -> None:
     assert set(ret) == {
         ('AtmosphericModel', 'SecondModel', 'obs_2', CompatibilityLevel.FULL, CompatibilityLevel.OPTIONAL),
     }
+
+
+@pytest.mark.compatibility
+def test_module_order_does_not_change_compatibility_report() -> None:
+    modules = [AtmosphericModel, ExampleChild, ExampleAtmosphericModelMismatcher]
+    expected = set(check_compatibility(modules))
+
+    for module_order in permutations(modules):
+        assert set(check_compatibility(module_order)) == expected
+
+
+@pytest.mark.compatibility
+def test_check_compatibility_accepts_instances() -> None:
+    assert check_compatibility([ExampleModule()]) == check_compatibility([ExampleModule])
+
+
+@pytest.mark.compatibility
+@pytest.mark.parametrize("invalid_module", [object(), object])
+def test_check_compatibility_rejects_invalid_input(invalid_module: object) -> None:
+    with pytest.raises(TypeError, match="Expected OFFModule class or instance"):
+        check_compatibility([invalid_module])
+
+
+@pytest.mark.compatibility
+@pytest.mark.parametrize(("provided_level", "required_level", "is_unmet"), [
+        (CompatibilityLevel.NONE, CompatibilityLevel.NONE, False),
+        (CompatibilityLevel.NONE, CompatibilityLevel.UNKNOWN, True),
+        (CompatibilityLevel.UNKNOWN, CompatibilityLevel.UNKNOWN, False),
+        (CompatibilityLevel.UNKNOWN, CompatibilityLevel.OPTIONAL, True),
+        (CompatibilityLevel.OPTIONAL, CompatibilityLevel.UNKNOWN, False),
+        (CompatibilityLevel.OPTIONAL, CompatibilityLevel.FULL, True),
+        (CompatibilityLevel.FULL, CompatibilityLevel.OPTIONAL, False),
+        (CompatibilityLevel.FULL, CompatibilityLevel.FULL, False),
+        ],
+    )
+def test_compatibility_level_thresholds(provided_level: CompatibilityLevel, required_level: CompatibilityLevel, is_unmet: bool) -> None:
+    class ThresholdProvider(OFFModule):
+        MODULE_TYPE = "ThresholdProvider"
+
+        @compatibility(provided_level)
+        def obs_value(self) -> None:
+            pass
+
+    class ThresholdConsumer(OFFModule):
+        MODULE_TYPE = "ThresholdConsumer"
+        REQUIRES = {"ThresholdProvider": {"obs_value": required_level}}
+
+    report = check_compatibility([ThresholdProvider, ThresholdConsumer])
+
+    assert bool(report) is is_unmet
+    if is_unmet:
+        assert report == [
+            ("ThresholdConsumer", "ThresholdProvider", "obs_value", required_level, provided_level,)
+        ]
+
+
+@pytest.mark.compatibility
+def test_empty_module_list_is_compatible() -> None:
+    assert check_compatibility([]) == []
+
+
+@pytest.mark.compatibility
+def test_describe_compatibility_returns_report(capsys: pytest.CaptureFixture[str]) -> None:
+    report = ExampleModule.describe_compatibility()
+
+    captured = capsys.readouterr()
+    assert report is not None
+    assert captured.out == f"{report}\n"
+    assert "Compatibility report for ExampleModule" in report
+    assert "obs_full: full" in report
