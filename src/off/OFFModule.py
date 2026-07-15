@@ -145,6 +145,23 @@ class OFFModule(ABC):
         # return report
     
 def check_compatibility(modules) -> list[tuple]:
+    """ Checks compatibility between given modules. Returns a list of component requirements
+    that are not met by **all** modules of a given type.
+
+    For example, a given implementation of WakeModel requires a TurbineModel with implemented `obs_power_curve`
+    method with requirement level `FULL`. So all implementations in `modules` with TurbineModel as basetype need 
+    to have `obs_power_curve` implemented with the same level of support.
+
+    Args:
+        modules (nd.array[OFFModule]): List of OFFModules
+
+    Raises:
+        TypeError: If one of the modules is not derived from OFFModule
+
+    Returns:
+        list[tuple]: List of unmet requirements, in the format: 
+        (Module, Module Type Required From, Required Component, Required Minimum Compatibility Level, Supported Compatability Level by Component)
+    """
     provided: dict[tuple[str, str], CompatibilityLevel] = {}
     compat_infos: list[tuple[type[OFFModule], OFFCompatibility]] = []
 
