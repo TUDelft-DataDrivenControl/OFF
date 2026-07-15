@@ -145,8 +145,25 @@ class OFFModule(ABC):
         # return report
     
 def check_compatibility(modules) -> list[tuple]:
-    provided: dict[tuple[str, str], CompatibilityLevel] = {}
-    compat_infos: list[tuple[type[OFFModule], OFFCompatibility]] = []
+    """ Checks compatibility between given modules. Returns a list of component requirements
+    that are not met by **all** modules of a given type.
+
+    For example, a given implementation of WakeModel requires a TurbineModel with implemented `obs_power_curve`
+    method with requirement level `FULL`. So all implementations in `modules` with TurbineModel as basetype need 
+    to have `obs_power_curve` implemented with the same level of support.
+
+    Args:
+        modules (nd.array[OFFModule]): List of OFFModules
+
+    Raises:
+        TypeError: If one of the modules is not derived from OFFModule
+
+    Returns:
+        list[tuple]: List of unmet requirements, in the format: 
+        (Module, Module Type Required From, Required Component, Required Minimum Compatibility Level, Supported Compatability Level by Component)
+    """
+    providers: dict[str, list[OFFCompatibility]] = {}
+    compat_infos: list[OFFCompatibility] = []
 
     for module in modules:
         if inspect.isclass(module) and issubclass(module, OFFModule):
@@ -160,19 +177,27 @@ def check_compatibility(modules) -> list[tuple]:
         if compat is None:
             continue
 
-        compat_infos.append((module_cls, compat))
+        compat_infos.append(compat)
+        provider_types = {compat.module_type}
         for base in module_cls.__mro__:
             if issubclass(base, OFFModule) and base is not OFFModule:
-                for name, level in compat.provides.items():
-                    key = (base.__name__, name)
-                    current = provided.get(key, CompatibilityLevel.NONE)
-                    provided[key] = max(current, level, key=lambda item: item.value)
+                provider_types.add(base.__name__)
+
+        for provider_type in provider_types:
+            providers.setdefault(provider_type, []).append(compat)
 
     unmet = []
-    for module_cls, compat in compat_infos:
+    for compat in compat_infos:
         for module_type, funcs in compat.requires.items():
             for name, min_level in funcs.items():
-                have = provided.get((module_type, name), CompatibilityLevel.NONE)
+                have = min(
+                    (
+                        provider.provides.get(name, CompatibilityLevel.NONE)
+                        for provider in providers.get(module_type, [])
+                    ),
+                    key=lambda item: item.value,
+                    default=CompatibilityLevel.NONE,
+                )
                 if have.value < min_level.value:
                     unmet.append((compat.module_type, module_type, name, min_level, have))
     return unmet

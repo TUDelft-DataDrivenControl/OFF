@@ -628,7 +628,7 @@ vis:
     time: [656, 696, 736, 776, 816, 856, 896, 936]
     #[600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1040, 1060, 1080, 1100, 1120, 1140, 1160, 1180] 
     # Master-switch to generate & store flow field data
-    plot: True  
+    plot: False  
     # Generates a mountain range like visualization of the wind speed based on the OPs
     mountains: True
     # Steps between the OPs -> 1 every OP, 5 -> every 5th OP
