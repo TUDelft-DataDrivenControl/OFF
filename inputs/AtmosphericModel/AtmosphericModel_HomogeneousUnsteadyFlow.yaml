@@ -1,0 +1,42 @@
+name: Atmospheric Model Homogeneous Unsteady Flow
+description: The unsteady but homogeneous background flow model provides a simplified representation of atmospheric flow, assuming uniform, but time varying flow properties throughout the flow field.
+air_density_kgpm3: 1.225  # kg/m^3, standard air density at sea level
+reference_height_m: 115.0  # reference height in meters (for e.g., wind shear calculations)
+wind_speed_mps: # wind speed in meters per second
+  - 10.0
+  - 8.0
+wind_speed_timestep_s: # time steps for wind speed values
+  - 0.0
+  - 2000.0
+wind_direction_degrees: # wind direction in degrees (0° = Southward, 90° = Westward)
+  - 260.0
+  - 280.0
+wind_direction_timestep_s: # time steps for wind direction values
+  - 0.0
+  - 2000.0
+turbulence_intensities_percent: # percentage of turbulence intensity
+  - 5.0
+  - 8.0
+turbulence_intensities_timestep_s: # time steps for turbulence intensity values
+  - 0.0
+  - 2000.0
+wind_shear_exponents: 
+  - 0.143  # wind shear exponent (0.143 for neutral stability)
+  - 0.143
+wind_shear_timestep_s: # time steps for wind shear exponent values
+  - 0.0
+  - 2000.0
+wind_veer_factors_degpm: # wind veer factors in degrees per meter
+  - 0.0
+  - 0.0
+wind_veer_timestep_s: # time steps for wind veer factor values
+  - 0.0
+  - 2000.0
+atmospheric_stability_L: # atmospheric stability parameter (Monin-Obukhov length) in meters
+  - 600.0
+  - 600.0
+atmospheric_stability_timestep_s: # time steps for atmospheric stability parameter values
+  - 0.0
+  - 2000.0
+surface_pressure_Pa: # surface pressure in Pascals
+  - 101325.0
